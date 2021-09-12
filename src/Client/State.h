@@ -5,30 +5,25 @@
 #include <memory>
 
 #include "Client/BaseState.h"
+#include "Client/EmulatorState.h"
 
 #include "Renderer/Base.h"
 #include "Common/DisplayMode.h"
 
+#include "Emulator/VM.h"
+
 #include "Sys/Base.h"
 
 namespace Client {
-    enum class States {
-        Loading,
-        FirstPerson,
-        DisplayMenu,
-        Map,
-        Count
-    };
-
     class State {
-        std::map<States, std::shared_ptr<BaseState>> states;
+        std::map<uint32_t, std::shared_ptr<BaseState>> states;
         std::shared_ptr<Client::BaseState> currentState;
         std::shared_ptr<Renderer::Base> renderer;
         std::shared_ptr<Sys::Base> sys;
 //        Common::DisplayMode displayMode;
     public:
-        State(std::shared_ptr<Renderer::Base> renderer, std::shared_ptr<Sys::Base> sys);
-        void changeState(const States newState, const int enter=0, const int leave=0);
+        State(std::shared_ptr<Renderer::Base> renderer, std::shared_ptr<Sys::Base> sys, std::pair<uint32_t, std::shared_ptr<BaseState>> &state);
+        void changeState(const uint32_t newState, const int enter=0, const int leave=0);
 
         // Event dispatch
         void render(const uint32_t time);
@@ -49,6 +44,11 @@ namespace Client {
 
         const Common::DisplayMode getDisplayMode() const {
             return sys->currentDisplayMode();
+        }
+
+
+        void addState(const uint32_t newState, std::shared_ptr<BaseState> &state) {
+            states[newState] = state;
         }
 
         void changeDisplayMode(const Common::DisplayMode &mode, bool fullscreen) {

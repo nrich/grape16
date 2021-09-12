@@ -5,14 +5,16 @@
 
 using namespace Client;
 
-State::State(std::shared_ptr<Renderer::Base> renderer, std::shared_ptr<Sys::Base> sys) : renderer(renderer), sys(sys) {
-    states[States::Loading] = std::dynamic_pointer_cast<BaseState>(std::make_shared<LoadingState>());
-    states[States::DisplayMenu] = std::dynamic_pointer_cast<BaseState>(std::make_shared<DisplayMenuState>());
+State::State(std::shared_ptr<Renderer::Base> renderer, std::shared_ptr<Sys::Base> sys, std::pair<uint32_t, std::shared_ptr<BaseState>> &state) : renderer(renderer), sys(sys) {
+    //states[States::Loading] = std::dynamic_pointer_cast<BaseState>(std::make_shared<LoadingState>());
+    //states[States::Emulator] = std::dynamic_pointer_cast<BaseState>(std::make_shared<EmulatorState>(vm));
+    //states[States::DisplayMenu] = std::dynamic_pointer_cast<BaseState>(std::make_shared<DisplayMenuState>());
 
-    currentState = states[States::Loading];
+    states[state.first] = state.second;
+    currentState = state.second;
 }
 
-void State::changeState(const States newState, const int enter, const int leave) {
+void State::changeState(const uint32_t newState, const int enter, const int leave) {
     currentState->onLeaveState(this, leave);
     currentState = states[newState];
     currentState->onEnterState(this, enter);

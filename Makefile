@@ -3,7 +3,7 @@ CXX = g++
 RM = rm -f
 RMDIR = rm -rf
 INC = -I src
-LDFLAGS = $(shell sdl2-config --libs) -lGL -lGLU -lsfml-graphics -lsfml-window -lsfml-system -lglfw
+LDFLAGS = $(shell sdl2-config --libs) -lGL -lGLU -lsfml-graphics -lsfml-window -lsfml-system -lglfw -lstdc++
 CPPFLAGS = -std=c++14 $(INC) -Wall $(shell sdl2-config --cflags)
 STRIP = strip
  
@@ -65,15 +65,20 @@ default: all
 COMMON_OBJS := \
 	src/Client/BaseState.o \
 	src/Client/DisplayMenuState.o \
+	src/Client/EmulatorState.o \
 	src/Client/LoadingState.o \
 	src/Client/State.o \
 	src/Common/Colour.o \
 	src/Common/DisplayMode.o \
+        src/Emulator/VM.o \
+        src/Emulator/Basic.o \
 	src/Renderer/Base.o \
 	src/Renderer/Immediate.o \
 	src/Renderer/Immediate/Font.o \
-	src/Sys/SFML.o \
+	src/Renderer/Text.o \
 	src/Sys/SDL2.o \
+	src/Sys/SFML.o \
+	src/Sys/Term.o \
 	src/main.o 
  
 ifdef CONFIG_WIN32

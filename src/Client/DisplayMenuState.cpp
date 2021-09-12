@@ -63,13 +63,9 @@ void DisplayMenuState::onKeyDown(State *state, const KeyPress &event) {
     auto sys = state->getSys();
 
     if (event.keyCode == Common::Keys::Escape) {
-        state->changeState(States::FirstPerson, 0);
     } else if (event.keyCode == '1') {
-        state->changeDisplayMode(sys->findDisplayMode(640, 480), sys->isFullScreen());
     } else if (event.keyCode == '2') {
-        state->changeDisplayMode(sys->findDisplayMode(800, 600), sys->isFullScreen());
     } else if (event.keyCode == '3') {
-        state->changeDisplayMode(sys->findDisplayMode(854, 480), sys->isFullScreen());
     } else if (event.keyCode == Common::Keys::Left) {
         if (menuState == DisplayMenu::MENU_RESOLUTION) {
             auto modes = sys->getPreviousNextMode(state->getDisplayMode());
