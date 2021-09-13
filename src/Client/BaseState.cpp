@@ -32,11 +32,11 @@ void BaseState::onKeyUp(State *state, const KeyPress &event) {
 
 }
 
-void BaseState::onEnterState(State *state, const int data) {
+void BaseState::onEnterState(State *state, std::any data) {
 
 }
 
-void BaseState::onLeaveState(State *state, const int data) {
+void BaseState::onLeaveState(State *state, std::any data) {
 
 }
 

@@ -9,7 +9,8 @@ void EmulatorState::onRender(State *state, const uint32_t time) {
 }
 
 void EmulatorState::onTick(State *state, const uint32_t time) {
-    
+    while(vm->run(*program, clockspeed, false, true))
+        ;
 }
 
 void EmulatorState::onMouseMove(State *state, const MouseMove &event) {

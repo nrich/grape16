@@ -11,9 +11,11 @@ namespace Client {
 
     class EmulatorState : public BaseState {
             std::shared_ptr<Emulator::VM> vm;
+            std::shared_ptr<Emulator::Program> program;
             std::stack<char> keypresses;
+            uint32_t clockspeed;
         public:
-            EmulatorState(std::shared_ptr<Emulator::VM> vm) : vm(vm) {
+            EmulatorState(std::shared_ptr<Emulator::VM> vm, std::shared_ptr<Emulator::Program> program, uint32_t clockspeed) : vm(vm), program(program), clockspeed(clockspeed)  {
             }
 
             void onRender(State *state, const uint32_t time);

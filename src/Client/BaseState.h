@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <any>
 
 #include "Client/Events.h"
 
@@ -22,8 +23,8 @@ namespace Client {
             virtual void onMouseButtonRelease(State *state, const MouseClick &event);
             virtual void onKeyDown(State *state, const KeyPress &event);
             virtual void onKeyUp(State *state, const KeyPress &event);
-            virtual void onEnterState(State *state, const int data);
-            virtual void onLeaveState(State *state, const int data);
+            virtual void onEnterState(State *state, std::any data);
+            virtual void onLeaveState(State *state, std::any data);
 
             virtual void changeDisplayMode(const Common::DisplayMode &displayMode);
     };

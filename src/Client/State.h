@@ -3,6 +3,7 @@
 
 #include <map>
 #include <memory>
+#include <any>
 
 #include "Client/BaseState.h"
 #include "Client/EmulatorState.h"
@@ -22,8 +23,8 @@ namespace Client {
         std::shared_ptr<Sys::Base> sys;
 //        Common::DisplayMode displayMode;
     public:
-        State(std::shared_ptr<Renderer::Base> renderer, std::shared_ptr<Sys::Base> sys, std::pair<uint32_t, std::shared_ptr<BaseState>> &state);
-        void changeState(const uint32_t newState, const int enter=0, const int leave=0);
+        State(std::shared_ptr<Renderer::Base> renderer, std::shared_ptr<Sys::Base> sys, std::pair<uint32_t, std::shared_ptr<BaseState>> state);
+        void changeState(const uint32_t newState, std::any enter=0, std::any leave=0);
 
         // Event dispatch
         void render(const uint32_t time);

@@ -58,7 +58,7 @@ class TermSysIO : public Emulator::SysIO {
         }
 };
 
-Emulator::Program loadAssembly(const std::string &input) {
+std::shared_ptr<Emulator::Program> loadAssembly(const std::string &input) {
     std::ifstream infile(input, std::ios_base::binary);
 
     if (!infile.is_open()) {
@@ -70,10 +70,10 @@ Emulator::Program loadAssembly(const std::string &input) {
 
     Emulator::Program program(buffer);
 
-    return program;
+    return std::make_shared<Emulator::Program>(program);
 }
 
-Emulator::Program loadBasic(const std::string &input, bool debug) {
+std::shared_ptr<Emulator::Program> loadBasic(const std::string &input, bool debug) {
     Emulator::Program program;
     auto lines = parseFile(input);
 
@@ -90,17 +90,16 @@ Emulator::Program loadBasic(const std::string &input, bool debug) {
 
     compile(lines, program);
 
-    return program;
+    return std::make_shared<Emulator::Program>(program);
 }
 
-int main(int argc, const char *argv[]) {
+int main(int argc, char *argv[]) {
     ez::ezOptionParser opt;
 
     opt.overview = "grape16 micro emulator";
     opt.syntax = std::string(argv[0]) + " [OPTIONS] [runfile]\n";
     opt.example = std::string(argv[0]) + " -b test.bas\n";
     opt.footer = std::string(argv[0]) + " v" + std::string(VERSION) + "\n";
-
 
     opt.add(
         "", // Default.
@@ -169,12 +168,12 @@ int main(int argc, const char *argv[]) {
         "--refresh"  // Flag token.
     );
 
-    opt.parse(argc, argv);
+    opt.parse(argc, (const char**)argv);
 
     if (opt.isSet("-h")) {
         std::string usage;
         opt.getUsage(usage);
-        std::cout << usage;
+        std::cout << usage << std::endl;
         exit(1);
     }
 
@@ -196,12 +195,25 @@ int main(int argc, const char *argv[]) {
                         basic.addShort(OpCode::JMP, prompt);
 */
 
+    std::shared_ptr<Emulator::Program> program;
+
+    if (opt.lastArgs.size() == 1) {
+        if (opt.isSet("-b")) {
+            program = loadBasic(*opt.lastArgs[0], opt.isSet("-d"));
+        } else {
+            program = loadAssembly(*opt.lastArgs[0]);
+        }
+    } else {
+        std::cout << "TODO make CLI work" << std::endl;
+        exit(0);
+    }
+
     auto sysio = std::make_shared<TermSysIO>();
     auto vm = std::make_shared<Emulator::VM>(std::dynamic_pointer_cast<Emulator::SysIO>(sysio), 0x003FFFFF);
 
     uint32_t clockspeed = opt.isSet("-t") ? CLOCK_66MHz_at_60FPS : CLOCK_33MHz_at_60FPS;
 
-    std::pair<uint32_t, std::shared_ptr<Client::BaseState>> emulatorState(0, std::dynamic_pointer_cast<Client::BaseState>(std::make_shared<Client::EmulatorState>(vm)));
+    auto emulatorState = std::make_shared<Client::EmulatorState>(vm, program, clockspeed);
 
     //auto sys = std::make_shared<Sys::SDL2>("Grape16");
     //auto sys = std::make_shared<Sys::SFML>("Grape16");
@@ -209,14 +221,21 @@ int main(int argc, const char *argv[]) {
 
     //auto renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
     auto renderer = std::make_shared<Renderer::Text>();
-    Client::State clientState(std::dynamic_pointer_cast<Renderer::Base>(renderer), std::dynamic_pointer_cast<Sys::Base>(sys), emulatorState);
+    Client::State clientState(
+        std::dynamic_pointer_cast<Renderer::Base>(renderer),
+        std::dynamic_pointer_cast<Sys::Base>(sys),
+        std::pair<uint32_t, std::shared_ptr<Client::BaseState>>(0, std::dynamic_pointer_cast<Client::BaseState>(emulatorState))
+    );
 
+    static uint32_t lastRender = sys->getTicks();
+    uint32_t renderTime = sys->getTicks();
 
     while (sys->handleEvents(clientState)) {
+std::cerr << "??" << std::endl;
         sys->clearScreen();
         //clientState.render(renderTime - lastRender);
-        //clientState.tick(renderTime - lastRender);
-        //lastRender = renderTime;
+        clientState.tick(renderTime - lastRender);
+        lastRender = renderTime;
 
         sys->swapBuffers();
     }

@@ -538,7 +538,7 @@ std::pair<Common::DisplayMode, Common::DisplayMode> Sys::Term::getPreviousNextMo
 
 bool Sys::Term::handleEvents(Client::State &clientState) const {
     bool run = true;
-    if (!_kbhit())  {
+    if (_kbhit())  {
         char ch = std::getchar();
         clientKeyDown(clientState, ch);
     }
