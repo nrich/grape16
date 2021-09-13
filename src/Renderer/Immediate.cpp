@@ -54,16 +54,16 @@ using namespace Renderer;
 Immediate::Immediate(const Common::DisplayMode &displayMode) : mode(Mode::Unknown), displayMode(displayMode) {
     switch (displayMode.Ratio()) {
         case Common::AspectRatio::_4x3:
-            virtualHeight = 480;
-            verticalOffset = 60;
+            virtualHeight = 240;
+            verticalOffset = 30;
             break;
         case Common::AspectRatio::_16x9:
-            virtualHeight = 360;
+            virtualHeight = 180;
             verticalOffset = 0;
             break;
         case Common::AspectRatio::_16x10:
-            virtualHeight = 400;
-            verticalOffset = 20;
+            virtualHeight = 200;
+            verticalOffset = 10;
             break;
         default:
             break;
@@ -85,7 +85,7 @@ void Immediate::enableInterfaceMode() {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    glOrtho(0, 640, virtualHeight, 0, -10, 10);
+    glOrtho(0, 320, virtualHeight, 0, -10, 10);
 
     //Back to the modelview so we can draw stuff
     glMatrixMode(GL_MODELVIEW);

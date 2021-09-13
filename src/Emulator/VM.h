@@ -322,9 +322,7 @@ namespace Emulator {
 
             value_t getValue(vmpointer_t ptr);
 
-            std::shared_ptr<SysIO> sysIO;
-
-            void Syscall(SysCall syscall, RuntimeValue rvalue);
+            void Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue rvalue);
 
             value_t getRuntimeValue(RuntimeValue rtarg) const {
                 switch(rtarg) {
@@ -342,10 +340,10 @@ namespace Emulator {
             }
 
         public:
-            VM(std::shared_ptr<SysIO> sysIO, const uint32_t _ptrspace);
+            VM(const uint32_t _ptrspace);
             ~VM();
 
-            bool run(const Program &program, uint32_t cycle_budget, bool step, bool debug);
+            bool run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycle_budget, bool step, bool debug);
             std::string readString(vmpointer_t p, uint32_t len) {
                 return getString(p, len);
             }

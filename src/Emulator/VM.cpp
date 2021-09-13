@@ -416,7 +416,7 @@ std::string VM::getString(vmpointer_t ptr, uint32_t len) {
     return str;
 }
 
-void VM::Syscall(SysCall syscall, RuntimeValue rvalue) {
+void VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue rvalue) {
     switch(syscall) {
         case SysCall::CLS:
             sysIO->cls();
@@ -477,7 +477,7 @@ void VM::Syscall(SysCall syscall, RuntimeValue rvalue) {
     }
 }
 
-VM::VM(std::shared_ptr<SysIO> sysIO, uint32_t _ptrspace) : idx(0),  pc(0), sp(0), ptrspace(_ptrspace), sysIO(sysIO) {
+VM::VM(uint32_t _ptrspace) : idx(0),  pc(0), sp(0), ptrspace(_ptrspace) {
     a = IntAsValue(0);
     b = IntAsValue(0);
     c = IntAsValue(0);
@@ -489,7 +489,7 @@ VM::VM(std::shared_ptr<SysIO> sysIO, uint32_t _ptrspace) : idx(0),  pc(0), sp(0)
     heap = mem.size();
 }
 
-bool VM::run(const Program &program, uint32_t cycle_budget, bool step, bool dbg) {
+bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycle_budget, bool step, bool dbg) {
     bool done = false;
     uint32_t cycles = 0;
 
@@ -923,7 +923,7 @@ bool VM::run(const Program &program, uint32_t cycle_budget, bool step, bool dbg)
                 pc += 1;
                 break;
             case OpCode::SYSCALL:
-                Syscall((SysCall)program.readShort(pc), (RuntimeValue)program.readShort(pc+2));
+                Syscall(sysIO, (SysCall)program.readShort(pc), (RuntimeValue)program.readShort(pc+2));
                 pc += 4;
                 break;
             case OpCode::CALL:

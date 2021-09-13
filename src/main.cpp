@@ -30,65 +30,6 @@
 #define CLOCK_33MHz_at_60FPS  550
 #define CLOCK_66MHz_at_60FPS  1100
 
-class TermSysIO : public Emulator::SysIO {
-    public:
-        TermSysIO() {
-        }
-
-        void cls() {
-        }
-
-        void write(uint8_t c) {
-            std::putchar(c);
-        }
-
-        uint8_t read() {
-            auto c = std::getchar();
-            return c;
-        }
-
-        void puts(const std::string &str) {
-            std::cout << str << std::endl;
-        }
-
-        std::string gets() {
-            std::string str;
-            std::cin >> str;
-            return str;
-        }
-};
-
-class SystemIO : public Emulator::SysIO {
-        std::shared_ptr<Renderer::Base> renderer;
-        std::shared_ptr<Sys::Base> sys;
-    public:
-        SystemIO(std::shared_ptr<Renderer::Base> renderer, std::shared_ptr<Sys::Base> sys) : renderer(renderer), sys(sys) {
-        }
-
-        void cls() {
-        }
-
-        void write(uint8_t c) {
-            //std::putchar(c);
-            renderer->drawString(10, 10, 32, 32, std::string("") + (char)c);
-        }
-
-        uint8_t read() {
-            //auto c = std::getchar();
-            //return c;
-            return 0;
-        }
-
-        void puts(const std::string &str) {
-            renderer->drawString(10, 10, 16, 16, str);
-        }
-
-        std::string gets() {
-            return "";
-        }
-};
-
-
 std::shared_ptr<Emulator::Program> loadAssembly(const std::string &input) {
     std::ifstream infile(input, std::ios_base::binary);
 
@@ -266,8 +207,7 @@ int main(int argc, char *argv[]) {
         renderer = std::make_shared<Renderer::Text>();
     }
 
-    auto sysio = std::make_shared<SystemIO>(renderer, sys);
-    auto vm = std::make_shared<Emulator::VM>(std::dynamic_pointer_cast<Emulator::SysIO>(sysio), 0x003FFFFF);
+    auto vm = std::make_shared<Emulator::VM>(0x003FFFFF);
 
     uint32_t clockspeed = opt.isSet("-t") ? CLOCK_66MHz_at_60FPS : CLOCK_33MHz_at_60FPS;
 

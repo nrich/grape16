@@ -216,6 +216,7 @@ namespace Math {
 
 typedef Math::Point2<float> Vec2f;
 typedef Math::Point2<double> Vec2d;
+typedef Math::Point2<int32_t> Point;
 
 #endif //__MATH_POINT2_H__
 
