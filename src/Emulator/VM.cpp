@@ -137,6 +137,7 @@ void Debugger::debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack,
 
 Program::Program() {
     entry = 0;
+    datacells = 0;
 }
 
 Program::Program(const std::vector<uint8_t> &data) {
