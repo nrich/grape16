@@ -19,9 +19,9 @@ namespace Sys {
             bool isFullScreen() const {
                 return true;
             };
-            bool handleEvents(Client::State &clientState) const;
+            bool handleEvents(Client::State &clientState);
         
-            void swapBuffers() const {
+            void swapBuffers() {
             }
 
             uint32_t getTicks() const {

@@ -431,7 +431,7 @@ bool Sys::SDL2::isFullScreen() const {
     return (flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_FULLSCREEN_DESKTOP));
 }
 
-bool Sys::SDL2::handleEvents(Client::State &clientState) const {
+bool Sys::SDL2::handleEvents(Client::State &clientState) {
     SDL_Event event;
     bool run = true;
 

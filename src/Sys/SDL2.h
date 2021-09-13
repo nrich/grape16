@@ -32,9 +32,9 @@ namespace Sys {
             Common::DisplayMode currentDisplayMode() const;
             std::pair<Common::DisplayMode, Common::DisplayMode> getPreviousNextMode(const Common::DisplayMode &displayMode) const;
             bool isFullScreen() const;
-            bool handleEvents(Client::State &clientState) const;
+            bool handleEvents(Client::State &clientState);
         
-            void swapBuffers() const {
+            void swapBuffers() {
                 SDL_GL_SwapWindow(window.get());
             }
 

@@ -58,6 +58,35 @@ class TermSysIO : public Emulator::SysIO {
         }
 };
 
+class SystemIO : public Emulator::SysIO {
+    public:
+        SystemIO() {
+        }
+
+        void cls() {
+        }
+
+        void write(uint8_t c) {
+            std::putchar(c);
+        }
+
+        uint8_t read() {
+            auto c = std::getchar();
+            return c;
+        }
+
+        void puts(const std::string &str) {
+            std::cout << str << std::endl;
+        }
+
+        std::string gets() {
+            std::string str;
+            std::cin >> str;
+            return str;
+        }
+};
+
+
 std::shared_ptr<Emulator::Program> loadAssembly(const std::string &input) {
     std::ifstream infile(input, std::ios_base::binary);
 
@@ -168,6 +197,17 @@ int main(int argc, char *argv[]) {
         "--refresh"  // Flag token.
     );
 
+    opt.add(
+        "term", // Default.
+        0, // Required?
+        1, // Number of args expected.
+        0, // Delimiter if expecting multiple args.
+        "Display usage instructions.", // Help description.
+        "-s",     // Flag token.
+        "-sys",  // Flag token.
+        "--sys" // Flag token.
+    );
+
     opt.parse(argc, (const char**)argv);
 
     if (opt.isSet("-h")) {
@@ -208,6 +248,22 @@ int main(int argc, char *argv[]) {
         exit(0);
     }
 
+    std::shared_ptr<Renderer::Base> renderer;
+    std::shared_ptr<Sys::Base> sys;
+    std::string sysname;
+    opt.get("-s")->getString(sysname);
+
+    if (sysname == "sdl2") {
+        sys = std::make_shared<Sys::SDL2>("Grape16");
+        renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
+    } else if (sysname == "sfml") {
+        sys = std::make_shared<Sys::SFML>("Grape16");
+        renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
+    } else if (sysname == "term") {
+        sys = std::make_shared<Sys::Term>("Grape16");
+        renderer = std::make_shared<Renderer::Text>();
+    }
+
     auto sysio = std::make_shared<TermSysIO>();
     auto vm = std::make_shared<Emulator::VM>(std::dynamic_pointer_cast<Emulator::SysIO>(sysio), 0x003FFFFF);
 
@@ -215,12 +271,8 @@ int main(int argc, char *argv[]) {
 
     auto emulatorState = std::make_shared<Client::EmulatorState>(vm, program, clockspeed);
 
-    //auto sys = std::make_shared<Sys::SDL2>("Grape16");
-    //auto sys = std::make_shared<Sys::SFML>("Grape16");
-    auto sys = std::make_shared<Sys::Term>("Grape16");
-
     //auto renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
-    auto renderer = std::make_shared<Renderer::Text>();
+    //auto renderer = std::make_shared<Renderer::Text>();
     Client::State clientState(
         std::dynamic_pointer_cast<Renderer::Base>(renderer),
         std::dynamic_pointer_cast<Sys::Base>(sys),

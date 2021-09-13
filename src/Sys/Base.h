@@ -8,6 +8,10 @@
 #include "Common/Shared.h"
 #include "Common/DisplayMode.h"
 
+namespace Client {
+    class State;
+};
+
 namespace Sys {
     class Base {
         protected:
@@ -21,6 +25,8 @@ namespace Sys {
             virtual bool isFullScreen() const = 0;
             virtual uint32_t getTicks() const = 0;
             virtual void clearScreen() const = 0;
+            virtual void swapBuffers() = 0;
+            virtual bool handleEvents(Client::State &clientState) = 0;
     };
 }; // Sys
 

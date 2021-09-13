@@ -536,7 +536,7 @@ std::pair<Common::DisplayMode, Common::DisplayMode> Sys::Term::getPreviousNextMo
     return std::pair<Common::DisplayMode, Common::DisplayMode>(Common::DisplayMode(0, 0, 60), Common::DisplayMode(0, 0, 60));
 }
 
-bool Sys::Term::handleEvents(Client::State &clientState) const {
+bool Sys::Term::handleEvents(Client::State &clientState) {
     bool run = true;
     if (_kbhit())  {
         char ch = std::getchar();
