@@ -11,6 +11,7 @@
 namespace Renderer {
 
 enum class Mode {
+    Unknown,
     Interface
 };
 

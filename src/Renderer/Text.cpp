@@ -9,7 +9,7 @@ Text::Text() {
 }
 
 void Text::drawString(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const std::string &str, const Common::Colour &colour) {
-    std::cout << str << std::endl;
+    std::cout << str;
 }
 
 void Text::drawRect(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const Common::Colour &colour) {

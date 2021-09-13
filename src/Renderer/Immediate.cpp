@@ -51,7 +51,7 @@
 using namespace Renderer;
 
 //Immediate::Immediate(const Common::DisplayMode &displayMode, const Common::DisplayMode &screen) : mode(Mode::Unknown), displayMode(displayMode), screen(screen) {
-Immediate::Immediate(const Common::DisplayMode &displayMode) : mode(Mode::Interface), displayMode(displayMode) {
+Immediate::Immediate(const Common::DisplayMode &displayMode) : mode(Mode::Unknown), displayMode(displayMode) {
     switch (displayMode.Ratio()) {
         case Common::AspectRatio::_4x3:
             virtualHeight = 480;
@@ -68,6 +68,8 @@ Immediate::Immediate(const Common::DisplayMode &displayMode) : mode(Mode::Interf
         default:
             break;
     }
+
+    enableInterfaceMode();
 }
 
 void Immediate::enableInterfaceMode() {
@@ -206,7 +208,7 @@ void Immediate::changeDisplayMode(const Common::DisplayMode &displayMode) {
     }
 
     this->displayMode = displayMode;
-    mode = Mode::Interface;
+    mode = Mode::Unknown;
 }
 
 Immediate::~Immediate() {

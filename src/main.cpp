@@ -59,30 +59,32 @@ class TermSysIO : public Emulator::SysIO {
 };
 
 class SystemIO : public Emulator::SysIO {
+        std::shared_ptr<Renderer::Base> renderer;
+        std::shared_ptr<Sys::Base> sys;
     public:
-        SystemIO() {
+        SystemIO(std::shared_ptr<Renderer::Base> renderer, std::shared_ptr<Sys::Base> sys) : renderer(renderer), sys(sys) {
         }
 
         void cls() {
         }
 
         void write(uint8_t c) {
-            std::putchar(c);
+            //std::putchar(c);
+            renderer->drawString(10, 10, 32, 32, std::string("") + (char)c);
         }
 
         uint8_t read() {
-            auto c = std::getchar();
-            return c;
+            //auto c = std::getchar();
+            //return c;
+            return 0;
         }
 
         void puts(const std::string &str) {
-            std::cout << str << std::endl;
+            renderer->drawString(10, 10, 16, 16, str);
         }
 
         std::string gets() {
-            std::string str;
-            std::cin >> str;
-            return str;
+            return "";
         }
 };
 
@@ -264,15 +266,13 @@ int main(int argc, char *argv[]) {
         renderer = std::make_shared<Renderer::Text>();
     }
 
-    auto sysio = std::make_shared<TermSysIO>();
+    auto sysio = std::make_shared<SystemIO>(renderer, sys);
     auto vm = std::make_shared<Emulator::VM>(std::dynamic_pointer_cast<Emulator::SysIO>(sysio), 0x003FFFFF);
 
     uint32_t clockspeed = opt.isSet("-t") ? CLOCK_66MHz_at_60FPS : CLOCK_33MHz_at_60FPS;
 
     auto emulatorState = std::make_shared<Client::EmulatorState>(vm, program, clockspeed);
 
-    //auto renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
-    //auto renderer = std::make_shared<Renderer::Text>();
     Client::State clientState(
         std::dynamic_pointer_cast<Renderer::Base>(renderer),
         std::dynamic_pointer_cast<Sys::Base>(sys),
@@ -283,12 +283,14 @@ int main(int argc, char *argv[]) {
     uint32_t renderTime = sys->getTicks();
 
     while (sys->handleEvents(clientState)) {
-        sys->clearScreen();
-        //clientState.render(renderTime - lastRender);
+        //sys->clearScreen();
         clientState.tick(renderTime - lastRender);
+        clientState.render(renderTime - lastRender);
         lastRender = renderTime;
 
         sys->swapBuffers();
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
     }
 
     exit(0);

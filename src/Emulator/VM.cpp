@@ -435,9 +435,12 @@ void VM::Syscall(SysCall syscall, RuntimeValue rvalue) {
 
                     if (IS_BYTE(arg)) {
                         if (arg != ptr) {
+                            std::string str;
                             while (getByte(ValueAsPointer(ptr))) {
-                                sysIO->write(getByte(ValueAsPointer(ptr++)));
+                                //sysIO->write(getByte(ValueAsPointer(ptr++)));
+                                str += getByte(ValueAsPointer(ptr++));
                             }
+                            sysIO->puts(str);
                         } else {
                             sysIO->puts(std::to_string(ValueAsByte(arg)));
                         }

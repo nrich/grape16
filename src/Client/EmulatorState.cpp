@@ -9,7 +9,7 @@ void EmulatorState::onRender(State *state, const uint32_t time) {
 }
 
 void EmulatorState::onTick(State *state, const uint32_t time) {
-    while(vm->run(*program, clockspeed, false, true))
+    while (!vm->run(*program, clockspeed, false, false))
         ;
 }
 
