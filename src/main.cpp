@@ -231,7 +231,6 @@ int main(int argc, char *argv[]) {
     uint32_t renderTime = sys->getTicks();
 
     while (sys->handleEvents(clientState)) {
-std::cerr << "??" << std::endl;
         sys->clearScreen();
         //clientState.render(renderTime - lastRender);
         clientState.tick(renderTime - lastRender);
