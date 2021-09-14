@@ -9,7 +9,7 @@ NCurses::NCurses(std::shared_ptr<WINDOW> window) : window(window) {
 
 void NCurses::drawString(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const std::string &str, const Common::Colour &colour) {
     //box(window.get(), 0, 0);
-    mvwprintw(window.get(), 1, 1, str.c_str());
+    mvwprintw(window.get(), x+1, y+1, str.c_str());
     //wrefresh(window.get());
     //refresh();
 }

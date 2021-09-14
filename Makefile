@@ -75,6 +75,7 @@ COMMON_OBJS := \
 	src/Renderer/Base.o \
 	src/Renderer/Immediate.o \
 	src/Renderer/Immediate/Font.o \
+	src/Sys/GLFW.o \
 	src/Sys/SDL2.o \
 	src/Sys/SFML.o \
 	src/main.o 

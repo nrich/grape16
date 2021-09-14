@@ -21,6 +21,7 @@
 
 #include "Sys/SDL2.h"
 #include "Sys/SFML.h"
+#include "Sys/GLFW.h"
 #include "Sys/NCurses.h"
 
 #include "Emulator/VM.h"
@@ -191,8 +192,9 @@ int main(int argc, char *argv[]) {
             program = loadAssembly(*opt.lastArgs[0]);
         }
     } else {
-        std::cout << "TODO make CLI work" << std::endl;
-        exit(0);
+        program = std::make_shared<Emulator::Program>();
+        program->add(Emulator::OpCode::NOP);
+        program->add(Emulator::OpCode::HALT);
     }
 
     std::shared_ptr<Renderer::Base> renderer;
@@ -205,6 +207,9 @@ int main(int argc, char *argv[]) {
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
     } else if (sysname == "sfml") {
         sys = std::make_shared<Sys::SFML>("Grape16");
+        renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
+    } else if (sysname == "glfw") {
+        sys = std::make_shared<Sys::GLFW>("Grape16");
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
 #ifndef _WIN32
     } else if (sysname == "ncurses") {

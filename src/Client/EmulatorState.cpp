@@ -22,6 +22,9 @@ uint8_t SystemIO::read() {
 
     uint8_t c = (uint8_t)inputBuffer.front();
 
+    linebuffer[cursor.Y()][cursor.X()] = (char)c;
+    cursor = cursor + Point(1, 0);
+
     inputBuffer.pop();
 
     return c;
@@ -67,6 +70,8 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
 
     if (!done)
         done = vm->run(std::dynamic_pointer_cast<Emulator::SysIO>(sysio), *program, clockspeed, false, false);
+
+    //sysio->puts("OK\n");
 }
 
 void EmulatorState::onMouseMove(State *state, const MouseMove &event) {
