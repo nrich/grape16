@@ -208,8 +208,15 @@ int main(int argc, char *argv[]) {
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
 #ifndef _WIN32
     } else if (sysname == "ncurses") {
-        sys = std::make_shared<Sys::NCurses>("Grape16");
-        renderer = std::make_shared<Renderer::NCurses>();
+        initscr();
+
+        auto window = std::shared_ptr<WINDOW>(
+            newwin(26, 82, 0, 0),
+            delwin
+        );
+
+        sys = std::make_shared<Sys::NCurses>("Grape16", window);
+        renderer = std::make_shared<Renderer::NCurses>(window);
 #endif
     } else {
         std::cerr << "Unknown system" << std::endl;
@@ -232,7 +239,7 @@ int main(int argc, char *argv[]) {
     uint32_t renderTime = sys->getTicks();
 
     while (sys->handleEvents(clientState)) {
-        //sys->clearScreen();
+        sys->clearScreen();
         clientState.tick(renderTime - lastRender);
         clientState.render(renderTime - lastRender);
         lastRender = renderTime;
