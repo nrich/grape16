@@ -210,7 +210,162 @@ void Sys::NCurses::clientKeyDown(Client::State &clientState, const char ch) cons
             break;
         case 'Z':
             event.keyCode = Common::Keys::Z;
+            break;
+        case '1':
+            event.keyCode = Common::Keys::Num1;
+            break;
+        case '2':
+            event.keyCode = Common::Keys::Num2;
+            break;
+        case '3':
+            event.keyCode = Common::Keys::Num3;
+            break;
+        case '4':
+            event.keyCode = Common::Keys::Num4;
+            break;
+        case '5':
+            event.keyCode = Common::Keys::Num5;
+            break;
+        case '6':
+            event.keyCode = Common::Keys::Num6;
+            break;
+        case '7':
+            event.keyCode = Common::Keys::Num7;
+            break;
+        case '8':
+            event.keyCode = Common::Keys::Num8;
+            break;
+        case '9':
+            event.keyCode = Common::Keys::Num9;
+            break;
+        case '0':
+            event.keyCode = Common::Keys::Num0;
+            break;
+        case '!':
+            event.keyCode = Common::Keys::Num1;
             event.shiftMod = true;
+            break;
+        case '@':
+            event.keyCode = Common::Keys::Num2;
+            event.shiftMod = true;
+            break;
+        case '#':
+            event.keyCode = Common::Keys::Num3;
+            event.shiftMod = true;
+            break;
+        case '$':
+            event.keyCode = Common::Keys::Num4;
+            event.shiftMod = true;
+            break;
+        case '%':
+            event.keyCode = Common::Keys::Num5;
+            event.shiftMod = true;
+            break;
+        case '^':
+            event.keyCode = Common::Keys::Num6;
+            event.shiftMod = true;
+            break;
+        case '&':
+            event.keyCode = Common::Keys::Num7;
+            event.shiftMod = true;
+            break;
+        case '*':
+            event.keyCode = Common::Keys::Num8;
+            event.shiftMod = true;
+            break;
+        case '(':
+            event.keyCode = Common::Keys::Num9;
+            event.shiftMod = true;
+            break;
+        case ')':
+            event.keyCode = Common::Keys::Num0;
+            event.shiftMod = true;
+            break;
+        case '`':
+            event.keyCode = Common::Keys::Tilde;
+            break;
+        case '~':
+            event.keyCode = Common::Keys::Tilde;
+            event.shiftMod = true;
+            break;
+        case '[':
+            event.keyCode = Common::Keys::LBracket;
+            break;
+        case '{':
+            event.keyCode = Common::Keys::LBracket;
+            event.shiftMod = true;
+            break;
+        case ']':
+            event.keyCode = Common::Keys::RBracket;
+            break;
+        case '}':
+            event.keyCode = Common::Keys::RBracket;
+            event.shiftMod = true;
+            break;
+        case ';':
+            event.keyCode = Common::Keys::Semicolon;
+            break;
+        case ':':
+            event.keyCode = Common::Keys::Semicolon;
+            event.shiftMod = true;
+            break;
+        case ',':
+            event.keyCode = Common::Keys::Comma;
+            break;
+        case '<':
+            event.keyCode = Common::Keys::Comma;
+            event.shiftMod = true;
+            break;
+        case '.':
+            event.keyCode = Common::Keys::Period;
+            break;
+        case '>':
+            event.keyCode = Common::Keys::Period;
+            event.shiftMod = true;
+            break;
+        case '\'':
+            event.keyCode = Common::Keys::Quote;
+            break;
+        case '"':
+            event.keyCode = Common::Keys::Quote;
+            event.shiftMod = true;
+            break;
+        case '/':
+            event.keyCode = Common::Keys::Slash;
+            break;
+        case '?':
+            event.keyCode = Common::Keys::Slash;
+            event.shiftMod = true;
+            break;
+        case '\\':
+            event.keyCode = Common::Keys::Backslash;
+            break;
+        case '|':
+            event.keyCode = Common::Keys::Backslash;
+            event.shiftMod = true;
+            break;
+        case '=':
+            event.keyCode = Common::Keys::Equal;
+            break;
+        case '+':
+            event.keyCode = Common::Keys::Equal;
+            event.shiftMod = true;
+            break;
+        case '-':
+            event.keyCode = Common::Keys::Hyphen;
+            break;
+        case '_':
+            event.keyCode = Common::Keys::Hyphen;
+            event.shiftMod = true;
+            break;
+        case ' ':
+            event.keyCode = Common::Keys::Space;
+            break;
+        case 8:
+            event.keyCode = Common::Keys::Backspace;
+            break;
+        case '\t':
+            event.keyCode = Common::Keys::Tab;
             break;
     }
     
@@ -242,7 +397,7 @@ std::pair<Common::DisplayMode, Common::DisplayMode> Sys::NCurses::getPreviousNex
 
 bool Sys::NCurses::handleEvents(Client::State &clientState) {
     bool run = true;
-    if (_kbhit())  {
+    while (_kbhit())  {
         char ch = getch();
         clientKeyDown(clientState, ch);
     }

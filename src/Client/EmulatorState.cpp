@@ -151,12 +151,36 @@ void EmulatorState::onKeyDown(State *state, const KeyPress &event) {
         sysio->inputBuffer.push(event.shiftMod ? '(' : '9');
     } else if (event.keyCode == Common::Keys::Num0) {
         sysio->inputBuffer.push(event.shiftMod ? ')' : '0');
+    } else if (event.keyCode == Common::Keys::Tilde) {
+        sysio->inputBuffer.push(event.shiftMod ? '~' : '`');
+    } else if (event.keyCode == Common::Keys::LBracket) {
+        sysio->inputBuffer.push(event.shiftMod ? '{' : '[');
+    } else if (event.keyCode == Common::Keys::RBracket) {
+        sysio->inputBuffer.push(event.shiftMod ? '}' : ']');
+    } else if (event.keyCode == Common::Keys::Semicolon) {
+        sysio->inputBuffer.push(event.shiftMod ? ':' : ';');
+    } else if (event.keyCode == Common::Keys::Comma) {
+        sysio->inputBuffer.push(event.shiftMod ? '<' : ',');
+    } else if (event.keyCode == Common::Keys::Period) {
+        sysio->inputBuffer.push(event.shiftMod ? '>' : '.');
+    } else if (event.keyCode == Common::Keys::Quote) {
+        sysio->inputBuffer.push(event.shiftMod ? '"' : '\'');
+    } else if (event.keyCode == Common::Keys::Slash) {
+        sysio->inputBuffer.push(event.shiftMod ? '?' : '/');
+    } else if (event.keyCode == Common::Keys::Backslash) {
+        sysio->inputBuffer.push(event.shiftMod ? '|' : '\\');
+    } else if (event.keyCode == Common::Keys::Equal) {
+        sysio->inputBuffer.push(event.shiftMod ? '+' : '=');
+    } else if (event.keyCode == Common::Keys::Hyphen) {
+        sysio->inputBuffer.push(event.shiftMod ? '_' : '-');
     } else if (event.keyCode == Common::Keys::Enter) {
         sysio->inputBuffer.push('\n');
     } else if (event.keyCode == Common::Keys::Tab) {
         sysio->inputBuffer.push('\t');
     } else if (event.keyCode == Common::Keys::Space) {
         sysio->inputBuffer.push(' ');
+    } else if (event.keyCode == Common::Keys::Backspace) {
+        sysio->inputBuffer.push(8);
     }
 }
 
