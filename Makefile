@@ -3,7 +3,7 @@ CXX = g++
 RM = rm -f
 RMDIR = rm -rf
 INC = -I src
-LDFLAGS = $(shell sdl2-config --libs) -lGL -lGLU -lsfml-graphics -lsfml-window -lsfml-system -lglfw -lstdc++
+LDFLAGS = $(shell sdl2-config --libs) -lGL -lGLU -lsfml-graphics -lsfml-window -lsfml-system -lglfw -lstdc++ -lncurses
 CPPFLAGS = -std=c++17 $(INC) -Wall $(shell sdl2-config --cflags)
 STRIP = strip
  
@@ -75,10 +75,8 @@ COMMON_OBJS := \
 	src/Renderer/Base.o \
 	src/Renderer/Immediate.o \
 	src/Renderer/Immediate/Font.o \
-	src/Renderer/Text.o \
 	src/Sys/SDL2.o \
 	src/Sys/SFML.o \
-	src/Sys/Term.o \
 	src/main.o 
  
 ifdef CONFIG_WIN32
@@ -91,7 +89,9 @@ OBJS := \
 	#space.res
 else
 OBJS := \
-	$(COMMON_OBJS)
+	$(COMMON_OBJS) \
+        src/Renderer/NCurses.o \
+        src/Sys/NCurses.o
 endif
  
 # Rewrite paths to build directories

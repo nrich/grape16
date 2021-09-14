@@ -15,13 +15,13 @@
 #include "Client/State.h"
 
 #include "Renderer/Immediate.h"
-#include "Renderer/Text.h"
+#include "Renderer/NCurses.h"
 
 #include "Common/DisplayMode.h"
 
 #include "Sys/SDL2.h"
 #include "Sys/SFML.h"
-#include "Sys/Term.h"
+#include "Sys/NCurses.h"
 
 #include "Emulator/VM.h"
 #include "Emulator/Basic.h"
@@ -141,7 +141,11 @@ int main(int argc, char *argv[]) {
     );
 
     opt.add(
-        "term", // Default.
+#ifdef _WIN32
+        "sdl2", // Default.
+#else
+        "ncurses", // Default.
+#endif
         0, // Required?
         1, // Number of args expected.
         0, // Delimiter if expecting multiple args.
@@ -202,9 +206,14 @@ int main(int argc, char *argv[]) {
     } else if (sysname == "sfml") {
         sys = std::make_shared<Sys::SFML>("Grape16");
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
-    } else if (sysname == "term") {
-        sys = std::make_shared<Sys::Term>("Grape16");
-        renderer = std::make_shared<Renderer::Text>();
+#ifndef _WIN32
+    } else if (sysname == "ncurses") {
+        sys = std::make_shared<Sys::NCurses>("Grape16");
+        renderer = std::make_shared<Renderer::NCurses>();
+#endif
+    } else {
+        std::cerr << "Unknown system" << std::endl;
+        exit(0);
     }
 
     auto vm = std::make_shared<Emulator::VM>(0x003FFFFF);

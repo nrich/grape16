@@ -6,10 +6,10 @@
 namespace Client {
     struct KeyPress {
         uint32_t keyCode; 
-        bool shiftMod;
-        bool ctrlMod;
-        bool altMod;
-        bool guiMod;
+        bool shiftMod = false;
+        bool ctrlMod = false;
+        bool altMod = false;
+        bool guiMod = false;
     };
 
     struct MouseMove {

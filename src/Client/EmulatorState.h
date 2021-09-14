@@ -1,7 +1,7 @@
 #ifndef __CLIENT_EMULATORSTATE_H__
 #define __CLIENT_EMULATORSTATE_H__
 
-#include <stack>
+#include <queue>
 
 #include "Math/Point2.h"
 #include "Emulator/VM.h"
@@ -33,6 +33,8 @@ namespace Client {
             std::vector<std::array<char, chars>> getLineBuffer() {
                 return linebuffer;
             }
+
+            std::queue<char> inputBuffer;
     };
 
     class EmulatorState : public BaseState {

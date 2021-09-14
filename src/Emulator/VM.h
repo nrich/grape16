@@ -322,7 +322,7 @@ namespace Emulator {
 
             value_t getValue(vmpointer_t ptr);
 
-            void Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue rvalue);
+            int32_t Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue rvalue, uint32_t cycle_budget);
 
             value_t getRuntimeValue(RuntimeValue rtarg) const {
                 switch(rtarg) {

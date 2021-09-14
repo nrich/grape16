@@ -417,7 +417,9 @@ std::string VM::getString(vmpointer_t ptr, uint32_t len) {
     return str;
 }
 
-void VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue rvalue) {
+int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue rvalue, uint32_t cycle_budget) {
+    static uint32_t offset = 0;
+
     switch(syscall) {
         case SysCall::CLS:
             sysIO->cls();
@@ -466,16 +468,26 @@ void VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue rva
 
                 uint8_t chr;
                 while ((chr = sysIO->read()) != '\n') {
-                    set(ptr, ByteAsValue(chr));
-                    ptr = ptr + 1;
+                    --cycle_budget;
+
+                    if (chr == 0)
+                        return 0;
+
+                    if (cycle_budget <= 0)
+                        return 0;
+
+                    set(ptr+offset, ByteAsValue(chr));
+                    offset++;
                 }
-                set(ptr, ByteAsValue(0));
-                ptr = ptr + 1;
+                set(ptr+offset, ByteAsValue(0));
             }
             break;
         default:
             error("Unknown SYSCALL");
     }
+
+    offset = 0;
+    return 1;
 }
 
 VM::VM(uint32_t _ptrspace) : idx(0),  pc(0), sp(0), ptrspace(_ptrspace) {
@@ -924,8 +936,10 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 pc += 1;
                 break;
             case OpCode::SYSCALL:
-                Syscall(sysIO, (SysCall)program.readShort(pc), (RuntimeValue)program.readShort(pc+2));
-                pc += 4;
+                if (Syscall(sysIO, (SysCall)program.readShort(pc), (RuntimeValue)program.readShort(pc+2), cycle_budget - cycles))
+                    pc += 4;
+                else
+                    pc -= 1;
                 break;
             case OpCode::CALL:
                 callstack[++sp] = pc + 2; 
