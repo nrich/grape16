@@ -23,21 +23,21 @@ void DisplayMenuState::onRender(State *state, const uint32_t time) {
     if (menuState == DisplayMenu::MENU_RESOLUTION) {
         std::ostringstream s;
         s << "> Screen: " << currentDisplayMode.Width() << "x" << currentDisplayMode.Height() << " @ " << currentDisplayMode.Refresh() << "Hz";
-        renderer->drawString(10, 10, 20, 20, s.str(), Common::Colour::White);
+        renderer->drawString(0, 0, 8, 8, s.str(), Common::Colour::White);
     } else {
         std::ostringstream s;
         s << "  Screen: " << currentDisplayMode.Width() << "x" << currentDisplayMode.Height() << " @ " << currentDisplayMode.Refresh() << "Hz";
-        renderer->drawString(10, 10, 20, 20, s.str(), Common::Colour::Grey);
+        renderer->drawString(0, 0, 8, 8, s.str(), Common::Colour::Grey);
     }
 
     if (menuState == DisplayMenu::MENU_FULLSCREEN) {
         std::ostringstream s;
         s << "> Fullscreen: " << (sys->isFullScreen() ? "true" : "false");
-        renderer->drawString(10, 30, 20, 20, s.str(), Common::Colour::White);
+        renderer->drawString(0, 8, 8, 8, s.str(), Common::Colour::White);
     } else {
         std::ostringstream s;
         s << "  Fullscreen: " << (sys->isFullScreen() ? "true" : "false");
-        renderer->drawString(10, 30, 20, 20, s.str(), Common::Colour::Grey);
+        renderer->drawString(0, 8, 8, 8, s.str(), Common::Colour::Grey);
     }
 }
 
