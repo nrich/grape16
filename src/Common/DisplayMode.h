@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <sstream>
 
 namespace Common {
     enum class AspectRatio {
@@ -44,6 +45,13 @@ namespace Common {
             return true;
         }
 
+        std::string toString() const {
+            std::ostringstream s;
+
+            s << width << "x" << height << "@" << refresh;
+
+            return s.str();
+        }
     };
 }; // namespace Common
 

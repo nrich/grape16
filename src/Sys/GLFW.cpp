@@ -228,6 +228,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 Common::DisplayMode Sys::GLFW::changeDisplayMode(const Common::DisplayMode &displayMode, bool fullscreen) {
     auto current = currentDisplayMode();
+
     if (displayMode == current && fullscreen == isFullScreen())
         return displayMode;
 
@@ -249,11 +250,16 @@ std::vector<Common::DisplayMode> Sys::GLFW::getDisplayModes() const {
     GLFWmonitor *primary = glfwGetPrimaryMonitor();
 
     int count;
-    const GLFWvidmode* vidmodes = glfwGetVideoModes(primary, &count);
+    const GLFWvidmode *vidmodes = glfwGetVideoModes(primary, &count);
+    const GLFWvidmode *current = glfwGetVideoMode(primary);
 
     for (int i = 0; i < count; i++) {
         auto mode = vidmodes[i];
+
         Common::DisplayMode displayMode(mode.width, mode.height, mode.refreshRate);
+
+        if (displayMode.Refresh() != current->refreshRate)
+            continue;
 
         if (displayMode.Ratio() != Common::AspectRatio::Ignore) {
             modes.push_back(displayMode);
@@ -301,6 +307,7 @@ std::pair<Common::DisplayMode, Common::DisplayMode> Sys::GLFW::getPreviousNextMo
         previous = modeList[i-1];
     if (i != modeList.size())
         next = modeList[i+1];
+
     return std::pair<Common::DisplayMode, Common::DisplayMode>(previous, next);
 }
 

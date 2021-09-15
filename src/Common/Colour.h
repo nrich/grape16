@@ -2,6 +2,7 @@
 #define __COMMON_COLOUR_H__
 
 #include <cstdint>
+#include <sstream>
 
 namespace Common {
     class Colour {
@@ -72,6 +73,14 @@ namespace Common {
         }
         Colour operator/(const uint8_t v) const {
             return Colour(r/v, g/v, b/v);
+        }
+
+        std::string toString() const {
+            std::ostringstream s;
+
+            s <<std::hex << r << "," << g << "," << b;
+
+            return s.str();
         }
 
         static const Colour AliceBlue;
