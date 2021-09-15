@@ -5,7 +5,7 @@
 #include <array>
 #include <string>
 
-#include <SDL_opengl.h>
+#include "Common/Shared.h"
 
 namespace Renderer {
 //namespace Immediate {

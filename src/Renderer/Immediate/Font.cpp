@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+#define GL_CLAMP_TO_EDGE                        0x812F
+
 #include "Renderer/Immediate/Font.h"
 
 using namespace Renderer;

@@ -23,8 +23,11 @@
 
 #include "Common/DisplayMode.h"
 
+#ifndef CONFIG_MIN
 #include "Sys/SDL2.h"
 #include "Sys/SFML.h"
+#endif
+
 #include "Sys/GLFW.h"
 
 #ifndef _WIN32
@@ -74,7 +77,7 @@ std::shared_ptr<Emulator::Program> loadBasic(const std::string &input, bool debu
     return std::make_shared<Emulator::Program>(program);
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char **argv) {
     ez::ezOptionParser opt;
 
     opt.overview = "grape16 micro emulator";
@@ -210,15 +213,17 @@ int main(int argc, char *argv[]) {
     std::string sysname;
     opt.get("-s")->getString(sysname);
 
-    if (sysname == "sdl2") {
+    if (sysname == "glfw") {
+        sys = std::make_shared<Sys::GLFW>("Grape16");
+        renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
+#ifndef CONFIG_MIN
+    } else if (sysname == "sdl2") {
         sys = std::make_shared<Sys::SDL2>("Grape16");
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
     } else if (sysname == "sfml") {
         sys = std::make_shared<Sys::SFML>("Grape16");
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
-    } else if (sysname == "glfw") {
-        sys = std::make_shared<Sys::GLFW>("Grape16");
-        renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
+#endif
 #ifndef _WIN32
     } else if (sysname == "ncurses") {
         initscr();

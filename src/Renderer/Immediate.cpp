@@ -46,7 +46,8 @@
 #define GL_MAX_3D_TEXTURE_SIZE                  0x8073
 #define GL_TEXTURE_BINDING_3D                   0x806A
 
-#include <SDL_opengl.h>
+#define GL_CLAMP_TO_EDGE                        0x812F
+
 
 using namespace Renderer;
 

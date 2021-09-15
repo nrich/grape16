@@ -7,11 +7,10 @@
 #include <cmath>
 
 #ifdef __MACOSX__
-//#include <gl.h>
+#include <gl.h>
 //#include <glu.h>
 #else
-//#include <GL/gl.h>
-//#include <GL/glu.h>
+#include <GL/gl.h>
 #endif
 
 #ifndef M_PI
@@ -33,28 +32,6 @@ typedef float vecf;
 typedef vecf vec2f[2];
 typedef vecf vec3f[3];
 typedef vecf vec4f[4];
-
-enum Actions {
-    StepForward     = 1 << 0,
-    StepBackward    = 1 << 1,
-    StepLeft        = 1 << 2,
-    StepRight       = 1 << 3,
-    TurnLeft        = 1 << 4,
-    TurnRight       = 1 << 5,
-    Jump            = 1 << 6,
-    Fire            = 1 << 7,
-};
-
-struct GameUpdate {
-    uint32_t state;
-    uint32_t timeDelta;
-    vec3f angles;
-    vec3f origin;
-};
-
-struct ClientUpdate {
-    uint32_t state;
-};
 
 #include <random>
 typedef std::mt19937 RngT;
