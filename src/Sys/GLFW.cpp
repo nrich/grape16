@@ -1,8 +1,36 @@
 #include "Sys/GLFW.h"
 
+#include "Common/Keys.h"
+
 #include <algorithm>
 
 #include <iostream>
+
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    Client::State *clientState = (Client::State *)glfwGetWindowUserPointer(window);
+    Client::KeyPress event;
+
+    event.shiftMod = mods & GLFW_MOD_SHIFT;
+    event.ctrlMod = mods & GLFW_MOD_CONTROL;
+    event.altMod = mods & GLFW_MOD_ALT;
+    event.guiMod = mods & GLFW_MOD_SUPER;
+
+    if (key == GLFW_KEY_ESCAPE) {
+        glfwSetWindowShouldClose(window, GL_TRUE);
+    } else if (key == GLFW_KEY_ENTER) {
+        event.keyCode = Common::Keys::Enter;
+    } else if (key == GLFW_KEY_LEFT_SHIFT) {
+        event.keyCode = Common::Keys::LShift;
+    } else if (key == GLFW_KEY_A) {
+        event.keyCode = Common::Keys::A;
+    }
+
+    if (action == GLFW_PRESS) {
+        clientState->keyDown(event);
+    } else if (action == GLFW_RELEASE) {
+        clientState->keyUp(event);
+    }
+}
 
 Common::DisplayMode Sys::GLFW::changeDisplayMode(const Common::DisplayMode &displayMode, bool fullscreen) {
     return currentDisplayMode();
@@ -76,6 +104,7 @@ bool Sys::GLFW::isFullScreen() const {
 }
 
 bool Sys::GLFW::handleEvents(Client::State &clientState) {
+    glfwSetWindowUserPointer(window.get(), &clientState);
     glfwPollEvents();
     return !glfwWindowShouldClose(window.get());
 }
@@ -96,24 +125,16 @@ Sys::GLFW::GLFW(const std::string &title) {
 
     auto mode = getDisplayModes().front();
 
-    std::cerr << mode.Width() << "x" <<  mode.Height() << std::endl;
-
     window = std::shared_ptr<GLFWwindow>(
         glfwCreateWindow(mode.Width(), mode.Height(), (std::string("GLFW ") + title).c_str(), NULL, NULL),
         glfwDestroyWindow
     );
 
-    glfwSetWindowUserPointer(window.get(), this);
-
     glfwMakeContextCurrent(window.get());
 
-    int width, height;
-    glfwGetFramebufferSize(window.get(), &width, &height);
-    glViewport(0, 0, width, height);
-
-    std::cerr << width << "X" <<  height << std::endl;
-
     glfwSwapInterval(1);
+
+    glfwSetKeyCallback(window.get(), key_callback);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
