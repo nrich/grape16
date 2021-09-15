@@ -227,7 +227,20 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 }
 
 Common::DisplayMode Sys::GLFW::changeDisplayMode(const Common::DisplayMode &displayMode, bool fullscreen) {
-    return currentDisplayMode();
+    auto current = currentDisplayMode();
+    if (displayMode == current && fullscreen == isFullScreen())
+        return displayMode;
+
+    glfwSetWindowSize(window.get(), displayMode.Width(), displayMode.Height());
+
+    if (fullscreen && !isFullScreen()) {
+        GLFWmonitor *primary = glfwGetPrimaryMonitor();
+        glfwSetWindowMonitor(window.get(), primary, 0, 0, displayMode.Width(), displayMode.Height(), 0);
+    } else if (isFullScreen() && !fullscreen) {
+        glfwSetWindowMonitor(window.get(), nullptr, 0, 0, displayMode.Width(), displayMode.Height(), 0);
+    }
+
+    return displayMode;
 }
 
 std::vector<Common::DisplayMode> Sys::GLFW::getDisplayModes() const {
@@ -294,7 +307,7 @@ std::pair<Common::DisplayMode, Common::DisplayMode> Sys::GLFW::getPreviousNextMo
 }
 
 bool Sys::GLFW::isFullScreen() const {
-    return false;
+    return glfwGetWindowMonitor(window.get()) != nullptr;
 }
 
 bool Sys::GLFW::handleEvents(Client::State &clientState) {
@@ -316,6 +329,7 @@ Sys::GLFW::GLFW(const std::string &title) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     auto mode = getDisplayModes().front();
 

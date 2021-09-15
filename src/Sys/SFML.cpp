@@ -70,14 +70,14 @@ void Sys::SFML::clientMouseButtonRelease(Client::State &clientState, const sf::E
 Common::DisplayMode Sys::SFML::changeDisplayMode(const Common::DisplayMode &displayMode, bool fullscreen) {
     uint32_t style = sf::Style::Default;
 
+    if (currentDisplayMode() == displayMode && fullscreen == isFullScreen())
+        return displayMode;
+
     if (fullscreen) { 
         style = sf::Style::Fullscreen;
     }
 
     auto settings = window.getSettings();
-
-    if (currentDisplayMode() == displayMode)
-        return displayMode;
 
     window.setActive(false);
     window.create(sf::VideoMode(displayMode.Width(), displayMode.Height()), title, style, settings);
