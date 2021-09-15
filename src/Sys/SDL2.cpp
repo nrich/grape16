@@ -369,7 +369,6 @@ std::vector<Common::DisplayMode> Sys::SDL2::getDisplayModes() const {
 
         if (displayMode.Ratio() != Common::AspectRatio::Ignore) { 
             modes.push_back(displayMode);
-            std::cerr << mode.w << "x" << mode.h << "@" << mode.refresh_rate << std::endl;
         }
     }
 

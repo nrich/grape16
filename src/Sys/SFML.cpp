@@ -76,6 +76,9 @@ Common::DisplayMode Sys::SFML::changeDisplayMode(const Common::DisplayMode &disp
 
     auto settings = window.getSettings();
 
+    if (currentDisplayMode() == displayMode)
+        return displayMode;
+
     window.setActive(false);
     window.create(sf::VideoMode(displayMode.Width(), displayMode.Height()), title, style, settings);
     window.setActive(true);
@@ -116,7 +119,7 @@ Common::DisplayMode Sys::SFML::findDisplayMode(uint16_t width, uint16_t height) 
 
 Common::DisplayMode Sys::SFML::currentDisplayMode() const {
     auto size = window.getSize();
-    return Common::DisplayMode(size.x, size.y, 32);
+    return Sys::SFML::findDisplayMode(size.x, size.y);
 }
 
 std::pair<Common::DisplayMode, Common::DisplayMode> Sys::SFML::getPreviousNextMode(const Common::DisplayMode &displayMode) const {
@@ -183,8 +186,6 @@ Sys::SFML::SFML(const std::string &title) : title(std::string("SFML ") + title),
     }
 
     auto mode = getDisplayModes().front();
-
-    std::cerr << mode.Width() << "x" << mode.Height() << std::endl;
 
     window.create(sf::VideoMode(mode.Width(), mode.Height()), this->title, style, sf::ContextSettings(32));
     window.setActive(true);

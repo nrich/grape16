@@ -193,16 +193,16 @@ void Immediate::drawBuffer(const uint32_t *buffer, uint32_t width, uint32_t heig
 void Immediate::changeDisplayMode(const Common::DisplayMode &displayMode) {
     switch (displayMode.Ratio()) {
         case Common::AspectRatio::_4x3:
-            virtualHeight = 480;
-            verticalOffset = 60;
+            virtualHeight = 240;
+            verticalOffset = 30;
             break;
         case Common::AspectRatio::_16x9:
-            virtualHeight = 360;
+            virtualHeight = 180;
             verticalOffset = 0;
             break;
         case Common::AspectRatio::_16x10:
-            virtualHeight = 400;
-            verticalOffset = 20;
+            virtualHeight = 100;
+            verticalOffset = 10;
             break;
         default:
             break;
@@ -210,6 +210,7 @@ void Immediate::changeDisplayMode(const Common::DisplayMode &displayMode) {
 
     this->displayMode = displayMode;
     mode = Mode::Unknown;
+    enableInterfaceMode();
 }
 
 Immediate::~Immediate() {
