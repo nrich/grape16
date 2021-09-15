@@ -61,9 +61,9 @@ else
 endif
  
 ifdef CONFIG_W32
-    TARG := grape1632.exe
+    TARG := grape16.exe
 else ifdef CONFIG_W64
-    TARG := grape1664.exe
+    TARG := grape16x64.exe
 else
     TARG := grape16
 endif
