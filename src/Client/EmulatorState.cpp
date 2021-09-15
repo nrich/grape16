@@ -8,6 +8,7 @@ using namespace Client;
 
 SystemIO::SystemIO() : cursor(0,0) {
     screenbuffer.resize(lines);
+    screenbuffer[cursor.Y()][cursor.X()] = 228;
 }
 
 void SystemIO::cls() {
@@ -19,6 +20,12 @@ void SystemIO::write(uint8_t c) {
     if (chr == '\n') {
         cursor = (cursor + Point(0,1)).withX(0);
         chr = 0;
+    } else if (chr == 8) {
+        if (cursor != Point(0,0)) {
+            cursor = (cursor - Point(1,0));
+            screenbuffer[cursor.Y()][cursor.X()] = ' ';
+        }
+        return;
     } else if (chr == '\t') {
         write(' ');
         write(' ');
@@ -69,7 +76,7 @@ std::string SystemIO::gets() {
 
 void EmulatorState::onRender(State *state, const uint32_t time) {
     uint16_t lineoffset = 0;
-    for (auto line : sysio->getLineBuffer()) {
+    for (auto line : sysio->getScreenBuffer()) {
         state->getRenderer()->drawString(0, lineoffset*8, 8, 8, std::string(line.data()));
         lineoffset++;
     }
@@ -77,7 +84,7 @@ void EmulatorState::onRender(State *state, const uint32_t time) {
 
 void EmulatorState::onTick(State *state, const uint32_t time) {
     static bool done = false;
-    std::string line;
+    static std::string input = "";
 
     if (!done) {
         done = vm->run(std::dynamic_pointer_cast<Emulator::SysIO>(sysio), *program, clockspeed, false, false);
@@ -85,8 +92,31 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
     }
 
     while (auto c = sysio->buffer()) {
-        line += c;
         sysio->write(c);
+
+        if (c == '\n') {
+            if (input == "LIST") {
+                for (auto const b : basic) {
+                    sysio->puts(std::to_string(b.first));
+                    for (auto token : b.second) {
+                        sysio->puts(std::string(" ") + token.str);
+                    }
+                    sysio->write('\n');
+                }
+            } else if (input == "RUN") {
+                auto run = program->add(Emulator::OpCode::NOP);
+                compile(basic, *program);
+                vm->Jump(run);
+                done = false;
+            } else {
+                auto basicline = parseLine(input);
+                basic[basicline.first] = basicline.second;
+            }
+
+            input = "";
+        } else {
+            input += c;
+        }
     }
 }
 

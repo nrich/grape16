@@ -5,6 +5,7 @@
 
 #include "Math/Point2.h"
 #include "Emulator/VM.h"
+#include "Emulator/Basic.h"
 #include "Client/BaseState.h"
 
 namespace Client {
@@ -32,7 +33,7 @@ namespace Client {
 
             std::string gets();
 
-            std::vector<std::array<char, chars>> getLineBuffer() {
+            std::vector<std::array<char, chars>> getScreenBuffer() {
                 return screenbuffer;
             }
 
@@ -56,6 +57,8 @@ namespace Client {
             std::stack<char> keypresses;
             uint32_t clockspeed;
             std::shared_ptr<SystemIO> sysio;
+
+            std::map<uint32_t, std::vector<Emulator::BasicToken>> basic;
         public:
             EmulatorState(std::shared_ptr<Emulator::VM> vm, std::shared_ptr<Emulator::Program> program, uint32_t clockspeed) : vm(vm), program(program), clockspeed(clockspeed) {
                 sysio = std::make_shared<SystemIO>();
