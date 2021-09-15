@@ -62,7 +62,8 @@ void DisplayMenuState::onEnterState(State *state, const int data) {
 void DisplayMenuState::onKeyDown(State *state, const KeyPress &event) {
     auto sys = state->getSys();
 
-    if (event.keyCode == Common::Keys::Escape) {
+    if (event.keyCode == Common::Keys::F1) {
+        state->changeState(0, 0);
     } else if (event.keyCode == '1') {
     } else if (event.keyCode == '2') {
     } else if (event.keyCode == '3') {

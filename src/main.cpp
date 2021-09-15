@@ -23,7 +23,8 @@
 
 #include "Common/DisplayMode.h"
 
-#ifndef CONFIG_MIN
+#if MINBUILD
+#else
 #include "Sys/SDL2.h"
 #include "Sys/SFML.h"
 #endif
@@ -37,6 +38,8 @@
 
 #include "Emulator/VM.h"
 #include "Emulator/Basic.h"
+
+#include "Client/DisplayMenuState.h"
 #include "Client/EmulatorState.h"
 
 #define CLOCK_33MHz_at_60FPS  550
@@ -216,7 +219,8 @@ int main(int argc, char **argv) {
     if (sysname == "glfw") {
         sys = std::make_shared<Sys::GLFW>("Grape16");
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
-#ifndef CONFIG_MIN
+#if MINBUILD
+#else
     } else if (sysname == "sdl2") {
         sys = std::make_shared<Sys::SDL2>("Grape16");
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
@@ -246,12 +250,15 @@ int main(int argc, char **argv) {
     uint32_t clockspeed = opt.isSet("-t") ? CLOCK_66MHz_at_60FPS : CLOCK_33MHz_at_60FPS;
 
     auto emulatorState = std::make_shared<Client::EmulatorState>(vm, program, clockspeed);
+    auto displayMenuState = std::make_shared<Client::DisplayMenuState>();
 
     Client::State clientState(
         std::dynamic_pointer_cast<Renderer::Base>(renderer),
         std::dynamic_pointer_cast<Sys::Base>(sys),
         std::pair<uint32_t, std::shared_ptr<Client::BaseState>>(0, std::dynamic_pointer_cast<Client::BaseState>(emulatorState))
     );
+
+    clientState.addState(1, std::dynamic_pointer_cast<Client::BaseState>(displayMenuState));
 
     static uint32_t lastRender = sys->getTicks();
     uint32_t renderTime = sys->getTicks();

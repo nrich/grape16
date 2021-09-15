@@ -37,9 +37,11 @@ ifdef CONFIG_W64
     STRIP = x86_64-w64-mingw32-strip
 endif
 
-
 VERSION = $(shell cat VERSION.txt)
 CPPFLAGS := $(CPPFLAGS) -DVERSION="\"$(VERSION)\""
+ifdef CONFIG_MIN
+CPPFLAGS := $(CPPFLAGS) -DMINBUILD="1"
+endif
 LDFLAGS := $(LDFLAGS)
  
 # Temporary build directories

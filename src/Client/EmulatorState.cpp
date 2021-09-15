@@ -186,6 +186,8 @@ void EmulatorState::onKeyDown(State *state, const KeyPress &event) {
         sysio->inputBuffer.push(' ');
     } else if (event.keyCode == Common::Keys::Backspace) {
         sysio->inputBuffer.push(8);
+    } else if (event.keyCode == Common::Keys::F1) {
+        state->changeState(1, 0);
     }
 }
 

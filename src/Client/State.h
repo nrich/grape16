@@ -48,7 +48,7 @@ namespace Client {
         }
 
 
-        void addState(const uint32_t newState, std::shared_ptr<BaseState> &state) {
+        void addState(const uint32_t newState, std::shared_ptr<BaseState> state) {
             states[newState] = state;
         }
 
