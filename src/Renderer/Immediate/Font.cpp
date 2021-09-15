@@ -2652,7 +2652,7 @@ void Font::drawString(const uint16_t x, const uint16_t y, const uint16_t w, cons
     glEnable(GL_TEXTURE_2D);
 
     for (const auto c : str) {
-        GLuint fontTexture = fontTextures[c];
+        GLuint fontTexture = fontTextures[(uint8_t)c];
         glBindTexture(GL_TEXTURE_2D, fontTexture);
 
         glBegin(GL_QUADS);

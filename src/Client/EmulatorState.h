@@ -16,7 +16,9 @@ namespace Client {
 
             Point cursor;
 
-            std::vector<std::array<char, chars>> linebuffer;
+            std::vector<std::array<char, chars>> screenbuffer;
+
+            std::queue<char> inputBuffer;
         public:
             SystemIO();
 
@@ -31,10 +33,21 @@ namespace Client {
             std::string gets();
 
             std::vector<std::array<char, chars>> getLineBuffer() {
-                return linebuffer;
+                return screenbuffer;
             }
 
-            std::queue<char> inputBuffer;
+            void buffer(char c) {
+                inputBuffer.push(c);
+            }
+
+            char buffer() {
+                if (inputBuffer.size() == 0)
+                    return 0;
+
+                char c = inputBuffer.front();
+                inputBuffer.pop();
+                return c;
+            }
     };
 
     class EmulatorState : public BaseState {
@@ -45,7 +58,6 @@ namespace Client {
             std::shared_ptr<SystemIO> sysio;
         public:
             EmulatorState(std::shared_ptr<Emulator::VM> vm, std::shared_ptr<Emulator::Program> program, uint32_t clockspeed) : vm(vm), program(program), clockspeed(clockspeed) {
-                //sysio = std::dynamic_pointer_cast<Emulator::SysIO>(std::make_shared<SystemIO>());
                 sysio = std::make_shared<SystemIO>();
             }
 
