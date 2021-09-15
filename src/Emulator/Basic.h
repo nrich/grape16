@@ -81,6 +81,8 @@ namespace Emulator {
         WHILE,
         WEND,
 
+        PSET,
+
         EOL,
 
         TOKEN_COUNT

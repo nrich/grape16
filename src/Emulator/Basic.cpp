@@ -182,6 +182,11 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                         tokenType = BasicTokenType::PRINT;
                         i += 4;
                     }
+                    else
+                    if (line.substr(i, 3) == "SET") {
+                        tokenType = BasicTokenType::PSET;
+                        i += 3;
+                    }
                     break;
                 case 'R':
                     if (line.substr(i, 3) == "EAD") {
@@ -733,6 +738,8 @@ static void next_statement(Program &program, uint32_t linenumber, const std::vec
 
     program.addShort(OpCode::JMP, std::get<0>(loop));
     auto pos = program.add(OpCode::NOP);
+    program.add(OpCode::POPA);
+    program.add(OpCode::POPB);
     program.update(std::get<1>(loop)+1, pos);
 }
 
@@ -835,6 +842,21 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
     } else if (tokens[current].type == BasicTokenType::NEXT) {
         current++;
         next_statement(program, linenumber, {tokens.begin(), tokens.end()});
+    } else if (tokens[current].type == BasicTokenType::PSET) {
+        current++;
+
+        check(linenumber, tokens[current++], BasicTokenType::LEFT_PAREN, "`(' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+
+        program.add(OpCode::POPC);
+        program.add(OpCode::POPB);
+        program.add(OpCode::POPA);
+        program.addSyscall(OpCode::SYSCALL, SysCall::DRAW, RuntimeValue::IDX);
     } else if (tokens[current].type == BasicTokenType::IDENTIFIER && tokens[current+1].type == BasicTokenType::EQUAL) {
         auto name = identifier(linenumber, tokens[current++]);
 

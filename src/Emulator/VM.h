@@ -178,7 +178,8 @@ namespace Emulator {
     enum class SysCall {
         CLS = 0,
         WRITE,
-        READ
+        READ,
+        DRAW
     };
 
 

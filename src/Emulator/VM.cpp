@@ -482,6 +482,9 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                 set(ptr+offset, ByteAsValue(0));
             }
             break;
+        case SysCall::DRAW:
+            sysIO->setpixel(ValueAsInt(a), ValueAsInt(b), ValueAsInt(c));
+            break;
         default:
             error("Unknown SYSCALL");
     }
