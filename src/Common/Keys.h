@@ -61,7 +61,7 @@ namespace Common {
             Quote,        ///< The ' key
             Slash,        ///< The / key
             Backslash,    ///< The \ key
-            Tilde,        ///< The ~ key
+            Backquote,    ///< The ` key
             Equal,        ///< The = key
             Hyphen,       ///< The - key (hyphen)
             Space,        ///< The Space key

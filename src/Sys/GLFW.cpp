@@ -16,13 +16,207 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     event.guiMod = mods & GLFW_MOD_SUPER;
 
     if (key == GLFW_KEY_ESCAPE) {
-        glfwSetWindowShouldClose(window, GL_TRUE);
-    } else if (key == GLFW_KEY_ENTER) {
+        event.keyCode = Common::Keys::Escape;
+    } else if (key == GLFW_KEY_ENTER || key == GLFW_KEY_KP_ENTER) {
         event.keyCode = Common::Keys::Enter;
     } else if (key == GLFW_KEY_LEFT_SHIFT) {
         event.keyCode = Common::Keys::LShift;
+    } else if (key == GLFW_KEY_RIGHT_SHIFT) {
+        event.keyCode = Common::Keys::RShift;
+    } else if (key == GLFW_KEY_LEFT_ALT) {
+        event.keyCode = Common::Keys::LAlt;
+    } else if (key == GLFW_KEY_RIGHT_ALT) {
+        event.keyCode = Common::Keys::RAlt;
+    } else if (key == GLFW_KEY_LEFT_CONTROL) {
+        event.keyCode = Common::Keys::LControl;
+    } else if (key == GLFW_KEY_RIGHT_CONTROL) {
+        event.keyCode = Common::Keys::RControl;
+    } else if (key == GLFW_KEY_LEFT_SUPER) {
+        event.keyCode = Common::Keys::LSystem;
+    } else if (key == GLFW_KEY_RIGHT_SUPER) {
+        event.keyCode = Common::Keys::RSystem;
+    } else if (key == GLFW_KEY_MENU) {
+        event.keyCode = Common::Keys::Menu;
+    } else if (key == GLFW_KEY_TAB) {
+        event.keyCode = Common::Keys::Tab;
+    } else if (key == GLFW_KEY_SPACE) {
+        event.keyCode = Common::Keys::Space;
+    } else if (key == GLFW_KEY_BACKSPACE) {
+        event.keyCode = Common::Keys::Backspace;
+    } else if (key == GLFW_KEY_APOSTROPHE) {
+        event.keyCode = Common::Keys::Quote;
+    } else if (key == GLFW_KEY_COMMA) {
+        event.keyCode = Common::Keys::Comma;
+    } else if (key == GLFW_KEY_MINUS) {
+        event.keyCode = Common::Keys::Hyphen;
+    } else if (key == GLFW_KEY_PERIOD) {
+        event.keyCode = Common::Keys::Period;
+    } else if (key == GLFW_KEY_SLASH) {
+        event.keyCode = Common::Keys::Slash;
+    } else if (key == GLFW_KEY_SEMICOLON) {
+        event.keyCode = Common::Keys::Semicolon;
+    } else if (key == GLFW_KEY_EQUAL) {
+        event.keyCode = Common::Keys::Equal;
+    } else if (key == GLFW_KEY_LEFT_BRACKET) {
+        event.keyCode = Common::Keys::LBracket;
+    } else if (key == GLFW_KEY_RIGHT_BRACKET) {
+        event.keyCode = Common::Keys::RBracket;
+    } else if (key == GLFW_KEY_GRAVE_ACCENT) {
+        event.keyCode = Common::Keys::Backquote;
+    } else if (key == GLFW_KEY_BACKSLASH) {
+        event.keyCode = Common::Keys::Backslash;
     } else if (key == GLFW_KEY_A) {
         event.keyCode = Common::Keys::A;
+    } else if (key == GLFW_KEY_B) {
+        event.keyCode = Common::Keys::B;
+    } else if (key == GLFW_KEY_C) {
+        event.keyCode = Common::Keys::C;
+    } else if (key == GLFW_KEY_D) {
+        event.keyCode = Common::Keys::D;
+    } else if (key == GLFW_KEY_E) {
+        event.keyCode = Common::Keys::E;
+    } else if (key == GLFW_KEY_F) {
+        event.keyCode = Common::Keys::F;
+    } else if (key == GLFW_KEY_G) {
+        event.keyCode = Common::Keys::G;
+    } else if (key == GLFW_KEY_H) {
+        event.keyCode = Common::Keys::H;
+    } else if (key == GLFW_KEY_I) {
+        event.keyCode = Common::Keys::I;
+    } else if (key == GLFW_KEY_J) {
+        event.keyCode = Common::Keys::J;
+    } else if (key == GLFW_KEY_K) {
+        event.keyCode = Common::Keys::K;
+    } else if (key == GLFW_KEY_L) {
+        event.keyCode = Common::Keys::L;
+    } else if (key == GLFW_KEY_M) {
+        event.keyCode = Common::Keys::M;
+    } else if (key == GLFW_KEY_N) {
+        event.keyCode = Common::Keys::N;
+    } else if (key == GLFW_KEY_O) {
+        event.keyCode = Common::Keys::O;
+    } else if (key == GLFW_KEY_P) {
+        event.keyCode = Common::Keys::P;
+    } else if (key == GLFW_KEY_Q) {
+        event.keyCode = Common::Keys::Q;
+    } else if (key == GLFW_KEY_R) {
+        event.keyCode = Common::Keys::R;
+    } else if (key == GLFW_KEY_S) {
+        event.keyCode = Common::Keys::S;
+    } else if (key == GLFW_KEY_T) {
+        event.keyCode = Common::Keys::T;
+    } else if (key == GLFW_KEY_U) {
+        event.keyCode = Common::Keys::U;
+    } else if (key == GLFW_KEY_V) {
+        event.keyCode = Common::Keys::V;
+    } else if (key == GLFW_KEY_W) {
+        event.keyCode = Common::Keys::W;
+    } else if (key == GLFW_KEY_X) {
+        event.keyCode = Common::Keys::X;
+    } else if (key == GLFW_KEY_Y) {
+        event.keyCode = Common::Keys::Y;
+    } else if (key == GLFW_KEY_Z) {
+        event.keyCode = Common::Keys::Z;
+    } else if (key == GLFW_KEY_1) {
+        event.keyCode = Common::Keys::Num1;
+    } else if (key == GLFW_KEY_2) {
+        event.keyCode = Common::Keys::Num2;
+    } else if (key == GLFW_KEY_3) {
+        event.keyCode = Common::Keys::Num3;
+    } else if (key == GLFW_KEY_4) {
+        event.keyCode = Common::Keys::Num4;
+    } else if (key == GLFW_KEY_5) {
+        event.keyCode = Common::Keys::Num5;
+    } else if (key == GLFW_KEY_6) {
+        event.keyCode = Common::Keys::Num6;
+    } else if (key == GLFW_KEY_7) {
+        event.keyCode = Common::Keys::Num7;
+    } else if (key == GLFW_KEY_8) {
+        event.keyCode = Common::Keys::Num8;
+    } else if (key == GLFW_KEY_9) {
+        event.keyCode = Common::Keys::Num9;
+    } else if (key == GLFW_KEY_0) {
+        event.keyCode = Common::Keys::Num0;
+    } else if (key == GLFW_KEY_KP_1) {
+        event.keyCode = Common::Keys::Numpad1;
+    } else if (key == GLFW_KEY_KP_2) {
+        event.keyCode = Common::Keys::Numpad2;
+    } else if (key == GLFW_KEY_KP_3) {
+        event.keyCode = Common::Keys::Numpad3;
+    } else if (key == GLFW_KEY_KP_4) {
+        event.keyCode = Common::Keys::Numpad4;
+    } else if (key == GLFW_KEY_KP_5) {
+        event.keyCode = Common::Keys::Numpad5;
+    } else if (key == GLFW_KEY_KP_6) {
+        event.keyCode = Common::Keys::Numpad6;
+    } else if (key == GLFW_KEY_KP_7) {
+        event.keyCode = Common::Keys::Numpad7;
+    } else if (key == GLFW_KEY_KP_8) {
+        event.keyCode = Common::Keys::Numpad8;
+    } else if (key == GLFW_KEY_KP_9) {
+        event.keyCode = Common::Keys::Numpad9;
+    } else if (key == GLFW_KEY_KP_0) {
+        event.keyCode = Common::Keys::Numpad0;
+    } else if (key == GLFW_KEY_F1) {
+        event.keyCode = Common::Keys::F1;
+    } else if (key == GLFW_KEY_F2) {
+        event.keyCode = Common::Keys::F2;
+    } else if (key == GLFW_KEY_F3) {
+        event.keyCode = Common::Keys::F3;
+    } else if (key == GLFW_KEY_F4) {
+        event.keyCode = Common::Keys::F4;
+    } else if (key == GLFW_KEY_F5) {
+        event.keyCode = Common::Keys::F5;
+    } else if (key == GLFW_KEY_F6) {
+        event.keyCode = Common::Keys::F6;
+    } else if (key == GLFW_KEY_F7) {
+        event.keyCode = Common::Keys::F7;
+    } else if (key == GLFW_KEY_F8) {
+        event.keyCode = Common::Keys::F8;
+    } else if (key == GLFW_KEY_F9) {
+        event.keyCode = Common::Keys::F9;
+    } else if (key == GLFW_KEY_F10) {
+        event.keyCode = Common::Keys::F10;
+    } else if (key == GLFW_KEY_F11) {
+        event.keyCode = Common::Keys::F11;
+    } else if (key == GLFW_KEY_F12) {
+        event.keyCode = Common::Keys::F12;
+    } else if (key == GLFW_KEY_F13) {
+        event.keyCode = Common::Keys::F13;
+    } else if (key == GLFW_KEY_F14) {
+        event.keyCode = Common::Keys::F14;
+    } else if (key == GLFW_KEY_F15) {
+        event.keyCode = Common::Keys::F15;
+    } else if (key == GLFW_KEY_LEFT) {
+        event.keyCode = Common::Keys::Left;
+    } else if (key == GLFW_KEY_RIGHT) {
+        event.keyCode = Common::Keys::Right;
+    } else if (key == GLFW_KEY_UP) {
+        event.keyCode = Common::Keys::Up;
+    } else if (key == GLFW_KEY_DOWN) {
+        event.keyCode = Common::Keys::Down;
+    } else if (key == GLFW_KEY_PAUSE) {
+        event.keyCode = Common::Keys::Pause;
+    } else if (key == GLFW_KEY_PAGE_UP) {
+        event.keyCode = Common::Keys::PageUp;
+    } else if (key == GLFW_KEY_PAGE_DOWN) {
+        event.keyCode = Common::Keys::PageDown;
+    } else if (key == GLFW_KEY_END) {
+        event.keyCode = Common::Keys::End;
+    } else if (key == GLFW_KEY_HOME) {
+        event.keyCode = Common::Keys::Home;
+    } else if (key == GLFW_KEY_INSERT) {
+        event.keyCode = Common::Keys::Insert;
+    } else if (key == GLFW_KEY_DELETE) {
+        event.keyCode = Common::Keys::Delete;
+    } else if (key == GLFW_KEY_KP_DIVIDE) {
+        event.keyCode = Common::Keys::Divide;
+    } else if (key == GLFW_KEY_KP_MULTIPLY) {
+        event.keyCode = Common::Keys::Multiply;
+    } else if (key == GLFW_KEY_KP_ADD) {
+        event.keyCode = Common::Keys::Add;
+    } else if (key == GLFW_KEY_KP_SUBTRACT) {
+        event.keyCode = Common::Keys::Subtract;
     }
 
     if (action == GLFW_PRESS) {

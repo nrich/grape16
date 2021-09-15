@@ -156,7 +156,7 @@ void EmulatorState::onKeyDown(State *state, const KeyPress &event) {
         sysio->inputBuffer.push(event.shiftMod ? '(' : '9');
     } else if (event.keyCode == Common::Keys::Num0) {
         sysio->inputBuffer.push(event.shiftMod ? ')' : '0');
-    } else if (event.keyCode == Common::Keys::Tilde) {
+    } else if (event.keyCode == Common::Keys::Backquote) {
         sysio->inputBuffer.push(event.shiftMod ? '~' : '`');
     } else if (event.keyCode == Common::Keys::LBracket) {
         sysio->inputBuffer.push(event.shiftMod ? '{' : '[');

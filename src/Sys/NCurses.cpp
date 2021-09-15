@@ -282,10 +282,10 @@ void Sys::NCurses::clientKeyDown(Client::State &clientState, const char ch) cons
             event.shiftMod = true;
             break;
         case '`':
-            event.keyCode = Common::Keys::Tilde;
+            event.keyCode = Common::Keys::Backquote;
             break;
         case '~':
-            event.keyCode = Common::Keys::Tilde;
+            event.keyCode = Common::Keys::Backquote;
             event.shiftMod = true;
             break;
         case '[':

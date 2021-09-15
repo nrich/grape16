@@ -95,7 +95,7 @@ static int sym2key(int sym) {
         case SDLK_UNDERSCORE:
             return Common::Keys::Subtract;
         case SDLK_BACKQUOTE:
-            return Common::Keys::Tilde;
+            return Common::Keys::Backquote;
         case SDLK_a:
             return Common::Keys::A;
         case SDLK_b:
