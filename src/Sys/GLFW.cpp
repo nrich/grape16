@@ -257,7 +257,6 @@ std::vector<Common::DisplayMode> Sys::GLFW::getDisplayModes() const {
 
         if (displayMode.Ratio() != Common::AspectRatio::Ignore) {
             modes.push_back(displayMode);
-            std::cerr << mode.width << "x" << mode.height << "@" << mode.refreshRate << std::endl;
         }
 
     }
