@@ -114,6 +114,8 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
             }
 
             input = "";
+        } else if (c == 8) {
+            input.pop_back();
         } else {
             input += c;
         }
