@@ -6,7 +6,7 @@
 
 using namespace Client;
 
-SystemIO::SystemIO() {
+SystemIO::SystemIO() : cursor(0,0) {
     linebuffer.resize(lines);
 }
 
@@ -14,6 +14,28 @@ void SystemIO::cls() {
 }
 
 void SystemIO::write(uint8_t c) {
+    char chr = (char)c;
+
+    if (chr == '\n') {
+        cursor = (cursor + Point(0,1)).withX(0);
+        return;
+    } else if (chr == '\t') {
+        write(' ');
+        write(' ');
+        return;
+    }
+
+    if (cursor.X() >= chars)
+        cursor = (cursor + Point(0,1)).withX(0);
+
+    if (cursor.Y() >= lines) {
+        cursor = cursor - Point(0, 1);
+        linebuffer.erase(linebuffer.begin());
+        linebuffer.push_back(std::array<char, chars>());
+    }
+
+    linebuffer[cursor.Y()][cursor.X()] = c;
+    cursor = (cursor + Point(1,0));
 }
 
 uint8_t SystemIO::read() {
@@ -22,8 +44,7 @@ uint8_t SystemIO::read() {
 
     uint8_t c = (uint8_t)inputBuffer.front();
 
-    linebuffer[cursor.Y()][cursor.X()] = (char)c;
-    cursor = cursor + Point(1, 0);
+    write(c);
 
     inputBuffer.pop();
 
@@ -32,23 +53,7 @@ uint8_t SystemIO::read() {
 
 void SystemIO::puts(const std::string &str) {
     for (auto c : str) {
-        if (c == '\n') {
-            cursor = (cursor + Point(0,1)).withX(0);
-            continue;
-        }
-
-        linebuffer[cursor.Y()][cursor.X()] = c;
-
-        cursor = cursor + Point(1, 0);
-
-        if (cursor.X() >= chars)
-            cursor = (cursor + Point(0,1)).withX(0);
-
-        if (cursor.Y() > lines) {
-            cursor = cursor - Point(0,1);
-            linebuffer.erase(linebuffer.begin());
-            linebuffer.push_back(std::array<char, chars>());
-        }
+        write(c);
     }
 }
 

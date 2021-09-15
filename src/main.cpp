@@ -233,7 +233,7 @@ int main(int argc, char **argv) {
         initscr();
 
         auto window = std::shared_ptr<WINDOW>(
-            newwin(26, 82, 0, 0),
+            newwin(24, 42, 0, 0),
             delwin
         );
 

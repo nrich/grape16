@@ -412,6 +412,7 @@ Sys::NCurses::NCurses(const std::string &title, std::shared_ptr<WINDOW> window) 
     noecho();
     nodelay(stdscr, TRUE);
     scrollok(stdscr, TRUE);
+    keypad(stdscr, TRUE);
 
     curs_set(0);
     clear();
