@@ -181,6 +181,9 @@ namespace Emulator {
         READ
     };
 
+
+    std::string OpCodeAsString(OpCode opcode);
+
     class SysIO {
         public:
             virtual void cls() = 0;

@@ -5,7 +5,7 @@
 
 using namespace Emulator;
 
-static std::string OpCodeAsString(OpCode opcode) {
+std::string OpCodeAsString(OpCode opcode) {
     switch(opcode) {
         case OpCode::NOP: return "NOP";
         case OpCode::HALT: return "HALT";
