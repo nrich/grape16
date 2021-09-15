@@ -190,6 +190,50 @@ void Immediate::drawBuffer(const uint32_t *buffer, uint32_t width, uint32_t heig
     glDeleteTextures(1, &screen);
 }
 
+void Immediate::drawBuffer(const uint8_t *buffer, uint32_t width, uint32_t height, uint32_t size) {
+    enableInterfaceMode();
+
+    glEnable(GL_BLEND);
+
+
+    GLuint screen;
+    glGenTextures(1, &screen);
+
+
+    glBindTexture(GL_TEXTURE_2D, screen);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R3_G3_B2, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE_3_3_2, buffer);
+    glEnable(GL_TEXTURE_2D);
+
+    int toffset = verticalOffset;
+    int boffset = verticalOffset;
+    int loffset = 0;
+    int roffset = 0;
+
+    int VWIDTH = 320;
+    int VHEIGHT = virtualHeight;
+
+    glBegin(GL_QUADS);
+        glTexCoord2i(0, 0);
+        glVertex3i(loffset, toffset, 0);
+
+        glTexCoord2i(1, 0);
+        glVertex3i(VWIDTH*size-roffset, toffset, 0);
+
+        glTexCoord2i(1, 1);
+        glVertex3i(VWIDTH*size-roffset, (VHEIGHT-boffset)*size, 0);
+
+        glTexCoord2i(0, 1);
+        glVertex3i(loffset, (VHEIGHT-boffset)*size, 0);
+    glEnd();
+
+    glDeleteTextures(1, &screen);
+}
+
+
 void Immediate::changeDisplayMode(const Common::DisplayMode &displayMode) {
     switch (displayMode.Ratio()) {
         case Common::AspectRatio::_4x3:

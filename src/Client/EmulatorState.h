@@ -18,6 +18,7 @@ namespace Client {
             Point cursor;
 
             std::vector<std::array<char, chars>> screenbuffer;
+            std::array<uint8_t, 320*180> screen;
 
             std::queue<char> inputBuffer;
         public:
@@ -48,6 +49,13 @@ namespace Client {
                 char c = inputBuffer.front();
                 inputBuffer.pop();
                 return c;
+            }
+
+            void setpixel(uint16_t x, uint16_t y, uint8_t pixel);
+            uint8_t getpixel(uint16_t x, uint16_t y);
+
+            std::array<uint8_t, 320*180> getScreen() {
+                return screen;
             }
     };
 

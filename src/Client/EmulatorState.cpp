@@ -9,10 +9,21 @@ using namespace Client;
 SystemIO::SystemIO() : cursor(0,0) {
     screenbuffer.resize(lines);
     screenbuffer[cursor.Y()][cursor.X()] = 228;
+
+    screen.fill(1);
 }
 
 void SystemIO::cls() {
 }
+
+void SystemIO::setpixel(uint16_t x, uint16_t y, uint8_t pixel) {
+    screen[y*320 + x] = pixel;
+}
+
+uint8_t SystemIO::getpixel(uint16_t x, uint16_t y) {
+    return screen[y*320 + x];
+}
+
 
 void SystemIO::write(uint8_t c) {
     char chr = (char)c;
@@ -75,6 +86,8 @@ std::string SystemIO::gets() {
 
 
 void EmulatorState::onRender(State *state, const uint32_t time) {
+    state->getRenderer()->drawBuffer(sysio->getScreen().data(), 320, 180);
+
     uint16_t lineoffset = 0;
     for (auto line : sysio->getScreenBuffer()) {
         state->getRenderer()->drawString(0, lineoffset*8, 8, 8, std::string(line.data()));

@@ -193,6 +193,9 @@ namespace Emulator {
 
             virtual void puts(const std::string &str) = 0;
             virtual std::string gets() = 0; 
+
+            virtual void setpixel(uint16_t x, uint16_t y, uint8_t pixel) = 0;
+            virtual uint8_t getpixel(uint16_t x, uint16_t y) = 0;
     };
 
     class Debugger {

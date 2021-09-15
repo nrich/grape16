@@ -26,6 +26,9 @@ void NCurses::drawPoint(const uint16_t x, const uint16_t y, const Common::Colour
 void NCurses::drawBuffer(const uint32_t *buffer, uint32_t width, uint32_t height, uint32_t size) {
 }
 
+void NCurses::drawBuffer(const uint8_t *buffer, uint32_t width, uint32_t height, uint32_t size) {
+}
+
 void NCurses::changeDisplayMode(const Common::DisplayMode &displayMode) {
 }
 

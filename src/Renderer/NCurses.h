@@ -23,6 +23,7 @@ public:
     void drawPoint(const uint16_t x, const uint16_t y, const Common::Colour &colour, const uint16_t size=1);
     void drawLine(const Vec2d &start, const Vec2d &end, const Common::Colour &colour);
     void drawBuffer(const uint32_t *buffer, uint32_t width, uint32_t height, uint32_t size=1);
+    void drawBuffer(const uint8_t *buffer, uint32_t width, uint32_t height, uint32_t size=1);
 
     void changeDisplayMode(const Common::DisplayMode &displayMode);
 
