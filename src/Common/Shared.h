@@ -7,11 +7,11 @@
 #include <cmath>
 
 #ifdef __MACOSX__
-#include <gl.h>
-#include <glu.h>
+//#include <gl.h>
+//#include <glu.h>
 #else
-#include <GL/gl.h>
-#include <GL/glu.h>
+//#include <GL/gl.h>
+//#include <GL/glu.h>
 #endif
 
 #ifndef M_PI

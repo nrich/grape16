@@ -13,13 +13,6 @@ namespace Sys {
     class GLFW : public Base {
             std::shared_ptr<GLFWwindow> window;
 
-            /*
-            void clientKeyDown(Client::State &clientState, const sf::Event::KeyEvent &sfEvent) const;
-            void clientKeyUp(Client::State &clientState, const sf::Event::KeyEvent &sfEvent) const;
-            void clientMouseMove(Client::State &clientState, const sf::Event::MouseMoveEvent &sfEvent) const;
-            void clientMouseButtonPress(Client::State &clientState, const sf::Event::MouseButtonEvent &sfEvent) const;
-            void clientMouseButtonRelease(Client::State &clientState, const sf::Event::MouseButtonEvent &sfEvent) const;
-            */
         public:
             GLFW(const std::string &title);
             ~GLFW();

@@ -8,21 +8,29 @@
 #include <ctime>
 #include <ratio>
 #include <chrono>
-#include <thread>
 
 #include "ezOptionParser.hpp"
+
+#ifdef _WIN32
+#include "mingw.thread.h"
+#else
+#include <thread>
+#endif
 
 #include "Client/State.h"
 
 #include "Renderer/Immediate.h"
-#include "Renderer/NCurses.h"
 
 #include "Common/DisplayMode.h"
 
 #include "Sys/SDL2.h"
 #include "Sys/SFML.h"
 #include "Sys/GLFW.h"
+
+#ifndef _WIN32
 #include "Sys/NCurses.h"
+#include "Renderer/NCurses.h"
+#endif
 
 #include "Emulator/VM.h"
 #include "Emulator/Basic.h"
@@ -143,7 +151,7 @@ int main(int argc, char *argv[]) {
 
     opt.add(
 #ifdef _WIN32
-        "sdl2", // Default.
+        "glfw", // Default.
 #else
         "ncurses", // Default.
 #endif

@@ -10,8 +10,8 @@ STRIP = strip
 ifdef CONFIG_W32
     CXX = i686-w64-mingw32-g++
     LDFLAGS = $(shell /opt/local/i686-w64-mingw32/bin/sdl2-config --libs --static-libs) -L/opt/local/SFML-i686/lib -L/opt/local/glfw-3.3.4.bin.WIN32/lib-mingw-w64/ -lopengl32 -lglu32 -static-libgcc -static-libstdc++ -lwsock32 -lwinspool -lws2_32 -lsfml-graphics -lsfml-window -lsfml-system -lglfw3
-    INC = -I src -I /opt/local/SFML-i686/include -I -I/opt/local/glfw-3.3.4.bin.WIN32/include/
-    CPPFLAGS = -O3 -std=c++17 $(INC) -D_WIN32 -Wall $(shell /opt/local/i686-w64-mingw32/bin/sdl2-config --cflags)
+    INC = -I src -I /opt/local/SFML-i686/include -I /opt/local/glfw-3.3.4.bin.WIN32/include -I /opt/local/mingw-std-threads-1.0.0
+    CPPFLAGS = -O3 -std=c++17  -pthread $(INC) -D_WIN32 -Wall $(shell /opt/local/i686-w64-mingw32/bin/sdl2-config --cflags)
     WINDRES = i686-w64-mingw32-windres
     STRIP = i686-w64-mingw32-strip
 endif
@@ -19,8 +19,8 @@ endif
 ifdef CONFIG_W64
     CXX = x86_64-w64-mingw32-g++
     LDFLAGS = $(shell /opt/local/x86_64-w64-mingw32/bin/sdl2-config --libs --static-libs) -L/opt/local/SFML-x86_64/lib -L /opt/local/glfw-3.3.4.bin.WIN64/lib-mingw-w64/ -lopengl32 -lglu32 -static-libgcc -static-libstdc++ -lwsock32 -lwinspool -lws2_32 -lsfml-graphics -lsfml-window -lsfml-system -lglfw3
-    INC = -I src -I/opt/local/SFML-x86_64/include -I/opt/local/glfw-3.3.4.bin.WIN64/include/
-    CPPFLAGS = -O3 -std=c++17 $(INC) -D_WIN64 -Wall $(shell /opt/local/x86_64-w64-mingw32/bin/sdl2-config --cflags)
+    INC = -I src -I/opt/local/SFML-x86_64/include -I /opt/local/glfw-3.3.4.bin.WIN64/include -I /opt/local/mingw-std-threads-1.0.0
+    CPPFLAGS = -O3 -std=c++17  -pthread $(INC) -pthread -D_WIN64 -Wall $(shell /opt/local/x86_64-w64-mingw32/bin/sdl2-config --cflags)
     WINDRES = x86_64-w64-mingw32-windres
     STRIP = x86_64-w64-mingw32-strip
 endif
@@ -80,11 +80,11 @@ COMMON_OBJS := \
 	src/Sys/SFML.o \
 	src/main.o 
  
-ifdef CONFIG_WIN32
+ifdef CONFIG_W32
 OBJS := \
 	$(COMMON_OBJS) \
 	#space.res
-else ifdef CONFIG_WIN64
+else ifdef CONFIG_W4
 OBJS := \
 	$(COMMON_OBJS) \
 	#space.res
