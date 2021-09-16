@@ -264,14 +264,20 @@ int main(int argc, char **argv) {
     uint32_t renderTime = sys->getTicks();
 
     while (sys->handleEvents(clientState)) {
+        auto t1 = std::chrono::high_resolution_clock::now();
         sys->clearScreen();
         clientState.tick(renderTime - lastRender);
         clientState.render(renderTime - lastRender);
+
         lastRender = renderTime;
 
         sys->swapBuffers();
+        auto t2 = std::chrono::high_resolution_clock::now();
+        auto taken = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+//        std::cerr << taken << std::endl;
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(16 - taken));
     }
 
     exit(0);
