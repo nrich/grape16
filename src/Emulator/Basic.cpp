@@ -154,6 +154,11 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                         i += 2;
                     }
                     else
+                    if (line.substr(i, 3) == "INE") {
+                        tokenType = BasicTokenType::LINE;
+                        i += 3;
+                    }
+                    else
                     if (line.substr(i, 2) == "OG") {
                         tokenType = BasicTokenType::FUNCTION;
                         i += 2;
@@ -372,7 +377,7 @@ std::map<uint32_t, std::vector<BasicToken>> parseFile(const std::string &filenam
 }
 
 void error(uint32_t linenumber, const std::string &err) {
-    std::cerr << "Error on line " << linenumber << ": " << err <<std::endl;
+    std::cerr << "Error on line " << linenumber << " at position " << current << ": " << err <<std::endl;
     exit(-1);
 }
 
@@ -823,6 +828,8 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
 
         program.add(OpCode::POPC);
         program.addPointer(OpCode::STOREC, program.Global(right));
+    } else if (tokens[current].type == BasicTokenType::CLS) {
+        program.addSyscall(OpCode::SYSCALL, SysCall::CLS, RuntimeValue::C);
     } else if (tokens[current].type == BasicTokenType::END) {
         program.add(OpCode::HALT);
 
@@ -857,6 +864,29 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.add(OpCode::POPB);
         program.add(OpCode::POPA);
         program.addSyscall(OpCode::SYSCALL, SysCall::DRAW, RuntimeValue::IDX);
+    } else if (tokens[current].type == BasicTokenType::LINE) {
+        current++;
+
+        check(linenumber, tokens[current++], BasicTokenType::LEFT_PAREN, "`(' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        check(linenumber, tokens[current++], BasicTokenType::MINUS, "`-' expected");
+        check(linenumber, tokens[current++], BasicTokenType::LEFT_PAREN, "`(' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        //check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+
+        auto draw = program.add(OpCode::POPC);
+                    program.add(OpCode::POPB);
+                    program.add(OpCode::POPA);
+                    program.addSyscall(OpCode::SYSCALL, SysCall::DRAW, RuntimeValue::IDX);
+
     } else if (tokens[current].type == BasicTokenType::IDENTIFIER && tokens[current+1].type == BasicTokenType::EQUAL) {
         auto name = identifier(linenumber, tokens[current++]);
 
@@ -915,6 +945,11 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.add(OpCode::WRITECX);
     } else {
         expression(program, linenumber, tokens);
+    }
+
+    if (tokens[current].type == BasicTokenType::SEMICOLON) {
+        current++;
+        statement(program, linenumber, tokens);
     }
 }
 

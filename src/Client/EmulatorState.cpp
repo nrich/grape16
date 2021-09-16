@@ -10,10 +10,14 @@ SystemIO::SystemIO() : cursor(0,0) {
     screenbuffer.resize(lines);
     screenbuffer[cursor.Y()][cursor.X()] = 228;
 
-    screen.fill(1);
+    screen.fill(0);
 }
 
 void SystemIO::cls() {
+    screen.fill(0);
+    cursor = Point(0,0);
+    screenbuffer.clear();
+    screenbuffer.resize(lines);
 }
 
 void SystemIO::setpixel(uint16_t x, uint16_t y, uint8_t pixel) {
@@ -121,6 +125,10 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
                 compile(basic, *program);
                 vm->Jump(run);
                 done = false;
+            } else if (input == "CLS") {
+                sysio->cls();
+            } else if (input == "CLEAR") {
+                basic.clear();
             } else {
                 auto basicline = parseLine(input);
                 basic[basicline.first] = basicline.second;

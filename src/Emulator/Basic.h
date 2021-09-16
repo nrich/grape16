@@ -82,6 +82,7 @@ namespace Emulator {
         WEND,
 
         PSET,
+        LINE,
 
         EOL,
 
