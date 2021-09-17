@@ -8,8 +8,8 @@
 
 namespace Sys {
     class NCurses : public Base {
-            void clientKeyDown(Client::State &clientState, const char ch) const;
-            void clientKeyUp(Client::State &clientState, const char ch) const;
+            void clientKeyDown(Client::State &clientState, const int ch) const;
+            void clientKeyUp(Client::State &clientState, const int ch) const;
 
             std::shared_ptr<WINDOW> window;
          public:
@@ -37,6 +37,7 @@ namespace Sys {
 
             void clearScreen() const {
                 //clear();
+                wclear(window.get());
             }
     };
 }; // Sys

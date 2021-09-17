@@ -80,6 +80,14 @@ namespace Client {
             void onMouseButtonRelease(State *state, const MouseClick &event);
             void onKeyDown(State *state, const KeyPress &event);
             void onKeyUp(State *state, const KeyPress &event);
+
+            void onEnterState(State *state, std::any data) {
+                sysio->cls();
+            }
+
+            void onLeaveState(State *state, std::any data) {
+                sysio->cls();
+            }
     };
 };
 
