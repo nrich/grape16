@@ -1099,8 +1099,6 @@ void compile(const std::map<uint32_t, std::vector<BasicToken>> &lines, Program &
         if (tokens[current].type == BasicTokenType::LET) {
             current++;
             declaration(program, linenumber, tokens);
-        } else if (tokens[current].type == BasicTokenType::IDENTIFIER && tokens[current+1].type == BasicTokenType::EQUAL) {
-            declaration(program, linenumber, tokens);
         } else if (tokens[current].type == BasicTokenType::REM) {
             program.add(OpCode::NOP);
         } else if (tokens[current].type == BasicTokenType::DATA) {
