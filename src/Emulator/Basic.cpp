@@ -691,6 +691,9 @@ static void if_statement(Program &program, uint32_t linenumber, const std::vecto
 
         auto end = program.add(OpCode::NOP);
         program.update(_true+1, (int16_t)end);
+    } else {
+        auto end = program.add(OpCode::NOP);
+        program.update(_false+1, (int16_t)end);
     }
 }
 
