@@ -81,7 +81,7 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
     }
 }
 
-void Debugger::debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack, value_t a, value_t b, value_t c, vmpointer_t idx, value_t memidx, uint32_t heap) {
+void Debugger::debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack, value_t a, value_t b, value_t c, vmpointer_t idx, value_t memidx, uint32_t heap, size_t stack) {
     std::cerr << "[" << pc << "] " << (int)opcode << ":" << OpCodeAsString(opcode) << " sp: " << (uint32_t)sp << " callstack: " << callstack << " [";
 
     if (IS_BYTE(a) && 0)
@@ -131,6 +131,7 @@ void Debugger::debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack,
     std::cerr << "]";
 
     std::cerr << " heap: " << heap;
+    std::cerr << " stack: " << stack;
 
     std::cerr << std::endl;
 }
@@ -505,7 +506,7 @@ VM::VM(uint32_t _ptrspace) : idx(0),  pc(0), sp(0), ptrspace(_ptrspace) {
     heap = mem.size();
 }
 
-bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycle_budget, bool step, bool dbg) {
+bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycle_budget, std::shared_ptr<Debugger> debugger) {
     bool done = false;
     uint32_t cycles = 0;
 
@@ -514,18 +515,13 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
 
     uint32_t offset = 0;
 
-    Debugger debug;
-
     static uint32_t total_cycles = 0;
 
     while (!done) {
         uint32_t cost = 1;
 
-        if (dbg)
-            debug.debug(program.fetch(pc), pc, sp, callstack[sp], a, b, c, idx, mem[idx], heap);
-
-        if (step)
-            getc(stdin);
+        if (debugger)
+            debugger->debug(program.fetch(pc), pc, sp, callstack[sp], a, b, c, idx, mem[idx], heap, stack.size());
 
         switch (program.fetch(pc++)) {
             case OpCode::NOP:

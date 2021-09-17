@@ -69,6 +69,17 @@ namespace Emulator {
         return f;
     }
 
+    inline std::string ValueToString(value_t value) {
+        if (IS_INT(value))
+            return std::to_string(ValueAsInt(value));
+        if (IS_FLOAT(value))
+            return std::to_string(ValueAsFloat(value));
+        if (IS_POINTER(value))
+            return std::to_string(ValueAsPointer(value));
+
+        return "";
+    }
+
     enum class OpCode {
         NOP = 0,
 
@@ -201,7 +212,7 @@ namespace Emulator {
 
     class Debugger {
         public:
-            virtual void debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack, value_t a, value_t b, value_t c, vmpointer_t idx, value_t memidx, uint32_t heap);
+            virtual void debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack, value_t a, value_t b, value_t c, vmpointer_t idx, value_t memidx, uint32_t heap, size_t stack);
     };
 
     class Program {
@@ -350,7 +361,7 @@ namespace Emulator {
             VM(const uint32_t _ptrspace);
             ~VM();
 
-            bool run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycle_budget, bool step, bool debug);
+            bool run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycle_budget, std::shared_ptr<Debugger> debugger);
             std::string readString(vmpointer_t p, uint32_t len) {
                 return getString(p, len);
             }
