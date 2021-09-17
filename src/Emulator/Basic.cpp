@@ -183,6 +183,16 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                     }
                     break;
                 case 'P':
+                    if (line.substr(i, 3) == "EEK") {
+                        tokenType = BasicTokenType::FUNCTION;
+                        i += 3;
+                    }
+                    else
+                    if (line.substr(i, 3) == "OKE") {
+                        tokenType = BasicTokenType::POKE;
+                        i += 3;
+                    }
+                    else
                     if (line.substr(i, 4) == "RINT") {
                         tokenType = BasicTokenType::PRINT;
                         i += 4;
@@ -432,6 +442,13 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
         check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
         program.add(OpCode::POPC);
         program.add(OpCode::LOG);
+        program.add(OpCode::PUSHC);
+    } else if (token.str == "PEEK") {
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        program.add(OpCode::POPC);
+        program.add(OpCode::MOVCIDX);
+        program.add(OpCode::IDXC);
         program.add(OpCode::PUSHC);
     } else if (token.str == "SIN") {
         expression(program, linenumber, {tokens.begin(), tokens.end()});
@@ -810,6 +827,16 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         jumps[jmp] = tokens[current+1].str;
 
         current += 2;
+    } else if (tokens[current].type == BasicTokenType::POKE) {
+        current += 1;
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+
+        program.add(OpCode::POPA);
+        program.add(OpCode::POPC);
+        program.add(OpCode::MOVCIDX);
+        program.add(OpCode::WRITEAX);
     } else if (tokens[current].type == BasicTokenType::RETURN) {
         program.addShort(OpCode::RETURN, 0);
 

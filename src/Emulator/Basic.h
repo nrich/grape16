@@ -70,7 +70,9 @@ namespace Emulator {
         INPUT,
         LET,
         NEXT,
+        POKE,
         PRINT,
+        PSET,
         READ,
         REM,
         RETURN,
@@ -81,7 +83,6 @@ namespace Emulator {
         WHILE,
         WEND,
 
-        PSET,
         LINE,
 
         EOL,

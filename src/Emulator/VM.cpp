@@ -601,9 +601,12 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 b = c;
                 break;
             case OpCode::MOVCIDX:
-                if (!IS_POINTER(c))
+                if (IS_POINTER(c))
+                    idx = ValueAsPointer(c);
+                else if (IS_INT(c))
+                    idx = ValueAsInt(c);
+                else
                     error("MOVCIDX is not a pointer");
-                idx = ValueAsPointer(c);
                 break;
             case OpCode::INCA:
                 if (IS_INT(a) && IS_INT(program.readValue(pc)))
