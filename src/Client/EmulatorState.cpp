@@ -104,7 +104,7 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
     static std::string input = "";
 
     if (!done) {
-        done = vm->run(std::dynamic_pointer_cast<Emulator::SysIO>(sysio), *program, clockspeed, false, false);
+        done = vm->run(std::dynamic_pointer_cast<Emulator::SysIO>(sysio), *program, clockspeed, false, debug);
         return;
     }
 

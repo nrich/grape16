@@ -516,7 +516,11 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
 
     Debugger debug;
 
+    static uint32_t total_cycles = 0;
+
     while (!done) {
+        uint32_t cost = 1;
+
         if (dbg)
             debug.debug(program.fetch(pc), pc, sp, callstack[sp], a, b, c, idx, mem[idx], heap);
 
@@ -525,6 +529,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
 
         switch (program.fetch(pc++)) {
             case OpCode::NOP:
+                cost = 0;
                 break;
             case OpCode::HALT:
                 pc = 0;
@@ -976,7 +981,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 std::cout << "Unknown opcode " << (int)program.fetch(pc-1) << std::endl;
         }
 
-        cycles++;
+        cycles += cost;
+        total_cycles += cost;
 
         if (cycles >= cycle_budget) {
             break;

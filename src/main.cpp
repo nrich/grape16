@@ -249,7 +249,7 @@ int main(int argc, char **argv) {
 
     uint32_t clockspeed = opt.isSet("-t") ? CLOCK_66MHz_at_60FPS : CLOCK_33MHz_at_60FPS;
 
-    auto emulatorState = std::make_shared<Client::EmulatorState>(vm, program, clockspeed);
+    auto emulatorState = std::make_shared<Client::EmulatorState>(vm, program, clockspeed, opt.isSet("-d"));
     auto displayMenuState = std::make_shared<Client::DisplayMenuState>();
 
     Client::State clientState(

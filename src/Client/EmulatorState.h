@@ -67,8 +67,9 @@ namespace Client {
             std::shared_ptr<SystemIO> sysio;
 
             std::map<uint32_t, std::vector<Emulator::BasicToken>> basic;
+            const bool debug;
         public:
-            EmulatorState(std::shared_ptr<Emulator::VM> vm, std::shared_ptr<Emulator::Program> program, uint32_t clockspeed) : vm(vm), program(program), clockspeed(clockspeed) {
+            EmulatorState(std::shared_ptr<Emulator::VM> vm, std::shared_ptr<Emulator::Program> program, uint32_t clockspeed, bool debug) : vm(vm), program(program), clockspeed(clockspeed), debug(debug) {
                 sysio = std::make_shared<SystemIO>();
             }
 
