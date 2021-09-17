@@ -256,7 +256,9 @@ void EmulatorState::onKeyDown(State *state, const KeyPress &event) {
     } else if (event.keyCode == Common::Keys::Backspace) {
         sysio->buffer(8);
     } else if (event.keyCode == Common::Keys::F1) {
-        state->changeState(1, 0);
+        state->changeState(1);
+    } else if (event.keyCode == Common::Keys::F2) {
+        state->changeState(2, std::make_any<std::shared_ptr<Emulator::Program>>(program));
     }
 }
 

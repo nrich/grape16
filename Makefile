@@ -78,6 +78,7 @@ default: all
  
 COMMON_OBJS := \
 	src/Client/BaseState.o \
+	src/Client/DebugState.o \
 	src/Client/DisplayMenuState.o \
 	src/Client/EmulatorState.o \
 	src/Client/LoadingState.o \

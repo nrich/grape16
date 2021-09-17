@@ -39,6 +39,7 @@
 #include "Emulator/VM.h"
 #include "Emulator/Basic.h"
 
+#include "Client/DebugState.h"
 #include "Client/DisplayMenuState.h"
 #include "Client/EmulatorState.h"
 
@@ -249,6 +250,7 @@ int main(int argc, char **argv) {
 
     uint32_t clockspeed = opt.isSet("-t") ? CLOCK_66MHz_at_60FPS : CLOCK_33MHz_at_60FPS;
 
+    auto debugState = std::make_shared<Client::DebugState>(vm);
     auto emulatorState = std::make_shared<Client::EmulatorState>(vm, program, clockspeed, opt.isSet("-d"));
     auto displayMenuState = std::make_shared<Client::DisplayMenuState>();
 
@@ -259,6 +261,7 @@ int main(int argc, char **argv) {
     );
 
     clientState.addState(1, std::dynamic_pointer_cast<Client::BaseState>(displayMenuState));
+    clientState.addState(2, std::dynamic_pointer_cast<Client::BaseState>(debugState));
 
     static uint32_t lastRender = sys->getTicks();
     uint32_t renderTime = sys->getTicks();
