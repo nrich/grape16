@@ -498,7 +498,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                 auto slice = std::vector<value_t>{mem.begin() + idx, mem.begin() + idx + count};
 
                 std::transform(slice.begin(), slice.end(), buffer.begin(),
-                    [](value_t &v) {
+                    [](value_t v) {
                         return ValueAsByte(v);
                     }
                 );

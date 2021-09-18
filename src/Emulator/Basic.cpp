@@ -261,6 +261,12 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                         i += 2;
                     }
                     break;
+                case 'V':
+                    if (line.substr(i, 5) == "ARPTR") {
+                        tokenType = BasicTokenType::FUNCTION;
+                        i += 5;
+                    }
+                    break;
                 case 'W':
                     if (line.substr(i, 4) == "HILE") {
                         tokenType = BasicTokenType::WHILE;
@@ -472,6 +478,11 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
         check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
         program.add(OpCode::POPC);
         program.add(OpCode::TAN);
+        program.add(OpCode::PUSHC);
+    } else if (token.str == "VARPTR") {
+        auto name = identifier(linenumber, tokens[current++]);
+        check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        program.addValue(OpCode::SETC, PointerAsValue(program.Global(name)));
         program.add(OpCode::PUSHC);
     } else {
         error(linenumber, std::string("Unknown function `") + token.str + std::string("'"));
