@@ -25,7 +25,7 @@ endif
 ifdef CONFIG_W64
     CXX = x86_64-w64-mingw32-g++
     ifdef CONFIG_MIN
-        LDFLAGS = -L/opt/local/glfw-3.3.4.bin.WIN64/lib-mingw-w64/ -lopengl32 -lglu32 -static-libgcc -static-libstdc++ -lwsock32 -lwinspool -lws2_32 -lglfw3 -lgdi32 
+        LDFLAGS = -mwindows -L/opt/local/glfw-3.3.4.bin.WIN64/lib-mingw-w64/ -lopengl32 -lglu32 -static-libgcc -static-libstdc++ -lwsock32 -lwinspool -lws2_32 -lglfw3 -lgdi32 
         INC = -I src -I /opt/local/glfw-3.3.4.bin.WIN64/include -I /opt/local/mingw-std-threads-1.0.0
         CPPFLAGS = -O3 -std=c++17  $(INC) -D_WIN32 -Wall
     else
