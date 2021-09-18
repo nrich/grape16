@@ -88,6 +88,12 @@ std::string SystemIO::gets() {
     return "";
 }
 
+void SystemIO::blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) {
+    uint8_t *ptr = screen.data();
+    ptr += y*320 + x;
+
+    std::memcpy(ptr, buffer.data(), buffer.size());
+}
 
 void EmulatorState::onRender(State *state, const uint32_t time) {
     state->getRenderer()->drawBuffer(sysio->getScreen().data(), 320, 180);

@@ -54,6 +54,8 @@ namespace Client {
             void setpixel(uint16_t x, uint16_t y, uint8_t pixel);
             uint8_t getpixel(uint16_t x, uint16_t y);
 
+            void blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer);
+
             std::array<uint8_t, 320*180> getScreen() {
                 return screen;
             }

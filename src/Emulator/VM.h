@@ -190,7 +190,8 @@ namespace Emulator {
         CLS = 0,
         WRITE,
         READ,
-        DRAW
+        DRAW,
+        BLIT
     };
 
 
@@ -208,6 +209,8 @@ namespace Emulator {
 
             virtual void setpixel(uint16_t x, uint16_t y, uint8_t pixel) = 0;
             virtual uint8_t getpixel(uint16_t x, uint16_t y) = 0;
+
+            virtual void blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) = 0;
     };
 
     class Debugger {

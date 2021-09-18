@@ -2,6 +2,7 @@
 
 #include <ctime>
 #include <cmath>
+#include <algorithm>
 
 using namespace Emulator;
 
@@ -485,6 +486,25 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
             break;
         case SysCall::DRAW:
             sysIO->setpixel(ValueAsInt(a), ValueAsInt(b), ValueAsInt(c));
+            break;
+        case SysCall::BLIT: {
+                auto x = ValueAsInt(a);
+                auto y = ValueAsInt(b);
+                auto count = ValueAsInt(c);
+                std::vector<uint8_t> buffer;
+
+                buffer.resize(count);
+
+                auto slice = std::vector<value_t>{mem.begin() + idx, mem.begin() + idx + count};
+
+                std::transform(slice.begin(), slice.end(), buffer.begin(),
+                    [](value_t &v) {
+                        return ValueAsByte(v);
+                    }
+                );
+
+                sysIO->blit(x, y, buffer);
+            }
             break;
         default:
             error("Unknown SYSCALL");

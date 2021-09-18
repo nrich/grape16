@@ -38,6 +38,10 @@ namespace Client {
             uint8_t getpixel(uint16_t x, uint16_t y) {
                 return 0;
             }
+
+            void blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) {
+
+            }
     };
 
     class DebugState : public BaseState {

@@ -73,6 +73,7 @@ namespace Emulator {
         POKE,
         PRINT,
         PSET,
+        PUT,
         READ,
         REM,
         RETURN,

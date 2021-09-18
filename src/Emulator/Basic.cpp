@@ -202,6 +202,11 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                         tokenType = BasicTokenType::PSET;
                         i += 3;
                     }
+                    else
+                    if (line.substr(i, 2) == "UT") {
+                        tokenType = BasicTokenType::PUT;
+                        i += 2;
+                    }
                     break;
                 case 'R':
                     if (line.substr(i, 3) == "EAD") {
@@ -596,6 +601,8 @@ static void Op(Program &program, uint32_t linenumber, const std::vector<BasicTok
 
         expression(program, linenumber, {tokens.begin(), tokens.end()}, token.lbp);
 
+        program.addValue(OpCode::INCIDX, IntAsValue(1));
+
         while (tokens[current].type != BasicTokenType::RIGHT_PAREN) {
             check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
 
@@ -894,6 +901,25 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.add(OpCode::POPB);
         program.add(OpCode::POPA);
         program.addSyscall(OpCode::SYSCALL, SysCall::DRAW, RuntimeValue::IDX);
+    } else if (tokens[current].type == BasicTokenType::PUT) {
+        current++;
+
+        check(linenumber, tokens[current++], BasicTokenType::LEFT_PAREN, "`(' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+        auto dst = identifier(linenumber, tokens[current++]);
+
+        program.addPointer(OpCode::LOADIDX, program.Global(dst));
+
+        program.add(OpCode::IDXC);
+        program.addValue(OpCode::INCIDX, IntAsValue(1));
+
+        program.add(OpCode::POPB);
+        program.add(OpCode::POPA);
+        program.addSyscall(OpCode::SYSCALL, SysCall::BLIT, RuntimeValue::IDX);
     } else if (tokens[current].type == BasicTokenType::LINE) {
         current++;
 
@@ -933,6 +959,8 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.addPointer(OpCode::LOADIDX, program.Global(name));
 
         expression(program, linenumber, {tokens.begin(), tokens.end()});
+
+        program.addValue(OpCode::INCIDX, IntAsValue(1));
 
         while (tokens[current].type != BasicTokenType::RIGHT_PAREN) {
             check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
@@ -1019,11 +1047,14 @@ static void dim_declaration(Program &program, uint32_t linenumber, const std::ve
     }
     check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
 
-    program.addShort(OpCode::ALLOC, data_lengths.size() + data);
+    program.addShort(OpCode::ALLOC, data_lengths.size() + data + 1);
     program.add(OpCode::PUSHIDX);
     program.add(OpCode::POPC);
 
     program.addPointer(OpCode::STOREC, program.Global(name));
+
+    program.addShort(OpCode::IDATA, data);
+    program.addValue(OpCode::INCIDX, IntAsValue(1));
 
     while (!data_lengths.empty()) {
         auto len = data_lengths.top();
@@ -1032,7 +1063,6 @@ static void dim_declaration(Program &program, uint32_t linenumber, const std::ve
         program.addShort(OpCode::IDATA, len);
         program.addValue(OpCode::INCIDX, IntAsValue(1));
     }
-    program.add(OpCode::NOP);
 }
 
 
