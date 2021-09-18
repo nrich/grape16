@@ -498,13 +498,6 @@ Sys::SDL2::SDL2(const std::string &title) {
     //SDL_SetWindowFullscreen(window.get(), SDL_WINDOW_FULLSCREEN);
     SDL_GL_SetSwapInterval(0);
 
-    int value = 0;
-    SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &value);
-    std::cout << "SDL_GL_CONTEXT_MAJOR_VERSION : " << value << std::endl;
-
-    SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &value);
-    std::cout << "SDL_GL_CONTEXT_MINOR_VERSION: " << value << std::endl;
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
