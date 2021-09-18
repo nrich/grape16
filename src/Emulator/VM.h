@@ -332,6 +332,8 @@ namespace Emulator {
 
             void set(vmpointer_t ptr, value_t v);
 
+            int compare(vmpointer_t a, vmpointer_t b);
+
             uint8_t getByte(vmpointer_t ptr);
             int16_t getShort(vmpointer_t ptr);
             float getFloat(vmpointer_t prt);

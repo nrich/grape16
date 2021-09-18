@@ -506,6 +506,21 @@ VM::VM(uint32_t _ptrspace) : idx(0),  pc(0), sp(0), ptrspace(_ptrspace) {
     heap = mem.size();
 }
 
+int VM::compare(vmpointer_t a, vmpointer_t b) {
+    if (a == b)
+        return 0;
+
+    while (ValueAsInt(mem[a])) {
+        if (mem[a] != mem[b])
+            break;
+
+        a++;
+        b++;
+    }
+
+    return ValueAsInt(mem[a]) - ValueAsInt(mem[b]);
+}
+
 bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycle_budget, std::shared_ptr<Debugger> debugger) {
     bool done = false;
     uint32_t cycles = 0;
@@ -833,6 +848,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     c = ValueAsInt(a) == ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
                     c = a == b ? IntAsValue(1) : IntAsValue(0);
+                else if (IS_POINTER(a) && IS_POINTER(b))
+                    c = compare(ValueAsPointer(a), ValueAsPointer(b)) == 0 ? IntAsValue(1) : IntAsValue(0);
                 else
                     error("EQ mismatch");
                 break;
@@ -841,6 +858,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     c = ValueAsInt(a) != ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
                     c = a != b ? IntAsValue(1) : IntAsValue(0);
+                else if (IS_POINTER(a) && IS_POINTER(b))
+                    c = compare(ValueAsPointer(a), ValueAsPointer(b)) != 0 ? IntAsValue(1) : IntAsValue(0);
                 else
                     error("NE mismatch");
                 break;
@@ -849,6 +868,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     c = ValueAsInt(a) > ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
                     c = a > b ? IntAsValue(1) : IntAsValue(0);
+                else if (IS_POINTER(a) && IS_POINTER(b))
+                    c = compare(ValueAsPointer(a), ValueAsPointer(b)) > 0 ? IntAsValue(1) : IntAsValue(0);
                 else
                     error("GT mismatch");
                 break;
@@ -857,6 +878,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     c = ValueAsInt(a) >= ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
                     c = a >= b ? IntAsValue(1) : IntAsValue(0);
+                else if (IS_POINTER(a) && IS_POINTER(b))
+                    c = compare(ValueAsPointer(a), ValueAsPointer(b)) >= 0 ? IntAsValue(1) : IntAsValue(0);
                 else
                     error("GE mismatch");
                 break;
@@ -865,6 +888,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     c = ValueAsInt(a) < ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
                     c = a < b ? IntAsValue(1) : IntAsValue(0);
+                else if (IS_POINTER(a) && IS_POINTER(b))
+                    c = compare(ValueAsPointer(a), ValueAsPointer(b)) < 0 ? IntAsValue(1) : IntAsValue(0);
                 else
                     error("LT mismatch");
                 break;
@@ -873,6 +898,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     c = ValueAsInt(a) <= ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
                     c = a <= b ? IntAsValue(1) : IntAsValue(0);
+                else if (IS_POINTER(a) && IS_POINTER(b))
+                    c = compare(ValueAsPointer(a), ValueAsPointer(b)) <= 0 ? IntAsValue(1) : IntAsValue(0);
                 else
                     error("LE mismatch");
                 break;
