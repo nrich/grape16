@@ -5,8 +5,6 @@
 
 #include <iostream>
 
-#include <ncurses.h>
-
 static int _kbhit(void) {
     int ch = getch();
 
@@ -466,6 +464,13 @@ bool Sys::NCurses::handleEvents(Client::State &clientState) {
 
     return run;
 }
+
+
+uint32_t Sys::NCurses::getTicks() const {
+    auto now = std::chrono::high_resolution_clock::now();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count();
+}
+
 
 Sys::NCurses::NCurses(const std::string &title, std::shared_ptr<WINDOW> window) : window(window) {
     cbreak();

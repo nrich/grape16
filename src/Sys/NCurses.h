@@ -6,12 +6,17 @@
 
 #include <ncurses.h>
 
+#include <ctime>
+#include <ratio>
+#include <chrono>
+
 namespace Sys {
     class NCurses : public Base {
             void clientKeyDown(Client::State &clientState, const int ch) const;
             void clientKeyUp(Client::State &clientState, const int ch) const;
 
             std::shared_ptr<WINDOW> window;
+            std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
          public:
             NCurses(const std::string &title, std::shared_ptr<WINDOW> window);
             ~NCurses();
@@ -31,9 +36,7 @@ namespace Sys {
                 //refresh();
             }
 
-            uint32_t getTicks() const {
-                return 0;
-            }
+            uint32_t getTicks() const;
 
             void clearScreen() const {
                 //clear();
