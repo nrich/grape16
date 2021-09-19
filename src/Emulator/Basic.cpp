@@ -69,254 +69,211 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
             size_t start = i++;
             auto tokenType = BasicTokenType::IDENTIFIER;
 
-            switch (line[start]) {
+            while((isAlpha(line[i]) || isDigit(line[i])) && tokenType == BasicTokenType::IDENTIFIER)
+                i++;
+
+            auto token = line.substr(start, i-start);
+
+            switch (token[0]) {
                 case 'A':
-                    if (line.substr(i, 2) == "ND") {
+                    if (token == "AND") {
                         tokenType = BasicTokenType::AND;
                         precedence = Precedence::AND;
-                        i += 2;
                     }
                     else
-                    if (line.substr(i, 2) == "BS") {
+                    if (token == "ABS") {
                         tokenType = BasicTokenType::FUNCTION;
-                        i += 2;
                     }
                     else
                     if (line.substr(i, 3) == "TAN") {
                         tokenType = BasicTokenType::FUNCTION;
-                        i += 3;
                     }
                     break;
                 case 'C':
-                    if (line.substr(i, 2) == "LS") {
+                    if (token == "CLS") {
                         tokenType = BasicTokenType::CLS;
-                        i += 2;
                     }
                     else
-                    if (line.substr(i, 3) == "INT") {
+                    if (token == "CINT") {
                         tokenType = BasicTokenType::FUNCTION;
-                        i += 3;
                     }
                     else
-                    if (line.substr(i, 2) == "OS") {
+                    if (token == "COS") {
                         tokenType = BasicTokenType::FUNCTION;
-                        i += 2;
                     }
                     else
-                    if (line.substr(i, 3) == "SNG") {
+                    if (token == "CSNG") {
                         tokenType = BasicTokenType::FUNCTION;
-                        i += 3;
                     }
                     break;
                 case 'D':
-                    if (line.substr(i, 3) == "ATA") {
+                    if (token == "DATA") {
                         tokenType = BasicTokenType::DATA;
-                        i += 3;
                     }
                     else
-                    if (line.substr(i, 2) == "DEF") {
+                    if (token == "DEF") {
                         tokenType = BasicTokenType::DEF;
-                        i += 2;
                     }
                     else
-                    if (line.substr(i, 2) == "IM") {
+                    if (token == "DIM") {
                         tokenType = BasicTokenType::DIM;
-                        i += 2;
                     }
                     break;
                 case 'E':
-                    if (line.substr(i, 3) == "LSE") {
+                    if (token == "ELSE") {
                         tokenType = BasicTokenType::ELSE;
-                        i += 3;
                     }
                     else
-                    if (line.substr(i, 2) == "ND") {
+                    if (token == "END") {
                         tokenType = BasicTokenType::END;
-                        i += 2;
                     }
                     break;
                 case 'F':
-                    if (line.substr(i, 2) == "OR") {
+                    if (token == "FOR") {
                         tokenType = BasicTokenType::FOR;
-                        i += 2;
                     }
                     else
-                    if (line.substr(i, 2) == "IX") {
+                    if (token == "FIX") {
                         tokenType = BasicTokenType::FUNCTION;
-                        i += 2;
                     }
                     break;
                 case 'G':
-                    if (line.substr(i, 3) == "OTO") {
+                    if (token == "GOTO") {
                         tokenType = BasicTokenType::GOTO;
-                        i += 3;
                     }
                     else
-                    if (line.substr(i, 4) == "OSUB") {
+                    if (token == "GOSUB") {
                         tokenType = BasicTokenType::GOSUB;
-                        i += 4;
                     }
                     break;
                 case 'I':
-                    if (line.substr(i, 1) == "F") {
+                    if (token == "IF") {
                         tokenType = BasicTokenType::IF;
-                        i += 1;
                     }
                     else
-                    if (line.substr(i, 4) == "NPUT") {
+                    if (token == "INPUT") {
                         tokenType = BasicTokenType::INPUT;
-                        i += 4;
                     }
                     else
-                    if (line.substr(i, 2) == "NT") {
+                    if (token == "INT") {
                         tokenType = BasicTokenType::FUNCTION;
-                        i += 2;
                     }
                     break;
                 case 'L':
-                    if (line.substr(i, 2) == "ET") {
+                    if (token == "LET") {
                         tokenType = BasicTokenType::LET;
-                        i += 2;
                     }
                     else
-                    if (line.substr(i, 3) == "INE") {
+                    if (token == "LINE") {
                         tokenType = BasicTokenType::LINE;
-                        i += 3;
                     }
                     else
-                    if (line.substr(i, 2) == "OG") {
+                    if (token == "LOG") {
                         tokenType = BasicTokenType::FUNCTION;
-                        i += 2;
                     }
                     break;
                 case 'N':
-                    if (line.substr(i, 3) == "EXT") {
+                    if (token == "NEXT") {
                         tokenType = BasicTokenType::NEXT;
-                        i += 3;
                     }
                     else
-                    if (line.substr(i, 2) == "OT") {
+                    if (token == "NOT") {
                         tokenType = BasicTokenType::NOT;
-                        i += 2;
                     }
                     break;
                 case 'O':
-                    if (line.substr(i, 1) == "R") {
+                    if (token == "OR") {
                         precedence = Precedence::OR;
                         tokenType = BasicTokenType::OR;
-                        i += 1;
                     }
                     break;
                 case 'P':
-                    if (line.substr(i, 3) == "EEK") {
+                    if (token == "PEEK") {
                         tokenType = BasicTokenType::FUNCTION;
-                        i += 3;
                     }
                     else
-                    if (line.substr(i, 3) == "OKE") {
+                    if (token == "POKE") {
                         tokenType = BasicTokenType::POKE;
-                        i += 3;
                     }
                     else
-                    if (line.substr(i, 4) == "RINT") {
+                    if (token == "PRINT") {
                         tokenType = BasicTokenType::PRINT;
-                        i += 4;
                     }
                     else
-                    if (line.substr(i, 3) == "SET") {
+                    if (token == "PSET") {
                         tokenType = BasicTokenType::PSET;
-                        i += 3;
                     }
                     else
-                    if (line.substr(i, 2) == "UT") {
+                    if (token == "PUT") {
                         tokenType = BasicTokenType::PUT;
-                        i += 2;
                     }
                     break;
                 case 'R':
-                    if (line.substr(i, 3) == "EAD") {
+                    if (token == "READ") {
                         tokenType = BasicTokenType::READ;
-                        i += 3;
                     }
                     else
-                    if (line.substr(i, 2) == "EM") {
+                    if (token == "REM") {
                         tokenType = BasicTokenType::REM;
-                        i += 2;
                     }
                     else
-                    if (line.substr(i, 5) == "ETURN") {
+                    if (token == "RETURN") {
                         tokenType = BasicTokenType::RETURN;
-                        i += 5;
                     }
                     break;
                 case 'S':
-                    if (line.substr(i, 2) == "GN") {
+                    if (token == "SGN") {
                         tokenType = BasicTokenType::FUNCTION;
-                        i += 2;
                     }
                     else
-                    if (line.substr(i, 2) == "IN") {
+                    if (token == "SIN") {
                         tokenType = BasicTokenType::FUNCTION;
-                        i += 2;
                     }
                     else
-                    if (line.substr(i, 2) == "QR") {
+                    if (token == "SQR") {
                         tokenType = BasicTokenType::FUNCTION;
-                        i += 2;
                     }
                     else
-                    if (line.substr(i, 3) == "TEP") {
+                    if (token == "STEP") {
                         tokenType = BasicTokenType::STEP;
-                        i += 3;
                     }
                     else
-                    if (line.substr(i, 3) == "WAP") {
+                    if (token == "SWAP") {
                         tokenType = BasicTokenType::SWAP;
-                        i += 3;
                     }
-
                     break;
                 case 'T':
-                    if (line.substr(i, 2) == "AN") {
+                    if (token == "TAN") {
                         tokenType = BasicTokenType::FUNCTION;
-                        i += 2;
                     }
                     else
-                    if (line.substr(i, 3) == "HEN") {
+                    if (token == "THEN") {
                         tokenType = BasicTokenType::THEN;
-                        i += 3;
                     }
                     else
-                    if (line.substr(i, 1) == "O") {
+                    if (token == "TO") {
                         tokenType = BasicTokenType::TO;
-                        i += 1;
                     }
                     break;
                 case 'V':
-                    if (line.substr(i, 5) == "ARPTR") {
+                    if (token == "VARPTR") {
                         tokenType = BasicTokenType::FUNCTION;
-                        i += 5;
                     }
                     break;
                 case 'W':
-                    if (line.substr(i, 4) == "HILE") {
+                    if (token == "WHILE") {
                         tokenType = BasicTokenType::WHILE;
-                        i += 4;
                     }
                     else
-                    if (line.substr(i, 3) == "END") {
+                    if (token == "WEND") {
                         tokenType = BasicTokenType::WEND;
-                        i += 3;
                     }
                     break;
                 default:
                     break;
             }
 
-            while((isAlpha(line[i]) || isDigit(line[i])) && tokenType == BasicTokenType::IDENTIFIER)
-                i++;
-
-            tokens.push_back(BasicToken(tokenType, line.substr(start, i-start), precedence));
+            tokens.push_back(BasicToken(tokenType, token, precedence));
         } else if (line[i] == '"') {
             i++;
             std::string str;
