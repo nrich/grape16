@@ -825,18 +825,74 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
     } else if (tokens[current].type == BasicTokenType::READ) {
         auto name = identifier(linenumber, tokens[current+1]);
 
-        program.addValue(OpCode::SETA, PointerAsValue(0));
-        program.addValue(OpCode::LOADB, program.Global(READ_INDEX));
-        program.add(OpCode::ADD);
+        if (tokens[current+2].type == BasicTokenType::LEFT_PAREN) {
+            current += 3;
+            program.addPointer(OpCode::LOADIDX, program.Global(name));
 
-        program.addValue(OpCode::INCB, IntAsValue(1));
-        program.addPointer(OpCode::STOREB, program.Global(READ_INDEX));
+            expression(program, linenumber, {tokens.begin(), tokens.end()});
 
-        program.add(OpCode::PUSHC);
-        program.add(OpCode::POPIDX);
+            program.addValue(OpCode::INCIDX, IntAsValue(1));
 
-        program.add(OpCode::IDXC);
-        program.addPointer(OpCode::STOREC, program.Global(name));
+            while (tokens[current].type != BasicTokenType::RIGHT_PAREN) {
+                check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+
+                expression(program, linenumber, {tokens.begin(), tokens.end()});
+
+                program.add(OpCode::IDXA);
+                program.add(OpCode::POPB);
+                program.add(OpCode::MUL);
+
+                program.addValue(OpCode::INCIDX, IntAsValue(1));
+
+                program.add(OpCode::MOVCA);
+                program.add(OpCode::POPB);
+                program.add(OpCode::ADD);
+
+                program.add(OpCode::PUSHC);
+            }
+            check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
+
+            program.add(OpCode::POPB);
+
+            program.add(OpCode::PUSHIDX);
+            program.add(OpCode::POPA);
+
+            program.add(OpCode::ADD);
+
+            program.add(OpCode::PUSHC);
+            program.add(OpCode::POPIDX);
+
+            program.add(OpCode::PUSHIDX);
+
+            program.addValue(OpCode::SETA, PointerAsValue(0));
+            program.addValue(OpCode::LOADB, program.Global(READ_INDEX));
+            program.add(OpCode::ADD);
+
+            program.addValue(OpCode::INCB, IntAsValue(1));
+            program.addPointer(OpCode::STOREB, program.Global(READ_INDEX));
+
+            program.add(OpCode::PUSHC);
+            program.add(OpCode::POPIDX);
+            program.add(OpCode::IDXC);
+
+            program.add(OpCode::POPIDX);
+
+            program.add(OpCode::WRITECX);
+
+        } else {
+            program.addValue(OpCode::SETA, PointerAsValue(0));
+            program.addValue(OpCode::LOADB, program.Global(READ_INDEX));
+            program.add(OpCode::ADD);
+
+            program.addValue(OpCode::INCB, IntAsValue(1));
+            program.addPointer(OpCode::STOREB, program.Global(READ_INDEX));
+
+            program.add(OpCode::PUSHC);
+            program.add(OpCode::POPIDX);
+
+            program.add(OpCode::IDXC);
+            program.addPointer(OpCode::STOREC, program.Global(name));
+        }
     } else if (tokens[current].type == BasicTokenType::GOTO) {
         if (tokens[current+1].type != BasicTokenType::INT)
             error(linenumber, "Line number expected");
