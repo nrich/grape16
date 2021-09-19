@@ -146,6 +146,7 @@ namespace Emulator {
         GE,
         LT,
         LE,
+        CMP,
 
         SETIDX,
         LOADIDX,

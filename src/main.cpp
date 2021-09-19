@@ -180,24 +180,6 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-/*
-    Program basic;
-
-                        uint32_t ok = mp;
-    auto start      =   basic.addPointer(OpCode::SETIDX, ok, "START");
-                        basic.addString(OpCode::SDATA, "OK\n");
-                        mp += 4;
-                        uint32_t prompt_buffer = mp;
-                        basic.addPointer(OpCode::SETIDX, prompt_buffer);
-                        basic.addString(OpCode::SDATA, std::string(80, ' '));
-    auto prompt     =   basic.addPointer(OpCode::SETIDX, (vmpointer_t)ok);
-                        basic.addShort(OpCode::CALL, printfn);
-                        basic.addPointer(OpCode::SETIDX, (vmpointer_t)prompt_buffer);
-                        basic.addShort(OpCode::CALL, inputfn);
-                        basic.addShort(OpCode::IRQ, 0);
-                        basic.addShort(OpCode::JMP, prompt);
-*/
-
     std::shared_ptr<Emulator::Program> program;
 
     if (opt.lastArgs.size() == 1) {

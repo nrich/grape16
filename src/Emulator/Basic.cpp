@@ -93,15 +93,30 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                         i += 2;
                     }
                     else
+                    if (line.substr(i, 3) == "INT") {
+                        tokenType = BasicTokenType::FUNCTION;
+                        i += 3;
+                    }
+                    else
                     if (line.substr(i, 2) == "OS") {
                         tokenType = BasicTokenType::FUNCTION;
                         i += 2;
+                    }
+                    else
+                    if (line.substr(i, 3) == "SNG") {
+                        tokenType = BasicTokenType::FUNCTION;
+                        i += 3;
                     }
                     break;
                 case 'D':
                     if (line.substr(i, 3) == "ATA") {
                         tokenType = BasicTokenType::DATA;
                         i += 3;
+                    }
+                    else
+                    if (line.substr(i, 2) == "DEF") {
+                        tokenType = BasicTokenType::DEF;
+                        i += 2;
                     }
                     else
                     if (line.substr(i, 2) == "IM") {
@@ -125,6 +140,11 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                         tokenType = BasicTokenType::FOR;
                         i += 2;
                     }
+                    else
+                    if (line.substr(i, 2) == "IX") {
+                        tokenType = BasicTokenType::FUNCTION;
+                        i += 2;
+                    }
                     break;
                 case 'G':
                     if (line.substr(i, 3) == "OTO") {
@@ -146,6 +166,11 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                     if (line.substr(i, 4) == "NPUT") {
                         tokenType = BasicTokenType::INPUT;
                         i += 4;
+                    }
+                    else
+                    if (line.substr(i, 2) == "NT") {
+                        tokenType = BasicTokenType::FUNCTION;
+                        i += 2;
                     }
                     break;
                 case 'L':
@@ -225,14 +250,9 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                     }
                     break;
                 case 'S':
-                    if (line.substr(i, 3) == "TEP") {
-                        tokenType = BasicTokenType::STEP;
-                        i += 3;
-                    }
-                    else
-                    if (line.substr(i, 3) == "WAP") {
-                        tokenType = BasicTokenType::SWAP;
-                        i += 3;
+                    if (line.substr(i, 2) == "GN") {
+                        tokenType = BasicTokenType::FUNCTION;
+                        i += 2;
                     }
                     else
                     if (line.substr(i, 2) == "IN") {
@@ -244,8 +264,24 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                         tokenType = BasicTokenType::FUNCTION;
                         i += 2;
                     }
+                    else
+                    if (line.substr(i, 3) == "TEP") {
+                        tokenType = BasicTokenType::STEP;
+                        i += 3;
+                    }
+                    else
+                    if (line.substr(i, 3) == "WAP") {
+                        tokenType = BasicTokenType::SWAP;
+                        i += 3;
+                    }
+
                     break;
                 case 'T':
+                    if (line.substr(i, 2) == "AN") {
+                        tokenType = BasicTokenType::FUNCTION;
+                        i += 2;
+                    }
+                    else
                     if (line.substr(i, 3) == "HEN") {
                         tokenType = BasicTokenType::THEN;
                         i += 3;
@@ -254,11 +290,6 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                     if (line.substr(i, 1) == "O") {
                         tokenType = BasicTokenType::TO;
                         i += 1;
-                    }
-                    else
-                    if (line.substr(i, 2) == "AN") {
-                        tokenType = BasicTokenType::FUNCTION;
-                        i += 2;
                     }
                     break;
                 case 'V':
@@ -428,21 +459,31 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
 
-        program.addValue(OpCode::SETA, IntAsValue(0));
-        program.add(OpCode::POPB);
-        program.add(OpCode::GE);
-        auto test = program.addShort(OpCode::JMPEZ, 0);
-        program.add(OpCode::SUB);
+        program.add(OpCode::POPA);
+        program.addValue(OpCode::SETB, IntAsValue(0));
+        program.add(OpCode::CMP);
         program.add(OpCode::MOVCB);
-        auto done = program.add(OpCode::PUSHB);
-        program.update(test+1, done);
+        program.add(OpCode::MUL);
+        program.add(OpCode::PUSHC);
     } else if (token.str == "ATAN") {
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
         program.add(OpCode::POPC);
         program.add(OpCode::ATAN);
         program.add(OpCode::PUSHC);
+    } else if (token.str == "CINT") {
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        program.add(OpCode::POPC);
+        program.add(OpCode::COS);
+        program.add(OpCode::PUSHC);
     } else if (token.str == "COS") {
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        program.add(OpCode::POPC);
+        program.add(OpCode::COS);
+        program.add(OpCode::PUSHC);
+    } else if (token.str == "CSNG") {
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
         program.add(OpCode::POPC);
@@ -460,6 +501,13 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
         program.add(OpCode::POPC);
         program.add(OpCode::MOVCIDX);
         program.add(OpCode::IDXC);
+        program.add(OpCode::PUSHC);
+    } else if (token.str == "SGN") {
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        program.add(OpCode::POPA);
+        program.addValue(OpCode::SETB, IntAsValue(0));
+        program.add(OpCode::CMP);
         program.add(OpCode::PUSHC);
     } else if (token.str == "SIN") {
         expression(program, linenumber, {tokens.begin(), tokens.end()});

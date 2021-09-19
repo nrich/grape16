@@ -59,6 +59,7 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
         case OpCode::GE: return "GE";
         case OpCode::LT: return "LT";
         case OpCode::LE: return "LE";
+        case OpCode::CMP: return "CMP";
         case OpCode::SETIDX: return "SETIDX";
         case OpCode::LOADIDX: return "LOADIDX";
         case OpCode::STOREIDX: return "STOREIDX";
@@ -867,7 +868,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 if (IS_INT(a) && IS_INT(b))
                     c = ValueAsInt(a) == ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = a == b ? IntAsValue(1) : IntAsValue(0);
+                    c = ValueAsFloat(a) == ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_POINTER(a) && IS_POINTER(b))
                     c = compare(ValueAsPointer(a), ValueAsPointer(b)) == 0 ? IntAsValue(1) : IntAsValue(0);
                 else
@@ -877,7 +878,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 if (IS_INT(a) && IS_INT(b))
                     c = ValueAsInt(a) != ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = a != b ? IntAsValue(1) : IntAsValue(0);
+                    c = ValueAsFloat(a) != ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_POINTER(a) && IS_POINTER(b))
                     c = compare(ValueAsPointer(a), ValueAsPointer(b)) != 0 ? IntAsValue(1) : IntAsValue(0);
                 else
@@ -887,7 +888,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 if (IS_INT(a) && IS_INT(b))
                     c = ValueAsInt(a) > ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = a > b ? IntAsValue(1) : IntAsValue(0);
+                    c = ValueAsFloat(a) > ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_POINTER(a) && IS_POINTER(b))
                     c = compare(ValueAsPointer(a), ValueAsPointer(b)) > 0 ? IntAsValue(1) : IntAsValue(0);
                 else
@@ -897,7 +898,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 if (IS_INT(a) && IS_INT(b))
                     c = ValueAsInt(a) >= ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = a >= b ? IntAsValue(1) : IntAsValue(0);
+                    c = ValueAsFloat(a) >= ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_POINTER(a) && IS_POINTER(b))
                     c = compare(ValueAsPointer(a), ValueAsPointer(b)) >= 0 ? IntAsValue(1) : IntAsValue(0);
                 else
@@ -907,7 +908,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 if (IS_INT(a) && IS_INT(b))
                     c = ValueAsInt(a) < ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = a < b ? IntAsValue(1) : IntAsValue(0);
+                    c = ValueAsFloat(a) < ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_POINTER(a) && IS_POINTER(b))
                     c = compare(ValueAsPointer(a), ValueAsPointer(b)) < 0 ? IntAsValue(1) : IntAsValue(0);
                 else
@@ -917,11 +918,23 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 if (IS_INT(a) && IS_INT(b))
                     c = ValueAsInt(a) <= ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = a <= b ? IntAsValue(1) : IntAsValue(0);
+                    c = ValueAsFloat(a) <= ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_POINTER(a) && IS_POINTER(b))
                     c = compare(ValueAsPointer(a), ValueAsPointer(b)) <= 0 ? IntAsValue(1) : IntAsValue(0);
                 else
                     error("LE mismatch");
+                break;
+            case OpCode::CMP:
+                if (IS_INT(a) && IS_INT(b))
+                    c = ValueAsInt(a) > ValueAsInt(b) ? IntAsValue(1) : ValueAsInt(a) < ValueAsInt(b) ? IntAsValue(-1) : IntAsValue(0);
+                else if (IS_FLOAT(a) && IS_FLOAT(b))
+                    c = ValueAsFloat(a) > ValueAsFloat(b) ? IntAsValue(1) : ValueAsFloat(a) < ValueAsFloat(b) ? IntAsValue(-1) : IntAsValue(0);
+                else if (IS_FLOAT(a) && IS_INT(b))
+                    c = ValueAsFloat(a) > ValueAsInt(b) ? IntAsValue(1) : ValueAsFloat(a) < ValueAsInt(b) ? IntAsValue(-1) : IntAsValue(0);
+                else if (IS_INT(a) && IS_FLOAT(b))
+                    c = ValueAsInt(a) > ValueAsFloat(b) ? IntAsValue(1) : ValueAsInt(a) < ValueAsFloat(b) ? IntAsValue(-1) : IntAsValue(0);
+                else
+                    error("CMP mismatch");
                 break;
             case OpCode::SETIDX:
                 idx = program.readPointer(pc);

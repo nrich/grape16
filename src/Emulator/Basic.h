@@ -60,6 +60,7 @@ namespace Emulator {
 
         CLS,
         DATA,
+        DEF,
         DIM,
         ELSE,
         END,
