@@ -252,15 +252,17 @@ int main(int argc, char **argv) {
         auto t1 = std::chrono::high_resolution_clock::now();
         sys->clearScreen();
         clientState.tick(renderTime - lastRender);
+        auto t2 = std::chrono::high_resolution_clock::now();
         clientState.render(renderTime - lastRender);
+        auto t3 = std::chrono::high_resolution_clock::now();
 
         lastRender = renderTime;
 
         sys->swapBuffers();
-        auto t2 = std::chrono::high_resolution_clock::now();
-        auto taken = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        auto t4 = std::chrono::high_resolution_clock::now();
+        auto taken = std::chrono::duration_cast<std::chrono::milliseconds>(t4 - t1).count();
 
-        //std::cerr << taken << std::endl;
+        //std::cerr << std::chrono::duration_cast<std::chrono::milliseconds>(t4 - t1).count() << std::endl;
 
         std::this_thread::sleep_for(std::chrono::milliseconds(16 - taken));
     }
