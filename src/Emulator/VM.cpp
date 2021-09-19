@@ -50,6 +50,9 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
         case OpCode::SIN: return "SIN";
         case OpCode::SQR: return "SQR";
         case OpCode::TAN: return "TAN";
+        case OpCode::FLT: return "FLT";
+        case OpCode::INT: return "INT";
+        case OpCode::PTR: return "PTR";
         case OpCode::AND: return "AND";
         case OpCode::OR: return "OR";
         case OpCode::NOT: return "NOT";
@@ -640,7 +643,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 if (IS_POINTER(c))
                     idx = ValueAsPointer(c);
                 else if (IS_INT(c))
-                    idx = ValueAsInt(c);
+                    idx = (vmpointer_t)ValueAsInt(c);
                 else
                     error("MOVCIDX is not a pointer");
                 break;
@@ -839,6 +842,32 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     c = FloatAsValue(std::tan(ValueAsFloat(c)));
                 else
                     error("TAN argument error");
+                break;
+            case OpCode::FLT:
+                if (IS_INT(c))
+                    c = FloatAsValue((float)ValueAsInt(c));
+                else if (IS_FLOAT(c))
+                    c = FloatAsValue(ValueAsFloat(c));
+                else
+                    error("FLT argument error");
+                break;
+            case OpCode::INT:
+                if (IS_INT(c))
+                    c = IntAsValue(ValueAsInt(c));
+                else if (IS_FLOAT(c))
+                    c = IntAsValue((int16_t)ValueAsFloat(c));
+                else if (IS_POINTER(c))
+                    c = IntAsValue((int16_t)ValueAsPointer(c));
+                else
+                    error("INT argument error");
+                break;
+            case OpCode::PTR:
+                if (IS_INT(c))
+                    c = PointerAsValue((vmpointer_t)ValueAsInt(c));
+                else if (IS_POINTER(c))
+                    c = PointerAsValue(ValueAsPointer(c));
+                else
+                    error("PTR argument error");
                 break;
             case OpCode::AND:
                 if (IS_INT(a) && IS_INT(b))

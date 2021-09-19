@@ -471,11 +471,11 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
         program.add(OpCode::POPC);
         program.add(OpCode::ATAN);
         program.add(OpCode::PUSHC);
-    } else if (token.str == "CINT") {
+    } else if (token.str == "CINT" || token.str == "INT") {
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
         program.add(OpCode::POPC);
-        program.add(OpCode::COS);
+        program.add(OpCode::INT);
         program.add(OpCode::PUSHC);
     } else if (token.str == "COS") {
         expression(program, linenumber, {tokens.begin(), tokens.end()});
@@ -487,7 +487,7 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
         program.add(OpCode::POPC);
-        program.add(OpCode::COS);
+        program.add(OpCode::FLT);
         program.add(OpCode::PUSHC);
     } else if (token.str == "LOG") {
         expression(program, linenumber, {tokens.begin(), tokens.end()});

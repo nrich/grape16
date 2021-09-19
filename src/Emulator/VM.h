@@ -136,6 +136,10 @@ namespace Emulator {
         SQR,
         TAN,
 
+        FLT,
+        INT,
+        PTR,
+
         AND,
         OR,
         NOT,
