@@ -488,13 +488,16 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                 set(ptr+offset, ByteAsValue(0));
             }
             break;
+        case SysCall::READKEY:
+            c = IntAsValue(sysIO->read());
+            break;
         case SysCall::DRAW:
             sysIO->setpixel(ValueAsInt(a), ValueAsInt(b), ValueAsInt(c));
             break;
         case SysCall::BLIT: {
                 auto x = ValueAsInt(a);
                 auto y = ValueAsInt(b);
-                auto count = ValueAsInt(c);
+                auto count = (uint16_t)ValueAsInt(c);
                 std::vector<uint8_t> buffer;
 
                 buffer.resize(count);
@@ -713,9 +716,13 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 else if (IS_INT(a) && IS_FLOAT(b))
                     c = FloatAsValue((float)ValueAsInt(a) + ValueAsFloat(b));
                 else if (IS_POINTER(a) && IS_INT(b))
-                    c = PointerAsValue(ValueAsPointer(a) + ValueAsInt(b));
+                    c = PointerAsValue(ValueAsPointer(a) + (uint16_t)ValueAsInt(b));
                 else if (IS_INT(a) && IS_POINTER(b))
-                    c = PointerAsValue(ValueAsPointer(b) + ValueAsInt(a));
+                    c = PointerAsValue(ValueAsPointer(b) + (uint16_t)ValueAsInt(a));
+                else if (IS_POINTER(a) && IS_FLOAT(b))
+                    c = PointerAsValue(ValueAsPointer(a) + (uint16_t)ValueAsFloat(b));
+                else if (IS_FLOAT(a) && IS_POINTER(b))
+                    c = PointerAsValue(ValueAsPointer(b) + (uint16_t)ValueAsFloat(a));
                 else
                     error("ADD mismatch");
                 break;
@@ -729,9 +736,13 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 else if (IS_INT(a) && IS_FLOAT(b))
                     c = FloatAsValue((float)ValueAsInt(a) - ValueAsFloat(b));
                 else if (IS_POINTER(a) && IS_INT(b))
-                    c = PointerAsValue(ValueAsPointer(a) - ValueAsInt(b));
+                    c = PointerAsValue(ValueAsPointer(a) - (uint16_t)ValueAsInt(b));
                 else if (IS_INT(a) && IS_POINTER(b))
-                    c = PointerAsValue(ValueAsPointer(b) - ValueAsInt(a));
+                    c = PointerAsValue(ValueAsPointer(b) - (uint16_t)ValueAsInt(a));
+                else if (IS_POINTER(a) && IS_FLOAT(b))
+                    c = PointerAsValue(ValueAsPointer(a) - (uint16_t)ValueAsFloat(b));
+                else if (IS_FLOAT(a) && IS_POINTER(b))
+                    c = PointerAsValue(ValueAsPointer(b) - (uint16_t)ValueAsFloat(a));
                 else
                     error("SUB mismatch");
                 break;
@@ -1059,9 +1070,9 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 }
                 break;
             case OpCode::ALLOC:
-                if (program.readShort(pc) < 1)
+                if ((uint16_t)program.readShort(pc) < 1)
                     error("ALLOC value must greater than zero");
-                heap -= program.readShort(pc);
+                heap -= (uint16_t)program.readShort(pc);
                 idx = heap;
                 pc += 2;
                 break;

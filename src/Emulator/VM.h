@@ -195,6 +195,7 @@ namespace Emulator {
         CLS = 0,
         WRITE,
         READ,
+        READKEY,
         DRAW,
         BLIT
     };

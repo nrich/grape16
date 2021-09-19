@@ -151,6 +151,10 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                         tokenType = BasicTokenType::IF;
                     }
                     else
+                    if (token == "INKEY") {
+                        tokenType = BasicTokenType::FUNCTION;
+                    }
+                    else
                     if (token == "INPUT") {
                         tokenType = BasicTokenType::INPUT;
                     }
@@ -415,7 +419,6 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
     if (token.str == "ABS") {
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
-
         program.add(OpCode::POPA);
         program.addValue(OpCode::SETB, IntAsValue(0));
         program.add(OpCode::CMP);
@@ -445,6 +448,10 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
         check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
         program.add(OpCode::POPC);
         program.add(OpCode::FLT);
+        program.add(OpCode::PUSHC);
+    } else if (token.str == "INKEY") {
+        check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        program.addSyscall(OpCode::SYSCALL, SysCall::READKEY, RuntimeValue::C);
         program.add(OpCode::PUSHC);
     } else if (token.str == "LOG") {
         expression(program, linenumber, {tokens.begin(), tokens.end()});
@@ -1106,12 +1113,13 @@ static void dim_declaration(Program &program, uint32_t linenumber, const std::ve
 
     int size = 1;
 
+    int16_t subdata = data;
     while (tokens[current].type != BasicTokenType::RIGHT_PAREN) {
         check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
         check(linenumber, tokens[current], BasicTokenType::INT, "integer expected");
 
-        int16_t subdata = stol(tokens[current].str) + 1;
         data_lengths.push(subdata * size);
+        subdata = stol(tokens[current].str) + 1;
         data *= subdata;
         current++;
 
