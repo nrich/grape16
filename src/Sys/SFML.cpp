@@ -190,6 +190,8 @@ Sys::SFML::SFML(const std::string &title) : title(std::string("SFML ") + title),
     window.create(sf::VideoMode(mode.Width(), mode.Height()), this->title, style, sf::ContextSettings(32));
     window.setActive(true);
 
+    window.setKeyRepeatEnabled(false);
+
     clock.restart();
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
