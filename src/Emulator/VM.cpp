@@ -82,6 +82,7 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
         case OpCode::RETURN: return "RETURN";
         case OpCode::IRQ: return "IRQ";
         case OpCode::ALLOC: return "ALLOC";
+        case OpCode::YIELD: return "YIELD";
         default: return "????";
     }
 }
@@ -1075,6 +1076,9 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 heap -= (uint16_t)program.readShort(pc);
                 idx = heap;
                 pc += 2;
+                break;
+            case OpCode::YIELD:
+                return done;
                 break;
             default:
                 std::cout << "Unknown opcode " << (int)program.fetch(pc-1) << std::endl;

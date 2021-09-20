@@ -82,6 +82,7 @@ namespace Emulator {
         SWAP,
         THEN,
         TO,
+        WAIT,
         WHILE,
         WEND,
 

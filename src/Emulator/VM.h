@@ -178,6 +178,8 @@ namespace Emulator {
 
         ALLOC,
 
+        YIELD,
+
         COUNT
     };
 

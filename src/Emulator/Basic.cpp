@@ -265,6 +265,10 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                     }
                     break;
                 case 'W':
+                    if (token == "WAIT") {
+                        tokenType = BasicTokenType::WAIT;
+                    }
+                    else
                     if (token == "WHILE") {
                         tokenType = BasicTokenType::WHILE;
                     }
@@ -927,7 +931,11 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.add(OpCode::MOVCIDX);
         program.add(OpCode::WRITEAX);
     } else if (tokens[current].type == BasicTokenType::RETURN) {
-        program.addShort(OpCode::RETURN, 0);
+        program.add(OpCode::RETURN);
+
+        current += 1;
+    } else if (tokens[current].type == BasicTokenType::WAIT) {
+        program.add(OpCode::YIELD);
 
         current += 1;
     } else if (tokens[current].type == BasicTokenType::SWAP) {
