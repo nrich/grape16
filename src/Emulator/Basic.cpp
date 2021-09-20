@@ -1043,7 +1043,9 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.add(OpCode::MOVCB);
         program.add(OpCode::POPA);
 
+
         expression(program, linenumber, {tokens.begin(), tokens.end()});
+        program.add(OpCode::POPC);
         //check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
 
         program.addSyscall(OpCode::SYSCALL, SysCall::DRAWLINE, RuntimeValue::IDX);

@@ -540,7 +540,9 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
 
                 int y = y0;
 
-                for (int x=0; x <= x1; x++) {
+                //std::cerr << "(" << x0 << "," << y0 << ")-(" << x1 << "," << y1 << ")," << colour << std::endl;
+
+                for (int x=x0; x <= x1; x++) {
                     if (steep) {
                         sysIO->setpixel(y, x, colour);
                     } else {
