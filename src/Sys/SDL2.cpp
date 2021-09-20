@@ -255,7 +255,7 @@ static int sym2key(int sym) {
     }
 }
 
-void Sys::SDL2::clientKeyDown(Client::State &clientState, const SDL_KeyboardEvent &sdlEvent) const {
+static void clientKeyDown(Client::State &clientState, const SDL_KeyboardEvent &sdlEvent) {
     Client::KeyPress event;
 
     event.keyCode = sym2key(sdlEvent.keysym.sym);
@@ -267,7 +267,7 @@ void Sys::SDL2::clientKeyDown(Client::State &clientState, const SDL_KeyboardEven
     clientState.keyDown(event);
 }
 
-void Sys::SDL2::clientKeyUp(Client::State &clientState, const SDL_KeyboardEvent &sdlEvent) const {
+static void clientKeyUp(Client::State &clientState, const SDL_KeyboardEvent &sdlEvent) {
     Client::KeyPress event;
 
     event.keyCode = sym2key(sdlEvent.keysym.sym);
@@ -279,25 +279,18 @@ void Sys::SDL2::clientKeyUp(Client::State &clientState, const SDL_KeyboardEvent 
     clientState.keyUp(event);
 }
 
-void Sys::SDL2::clientMouseMove(Client::State &clientState, const SDL_MouseMotionEvent &sdlEvent) const {
+static void clientMouseMove(Client::State &clientState, const SDL_MouseMotionEvent &sdlEvent) {
     Client::MouseMove event;
 
     event.x = sdlEvent.x;
     event.y = sdlEvent.y;
     event.xrel = sdlEvent.xrel;
     event.yrel = sdlEvent.yrel;
-/*
-    event.leftPressed = sdlEvent.state & SDL_BUTTON_LMASK;
-    event.middlePressed = sdlEvent.state & SDL_BUTTON_MMASK;
-    event.rightPressed = sdlEvent.state & SDL_BUTTON_RMASK;
-    event.x1Pressed = sdlEvent.state & SDL_BUTTON_X1MASK;
-    event.x2Pressed = sdlEvent.state & SDL_BUTTON_X2MASK;
-*/
 
     clientState.mouseMove(event);
 }
 
-void Sys::SDL2::clientMouseButtonPress(Client::State &clientState, const SDL_MouseButtonEvent &sdlEvent) const {
+static void clientMouseButtonPress(Client::State &clientState, const SDL_MouseButtonEvent &sdlEvent) {
     Client::MouseClick event;
 
     event.x = sdlEvent.x;
@@ -311,7 +304,7 @@ void Sys::SDL2::clientMouseButtonPress(Client::State &clientState, const SDL_Mou
     clientState.mouseButtonPress(event);
 }
 
-void Sys::SDL2::clientMouseButtonRelease(Client::State &clientState, const SDL_MouseButtonEvent &sdlEvent) const {
+static void clientMouseButtonRelease(Client::State &clientState, const SDL_MouseButtonEvent &sdlEvent) {
     Client::MouseClick event;
 
     event.x = sdlEvent.x;
@@ -437,11 +430,11 @@ bool Sys::SDL2::handleEvents(Client::State &clientState) {
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
             case SDL_KEYDOWN:
-                if (event.key.repeat == 0)
+                if (repeatKeys || event.key.repeat == 0)
                     clientKeyDown(clientState, event.key);
                 break;
             case SDL_KEYUP:
-                if (event.key.repeat == 0)
+                if (repeatKeys || event.key.repeat == 0)
                     clientKeyUp(clientState, event.key);
                 break;
             case SDL_MOUSEBUTTONDOWN:
@@ -464,7 +457,7 @@ bool Sys::SDL2::handleEvents(Client::State &clientState) {
     return run;
 }
 
-Sys::SDL2::SDL2(const std::string &title) {
+Sys::SDL2::SDL2(const std::string &title) : repeatKeys(false) {
     SDL_Init(SDL_INIT_EVERYTHING);
 
     auto mode = getDisplayModes().front();

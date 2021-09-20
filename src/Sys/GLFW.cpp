@@ -6,7 +6,10 @@
 
 #include <iostream>
 
+static bool RepeatKeys = false;
+
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+
     Client::State *clientState = (Client::State *)glfwGetWindowUserPointer(window);
     Client::KeyPress event;
 
@@ -221,6 +224,8 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
     if (action == GLFW_PRESS) {
         clientState->keyDown(event);
+    } else if (action == GLFW_REPEAT && RepeatKeys) {
+        clientState->keyDown(event);
     } else if (action == GLFW_RELEASE) {
         clientState->keyUp(event);
     }
@@ -321,13 +326,11 @@ bool Sys::GLFW::handleEvents(Client::State &clientState) {
     return !glfwWindowShouldClose(window.get());
 }
 
-static void error_callback(int error, const char* description) {
-    fprintf(stderr, "Error: %s\n", description);
+void Sys::GLFW::keyRepeat(bool enable) {
+    RepeatKeys = enable;
 }
 
 Sys::GLFW::GLFW(const std::string &title) {
-    glfwSetErrorCallback(error_callback);
-
     if (!glfwInit())
         exit(EXIT_FAILURE);
 
@@ -355,4 +358,3 @@ Sys::GLFW::GLFW(const std::string &title) {
 Sys::GLFW::~GLFW() {
     glfwTerminate();
 }
-

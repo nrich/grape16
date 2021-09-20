@@ -228,6 +228,8 @@ int main(int argc, char **argv) {
         exit(0);
     }
 
+    sys->keyRepeat(true);
+
     auto vm = std::make_shared<Emulator::VM>(0x003FFFFF);
 
     uint32_t clockspeed = opt.isSet("-t") ? CLOCK_66MHz_at_60FPS : CLOCK_33MHz_at_60FPS;

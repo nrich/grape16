@@ -42,6 +42,9 @@ namespace Sys {
                 //clear();
                 wclear(window.get());
             }
+
+            void keyRepeat(bool enable) {
+            }
     };
 }; // Sys
 

@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-void Sys::SFML::clientKeyDown(Client::State &clientState, const sf::Event::KeyEvent &sfEvent) const {
+static void clientKeyDown(Client::State &clientState, const sf::Event::KeyEvent &sfEvent) {
     Client::KeyPress event;
 
     event.keyCode = sfEvent.code;
@@ -16,7 +16,7 @@ void Sys::SFML::clientKeyDown(Client::State &clientState, const sf::Event::KeyEv
     clientState.keyDown(event);
 }
 
-void Sys::SFML::clientKeyUp(Client::State &clientState, const sf::Event::KeyEvent &sfEvent) const {
+static void clientKeyUp(Client::State &clientState, const sf::Event::KeyEvent &sfEvent) {
     Client::KeyPress event;
 
     event.keyCode = sfEvent.code;
@@ -28,7 +28,7 @@ void Sys::SFML::clientKeyUp(Client::State &clientState, const sf::Event::KeyEven
     clientState.keyUp(event);
 }
 
-void Sys::SFML::clientMouseMove(Client::State &clientState, const sf::Event::MouseMoveEvent &sfEvent) const {
+static void clientMouseMove(Client::State &clientState, const sf::Event::MouseMoveEvent &sfEvent) {
     Client::MouseMove event;
 
     event.x = sfEvent.x;
@@ -39,7 +39,7 @@ void Sys::SFML::clientMouseMove(Client::State &clientState, const sf::Event::Mou
     clientState.mouseMove(event);
 }
 
-void Sys::SFML::clientMouseButtonPress(Client::State &clientState, const sf::Event::MouseButtonEvent &sfEvent) const {
+static void clientMouseButtonPress(Client::State &clientState, const sf::Event::MouseButtonEvent &sfEvent) {
     Client::MouseClick event;
 
     event.x = sfEvent.x;
@@ -53,7 +53,7 @@ void Sys::SFML::clientMouseButtonPress(Client::State &clientState, const sf::Eve
     clientState.mouseButtonPress(event);
 }
 
-void Sys::SFML::clientMouseButtonRelease(Client::State &clientState, const sf::Event::MouseButtonEvent &sfEvent) const {
+static void clientMouseButtonRelease(Client::State &clientState, const sf::Event::MouseButtonEvent &sfEvent) {
     Client::MouseClick event;
 
     event.x = sfEvent.x;

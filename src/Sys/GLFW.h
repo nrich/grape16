@@ -12,7 +12,6 @@
 namespace Sys {
     class GLFW : public Base {
             std::shared_ptr<GLFWwindow> window;
-
         public:
             GLFW(const std::string &title);
             ~GLFW();
@@ -35,6 +34,8 @@ namespace Sys {
             void clearScreen() const {
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             }
+
+            void keyRepeat(bool enable);
     };
 }; // Sys
 

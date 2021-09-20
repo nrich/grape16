@@ -14,15 +14,11 @@ namespace Sys {
             std::shared_ptr<SDL_Window> window;
             SDL_GLContext context;
 
-            void clientKeyDown(Client::State &clientState, const SDL_KeyboardEvent &sdlEvent) const;
-            void clientKeyUp(Client::State &clientState, const SDL_KeyboardEvent &sdlEvent) const;
-            void clientMouseMove(Client::State &clientState, const SDL_MouseMotionEvent &sdlEvent) const;
-            void clientMouseButtonPress(Client::State &clientState, const SDL_MouseButtonEvent &sdlEvent) const;
-            void clientMouseButtonRelease(Client::State &clientState, const SDL_MouseButtonEvent &sdlEvent) const;
-
             void setWindow(std::shared_ptr<SDL_Window> window) {
                 this->window = window;
             }
+
+            bool repeatKeys;
         public:
             SDL2(const std::string &title);
             ~SDL2();
@@ -44,6 +40,10 @@ namespace Sys {
 
             void clearScreen() const {
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            }
+
+            void keyRepeat(bool enable) {
+                repeatKeys = enable;
             }
     };
 }; // Sys

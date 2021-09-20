@@ -27,6 +27,7 @@ namespace Sys {
             virtual void clearScreen() const = 0;
             virtual void swapBuffers() = 0;
             virtual bool handleEvents(Client::State &clientState) = 0;
+            virtual void keyRepeat(bool enable) = 0;
     };
 }; // Sys
 

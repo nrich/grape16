@@ -17,11 +17,6 @@ namespace Sys {
             const std::string title;
             bool isFullscreen;
 
-            void clientKeyDown(Client::State &clientState, const sf::Event::KeyEvent &sfEvent) const;
-            void clientKeyUp(Client::State &clientState, const sf::Event::KeyEvent &sfEvent) const;
-            void clientMouseMove(Client::State &clientState, const sf::Event::MouseMoveEvent &sfEvent) const;
-            void clientMouseButtonPress(Client::State &clientState, const sf::Event::MouseButtonEvent &sfEvent) const;
-            void clientMouseButtonRelease(Client::State &clientState, const sf::Event::MouseButtonEvent &sfEvent) const;
         public:
             SFML(const std::string &title);
             ~SFML();
@@ -43,6 +38,10 @@ namespace Sys {
 
             void clearScreen() const {
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            }
+
+            void keyRepeat(bool enable) {
+                window.setKeyRepeatEnabled(enable);
             }
     };
 }; // Sys

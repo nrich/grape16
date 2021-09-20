@@ -60,7 +60,6 @@ namespace Client {
 
         ~State();
     };
-
 };
 
 #endif //__CLIENT_STATE_H__
