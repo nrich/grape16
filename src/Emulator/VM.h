@@ -199,7 +199,9 @@ namespace Emulator {
         READ,
         READKEY,
         DRAW,
-        BLIT
+        DRAWLINE,
+        BLIT,
+        COUNT
     };
 
 

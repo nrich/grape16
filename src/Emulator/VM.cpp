@@ -495,6 +495,72 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
         case SysCall::DRAW:
             sysIO->setpixel(ValueAsInt(a), ValueAsInt(b), ValueAsInt(c));
             break;
+        case SysCall::DRAWLINE: {
+                int fa = 0;
+                int fb = 0;
+
+                int colour = ValueAsInt(c);
+
+                if (IS_FLOAT(a)) {
+                    fa = (int)ValueAsFloat(a);
+                } else {
+                    fa = (int)ValueAsInt(a);
+                }
+
+                if (IS_FLOAT(b)) {
+                    fb = (int)ValueAsFloat(b);
+                } else {
+                    fb = (int)ValueAsInt(b);
+                }
+
+                int x0 = fa % 320;
+                int y0 = (int)(fa / 320);
+
+                int x1 = fb % 320;
+                int y1 = (int)(fb / 320);
+
+                int steep = 0;
+
+                if (std::abs(x0-x1) < std::abs(y0-y1)) {
+                    std::swap(x0,y0);
+                    std::swap(x1,y1);
+                    steep = 1;
+                }
+
+                if (x0>x1) {
+                    std::swap(x0, x1);
+                    std::swap(y0, y1);
+                }
+
+                int dx = x1-x0;
+                int dy = y1-y0;
+
+                int derror2 = std::abs(dy) * 2;
+                int error2 = 0;
+
+                int y = y0;
+
+                for (int x=0; x <= x1; x++) {
+                    if (steep) {
+                        sysIO->setpixel(y, x, colour);
+                    } else {
+                        sysIO->setpixel(x, y, colour);
+                    }
+
+                    error2 += derror2;
+
+                    if (error2 > dx) {
+                        error2 -= dx*2;
+
+                        if (y1>y0) {
+                            y += 1;
+                        } else {
+                            y -= 1;
+                        }
+                    }
+                }
+            }
+            break;
         case SysCall::BLIT: {
                 auto x = ValueAsInt(a);
                 auto y = ValueAsInt(b);
@@ -1078,6 +1144,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 pc += 2;
                 break;
             case OpCode::YIELD:
+                std::cerr << "Yield " << cycles << std::endl;
                 return done;
                 break;
             default:
@@ -1088,6 +1155,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
         total_cycles += cost;
 
         if (cycles >= cycle_budget) {
+            std::cerr << "Budget " << cycles << std::endl;
             break;
         }
     }

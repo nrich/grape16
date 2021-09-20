@@ -40,7 +40,6 @@ namespace Client {
             }
 
             void blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) {
-
             }
     };
 

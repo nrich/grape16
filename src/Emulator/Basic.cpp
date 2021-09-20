@@ -1015,6 +1015,16 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
+
+        program.add(OpCode::POPA);
+        program.addValue(OpCode::SETB, IntAsValue(320));
+        program.add(OpCode::MUL);
+        program.add(OpCode::MOVCB);
+        program.add(OpCode::POPA);
+        program.add(OpCode::ADD);
+
+        program.add(OpCode::PUSHC);
+
         check(linenumber, tokens[current++], BasicTokenType::MINUS, "`-' expected");
         check(linenumber, tokens[current++], BasicTokenType::LEFT_PAREN, "`(' expected");
         expression(program, linenumber, {tokens.begin(), tokens.end()});
@@ -1022,14 +1032,21 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
         check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+
+        program.add(OpCode::POPA);
+        program.addValue(OpCode::SETB, IntAsValue(320));
+        program.add(OpCode::MUL);
+        program.add(OpCode::MOVCB);
+        program.add(OpCode::POPA);
+        program.add(OpCode::ADD);
+
+        program.add(OpCode::MOVCB);
+        program.add(OpCode::POPA);
+
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         //check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
 
-        auto draw = program.add(OpCode::POPC);
-                    program.add(OpCode::POPB);
-                    program.add(OpCode::POPA);
-                    program.addSyscall(OpCode::SYSCALL, SysCall::DRAW, RuntimeValue::IDX);
-
+        program.addSyscall(OpCode::SYSCALL, SysCall::DRAWLINE, RuntimeValue::IDX);
     } else if (tokens[current].type == BasicTokenType::IDENTIFIER && tokens[current+1].type == BasicTokenType::EQUAL) {
         auto name = identifier(linenumber, tokens[current++]);
 
