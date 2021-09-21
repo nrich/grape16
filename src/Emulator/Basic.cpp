@@ -1010,6 +1010,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
     } else if (tokens[current].type == BasicTokenType::LINE) {
         current++;
 
+
         check(linenumber, tokens[current++], BasicTokenType::LEFT_PAREN, "`(' expected");
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
@@ -1043,12 +1044,20 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.add(OpCode::MOVCB);
         program.add(OpCode::POPA);
 
+        //program.addShort(OpCode::TRACE, 1);
+
+        program.add(OpCode::PUSHA);
+        program.add(OpCode::PUSHB);
 
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         program.add(OpCode::POPC);
         //check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
 
+        program.add(OpCode::POPB);
+        program.add(OpCode::POPA);
+
         program.addSyscall(OpCode::SYSCALL, SysCall::DRAWLINE, RuntimeValue::IDX);
+        //program.addShort(OpCode::TRACE, 0);
     } else if (tokens[current].type == BasicTokenType::IDENTIFIER && tokens[current+1].type == BasicTokenType::EQUAL) {
         auto name = identifier(linenumber, tokens[current++]);
 

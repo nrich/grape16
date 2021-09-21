@@ -34,6 +34,10 @@ namespace Emulator {
     }
 
     inline int16_t ValueAsInt(value_t value) {
+        if (!IS_INT(value)) {
+            std::cerr << "Value is not an int!" << std::endl;
+            exit(-1);
+        }
         return (int16_t)(0x0000FFFF & value);
     }
 
@@ -179,6 +183,8 @@ namespace Emulator {
         ALLOC,
 
         YIELD,
+
+        TRACE,
 
         COUNT
     };

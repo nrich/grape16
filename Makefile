@@ -4,7 +4,7 @@ RM = rm -f
 RMDIR = rm -rf
 INC = -I src
 LDFLAGS = $(shell sdl2-config --libs) -lGL -lGLU -lsfml-graphics -lsfml-window -lsfml-system -lglfw -lstdc++ -lncurses
-CPPFLAGS = -std=c++17 $(INC) -Wall $(shell sdl2-config --cflags)
+CPPFLAGS = -g -std=c++17 $(INC) -Wall $(shell sdl2-config --cflags)
 STRIP = strip
  
 ifdef CONFIG_W32

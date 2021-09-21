@@ -83,6 +83,7 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
         case OpCode::IRQ: return "IRQ";
         case OpCode::ALLOC: return "ALLOC";
         case OpCode::YIELD: return "YIELD";
+        case OpCode::TRACE: return "TRACE";
         default: return "????";
     }
 }
@@ -490,7 +491,19 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
             }
             break;
         case SysCall::READKEY:
-            c = IntAsValue(sysIO->read());
+            switch (rvalue) {
+                case RuntimeValue::A:
+                    a = IntAsValue(sysIO->read());
+                    break;
+                case RuntimeValue::B:
+                    b = IntAsValue(sysIO->read());
+                    break;
+                case RuntimeValue::C:
+                    c = IntAsValue(sysIO->read());
+                    break;
+                default:
+                    error("Cannot readkey to register");
+            }
             break;
         case SysCall::DRAW:
             sysIO->setpixel(ValueAsInt(a), ValueAsInt(b), ValueAsInt(c));
@@ -502,14 +515,18 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                 int colour = ValueAsInt(c);
 
                 if (IS_FLOAT(a)) {
+//std::cerr << "FA";
                     fa = (int)ValueAsFloat(a);
                 } else {
+//std::cerr << "IA";
                     fa = (int)ValueAsInt(a);
                 }
 
                 if (IS_FLOAT(b)) {
+//std::cerr << "FB";
                     fb = (int)ValueAsFloat(b);
                 } else {
+//std::cerr << "IB";
                     fb = (int)ValueAsInt(b);
                 }
 
@@ -540,7 +557,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
 
                 int y = y0;
 
-                //std::cerr << "(" << x0 << "," << y0 << ")-(" << x1 << "," << y1 << ")," << colour << std::endl;
+//std::cerr << "[" << fa << "," << fb << "](" << x0 << "," << y0 << ")-(" << x1 << "," << y1 << ")," << colour << std::endl;
 
                 for (int x=x0; x <= x1; x++) {
                     if (steep) {
@@ -627,6 +644,9 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
     uint32_t offset = 0;
 
     static uint32_t total_cycles = 0;
+    static int16_t trace = 0;
+
+    static std::shared_ptr<Debugger> tracer = std::make_shared<Debugger>();
 
     while (!done) {
         uint32_t cost = 1;
@@ -772,10 +792,12 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 break;
             case OpCode::ADD:
                 if (IS_INT(a) && IS_INT(b)) {
-                    overflow = ValueAsInt(a) + ValueAsInt(b);
-                    if (overflow > 0x7FFF)
+                    overflow = (int32_t)ValueAsInt(a) + (int32_t)ValueAsInt(b);
+                    if (overflow > INT16_MAX || overflow < INT16_MIN) {
+                        //error(std::string("ADD overflow: ") + std::to_string(overflow));
+                        //std::cerr << std::string("ADD overflow: ") << std::to_string(overflow) << "=" << ValueAsInt(a) << "+" << ValueAsInt(b) << std::endl;
                         c = FloatAsValue((float)overflow);
-                    else 
+                    } else 
                         c = IntAsValue(overflow);
                 }
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
@@ -796,8 +818,14 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     error("ADD mismatch");
                 break;
             case OpCode::SUB:
-                if (IS_INT(a) && IS_INT(b))
-                    c = IntAsValue(ValueAsInt(a) - ValueAsInt(b));
+                if (IS_INT(a) && IS_INT(b)) {
+                    overflow = ValueAsInt(a) - ValueAsInt(b);
+                    if (overflow > INT16_MAX || overflow < INT16_MIN) {
+                        std::cerr << std::string("SUB overflow: ") << std::to_string(overflow) << "=" << ValueAsInt(a) << "-" << ValueAsInt(b) << std::endl;
+                        c = FloatAsValue((float)overflow);
+                    } else 
+                        c = IntAsValue(overflow);
+                }
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
                     c = FloatAsValue(ValueAsFloat(a) - ValueAsFloat(b));
                 else if (IS_FLOAT(a) && IS_INT(b))
@@ -817,11 +845,13 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 break;
             case OpCode::MUL:
                 if (IS_INT(a) && IS_INT(b)) {
-                    overflow = ValueAsInt(a) * ValueAsInt(b);
+                    overflow = (int32_t)ValueAsInt(a) * (int32_t)ValueAsInt(b);
 
-                    if (overflow > 0x7FFF)
+                    if (overflow > INT16_MAX || overflow < INT16_MIN) {
+                        //error(std::string("MUL overflow: ") + std::to_string(overflow));
+                        //std::cerr << std::string("MUL overflow: ") << std::to_string(overflow) << "=" << ValueAsInt(a) << "x" << ValueAsInt(b) << std::endl;
                         c = FloatAsValue((float)overflow);
-                    else
+                    } else
                         c = IntAsValue(overflow);
                 }
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
@@ -846,8 +876,13 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     error("DIV mismatch");
                 break;
             case OpCode::IDIV:
-                if (IS_INT(a) && IS_INT(b))
-                    c = IntAsValue(ValueAsInt(a) / ValueAsInt(b));
+                if (IS_INT(a) && IS_INT(b)) {
+                    overflow = ValueAsInt(a) / ValueAsInt(b);
+                    if (overflow > INT16_MAX || overflow < INT16_MIN)
+                        error("IDIV overflow");
+                    else
+                        c = IntAsValue(overflow);
+                }
                 else
                     error("IDIV mismatch");
                 break;
@@ -861,9 +896,10 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 if (IS_INT(a) && IS_INT(b)) {
                     overflow = std::pow(ValueAsInt(a), ValueAsInt(b));
 
-                    if (overflow > 0xFFFF)
+                    if (overflow > INT16_MAX || overflow < INT16_MIN) {
+                        std::cerr << "EXP overflow " << overflow << std::endl;
                         c = FloatAsValue((float)overflow);
-                    else
+                    } else
                         c = IntAsValue(overflow);
                 }
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
@@ -932,11 +968,22 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     error("FLT argument error");
                 break;
             case OpCode::INT:
-                if (IS_INT(c))
-                    c = IntAsValue(ValueAsInt(c));
-                else if (IS_FLOAT(c))
-                    c = IntAsValue((int16_t)ValueAsFloat(c));
-                else if (IS_POINTER(c))
+                if (IS_INT(c)) {
+                    overflow = ValueAsInt(c);
+
+                    if (overflow > INT16_MAX || overflow < INT16_MIN)
+                        error("INT overflow");
+                    else
+                        c = IntAsValue(overflow);
+                }
+                else if (IS_FLOAT(c)) {
+                    overflow = (int16_t)ValueAsFloat(c);
+
+                    if (overflow > INT16_MAX || overflow < INT16_MIN)
+                        error("INT overflow");
+                    else
+                        c = IntAsValue(overflow);
+                } else if (IS_POINTER(c))
                     c = IntAsValue((int16_t)ValueAsPointer(c));
                 else
                     error("INT argument error");
@@ -1146,8 +1193,20 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 pc += 2;
                 break;
             case OpCode::YIELD:
-                std::cerr << "Yield " << cycles << std::endl;
+                //std::cerr << "Yield " << cycles << std::endl;
                 return done;
+                break;
+            case OpCode::TRACE:
+                trace = program.readShort(pc);
+                pc += 2;
+
+                if (trace) {
+                    debugger = tracer;
+                } else {
+                    if (debugger == tracer)
+                        debugger = nullptr;
+                }
+
                 break;
             default:
                 std::cout << "Unknown opcode " << (int)program.fetch(pc-1) << std::endl;
