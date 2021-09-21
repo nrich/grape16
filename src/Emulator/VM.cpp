@@ -973,19 +973,19 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 break;
             case OpCode::INT:
                 if (IS_INT(c)) {
-                    overflow = ValueAsInt(c);
-
-                    if (overflow > INT16_MAX || overflow < INT16_MIN)
-                        error(std::string("INT overflow ") + std::to_string(overflow));
-                    else
-                        c = IntAsValue(overflow);
+                    c = IntAsValue(overflow);
                 }
                 else if (IS_FLOAT(c)) {
                     overflow = (int32_t)ValueAsFloat(c);
 
-                    if (overflow > INT16_MAX || overflow < INT16_MIN)
-                        error(std::string("INT overflow (f)") + std::to_string(overflow));
-                    else
+                    if (overflow > INT16_MAX) {
+                        std::cerr << (std::string("INT overflow") + std::to_string(overflow)) << std::endl;
+                        c = IntAsValue(INT16_MAX);
+                    } else if (overflow < INT16_MIN) {
+                        //error(std::string("INT overflow (f)") + std::to_string(overflow));
+                        std::cerr << (std::string("INT underflow") + std::to_string(overflow)) << std::endl;
+                        c = IntAsValue(INT16_MIN);
+                    } else
                         c = IntAsValue(overflow);
                 } else if (IS_POINTER(c))
                     c = IntAsValue((int16_t)ValueAsPointer(c));
