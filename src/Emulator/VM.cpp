@@ -428,6 +428,8 @@ std::string VM::getString(vmpointer_t ptr, uint32_t len) {
 int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue rvalue, uint32_t cycle_budget) {
     static uint32_t offset = 0;
 
+    static std::shared_ptr<Debugger> tracer = std::make_shared<Debugger>();
+
     switch(syscall) {
         case SysCall::CLS:
             sysIO->cls();
@@ -558,6 +560,8 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                 int y = y0;
 
 //std::cerr << "[" << fa << "," << fb << "](" << x0 << "," << y0 << ")-(" << x1 << "," << y1 << ")," << colour << std::endl;
+
+                //tracer->debug(OpCode::SYSCALL, pc, sp, callstack[sp], a, b, c, idx, mem[idx], heap, stack.size());
 
                 for (int x=x0; x <= x1; x++) {
                     if (steep) {
@@ -755,7 +759,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     b = IntAsValue(ValueAsInt(b) + ValueAsInt(program.readValue(pc)));
                 else if (IS_FLOAT(b) && IS_FLOAT(program.readValue(pc)))
                     b = FloatAsValue(ValueAsFloat(b) + ValueAsFloat(program.readValue(pc)));
-                else if (IS_POINTER(a) && IS_INT(program.readValue(pc)))
+                else if (IS_POINTER(b) && IS_INT(program.readValue(pc)))
                     b = PointerAsValue(ValueAsPointer(b) + ValueAsInt(program.readValue(pc)));
                 else
                     error("INCB mismatch");
@@ -766,8 +770,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     c = IntAsValue(ValueAsInt(c) + ValueAsInt(program.readValue(pc)));
                 else if (IS_FLOAT(c) && IS_FLOAT(program.readValue(pc)))
                     c = FloatAsValue(ValueAsFloat(c) + ValueAsFloat(program.readValue(pc)));
-                else if (IS_POINTER(a) && IS_INT(program.readValue(pc)))
-                    b = PointerAsValue(ValueAsPointer(b) + ValueAsInt(program.readValue(pc)));
+                else if (IS_POINTER(c) && IS_INT(program.readValue(pc)))
+                    c = PointerAsValue(ValueAsPointer(c) + ValueAsInt(program.readValue(pc)));
                 else
                     error("INCC mismatch");
                 pc += 4;
@@ -972,15 +976,15 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     overflow = ValueAsInt(c);
 
                     if (overflow > INT16_MAX || overflow < INT16_MIN)
-                        error("INT overflow");
+                        error(std::string("INT overflow ") + std::to_string(overflow));
                     else
                         c = IntAsValue(overflow);
                 }
                 else if (IS_FLOAT(c)) {
-                    overflow = (int16_t)ValueAsFloat(c);
+                    overflow = (int32_t)ValueAsFloat(c);
 
                     if (overflow > INT16_MAX || overflow < INT16_MIN)
-                        error("INT overflow");
+                        error(std::string("INT overflow (f)") + std::to_string(overflow));
                     else
                         c = IntAsValue(overflow);
                 } else if (IS_POINTER(c))

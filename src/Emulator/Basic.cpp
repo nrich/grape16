@@ -1010,7 +1010,6 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
     } else if (tokens[current].type == BasicTokenType::LINE) {
         current++;
 
-
         check(linenumber, tokens[current++], BasicTokenType::LEFT_PAREN, "`(' expected");
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
@@ -1020,8 +1019,8 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.add(OpCode::POPA);
         program.addValue(OpCode::SETB, IntAsValue(320));
         program.add(OpCode::MUL);
-        program.add(OpCode::MOVCB);
-        program.add(OpCode::POPA);
+        program.add(OpCode::MOVCA);
+        program.add(OpCode::POPB);
         program.add(OpCode::ADD);
 
         program.add(OpCode::PUSHC);
@@ -1037,22 +1036,22 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.add(OpCode::POPA);
         program.addValue(OpCode::SETB, IntAsValue(320));
         program.add(OpCode::MUL);
-        program.add(OpCode::MOVCB);
-        program.add(OpCode::POPA);
+        program.add(OpCode::MOVCA);
+        program.add(OpCode::POPB);
         program.add(OpCode::ADD);
 
-        program.add(OpCode::MOVCB);
-        program.add(OpCode::POPA);
+        program.add(OpCode::MOVCA);
+        program.add(OpCode::POPB);
 
-        //program.addShort(OpCode::TRACE, 1);
 
-        program.add(OpCode::PUSHA);
         program.add(OpCode::PUSHB);
+        program.add(OpCode::PUSHA);
 
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         program.add(OpCode::POPC);
         //check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
 
+        //program.addShort(OpCode::TRACE, 1);
         program.add(OpCode::POPB);
         program.add(OpCode::POPA);
 
