@@ -68,6 +68,8 @@ namespace Emulator {
                     return 1 + value.size();
                 } else if (std::holds_alternative<std::pair<SysCall, RuntimeValue>>(*arg)) {
                     return 1+2+2;
+                } else {
+                    std::cerr << "Error in size" << std::endl;
                 }
             }
         }
@@ -77,5 +79,7 @@ namespace Emulator {
 std::vector<Emulator::AsmToken> parseAsmFile(const std::string &filename);
 
 void assemble(std::vector<Emulator::AsmToken> lines, Emulator::Program &program);
+std::vector<Emulator::AsmToken> disassemble(Emulator::Program &program);
+std::string AsmTokenAsString(const Emulator::AsmToken &token);
 
 #endif //__EMULATOR_ASSEMBLER_H__

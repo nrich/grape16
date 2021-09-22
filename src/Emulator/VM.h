@@ -322,6 +322,10 @@ namespace Emulator {
             }
 
             void update(uint32_t pos, int16_t s);
+
+            size_t size() const {
+                return code.size();
+            }
     };
 
     class VM {

@@ -1,5 +1,7 @@
 #include "Emulator/Assembler.h"
 
+#include <sstream>
+
 using namespace Emulator;
 
 static std::map<std::string, uint32_t> labels;
@@ -161,6 +163,47 @@ std::pair<SysCall, RuntimeValue> getSyscall(const std::string &syscallname, cons
     return std::pair<SysCall, RuntimeValue>(syscall, rt);
 }
 
+std::pair<std::string, std::string> getSysCall(SysCall syscall, RuntimeValue rt) {
+    std::string syscallname;
+    std::string rtname;
+
+    if (syscall == SysCall::CLS) {
+        syscallname = "CLS";
+    } else if (syscall == SysCall::WRITE) {
+        syscallname = "WRITE";
+    } else if (syscall == SysCall::READ) {
+        syscallname = "READ";
+    } else if (syscall == SysCall::READKEY) {
+        syscallname = "READKEY";
+    } else if (syscall == SysCall::DRAW) {
+        syscallname = "DRAW";
+    } else if (syscall == SysCall::DRAWLINE) {
+        syscallname = "DRAWLINE";
+    } else if (syscall == SysCall::BLIT) {
+        syscallname = "BLIT";
+    } else {
+        std::cerr << "Unknown SysCall " << (int)syscall << std::endl;
+        exit(-1);
+    }
+
+    if (rt == RuntimeValue::NONE) {
+        rtname = "NONE";
+    } else if (rt == RuntimeValue::A) {
+        rtname = "A";
+    } else if (rt == RuntimeValue::B) {
+        rtname = "B";
+    } else if (rt == RuntimeValue::C) {
+        rtname = "C";
+    } else if (rt == RuntimeValue::IDX) {
+        rtname = "IDX";
+    } else {
+        std::cerr << "Unknown RuntimeValue " << syscallname << std::endl;
+        exit(-1);
+    }
+
+    return std::pair<std::string, std::string>(syscallname, rtname);
+}
+
 static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset, uint32_t linenum, uint32_t statement) {
     size_t i = 0;
 
@@ -215,17 +258,18 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
                 continue;
             }
 
-            int numstart = i;
-
-            while (i < line.size()) {
-                if (!isDigit(line[i])) {
-                    std::cerr << "Expected arg: UINT  for " << opname << std::endl;
-                    exit(-1);
-                }
-                i++;
+            if (line[i] != '0' && line[i+1] =='x') {
+                std::cerr << "Expected arg: UINT  for " << opname << std::endl;
+                exit(-1);
             }
 
-            return Emulator::AsmToken(opcode, (int32_t)std::stoi(line.substr(numstart, i-numstart)));
+            i+=2;
+            int numstart = i;
+
+            while (isDigit(line[i]))
+                i++;
+
+            return Emulator::AsmToken(opcode, (int32_t)(std::strtoul(line.substr(numstart).c_str(), nullptr, 16)));
         } else if (arg == ArgType::FLOAT) {
             while (isWhitespace(line[i])) {
                 i++;
@@ -251,7 +295,7 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
                 exit(-1);
             }
 
-            return Emulator::AsmToken(opcode, (float)std::stof(line.substr(numstart, i-numstart)));
+            return Emulator::AsmToken(opcode, (float)std::stof(line.substr(numstart)));
         } else if (arg == ArgType::VALUE) {
             while (isWhitespace(line[i])) {
                 i++;
@@ -259,6 +303,16 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
             }
 
             int numstart = i;
+
+            if (line[i] == '0' && line[i+1] =='x') {
+                i+=2;
+                numstart = i;
+
+                while (isDigit(line[i]))
+                    i++;
+
+                return Emulator::AsmToken(opcode, PointerAsValue(std::strtoul(line.substr(numstart).c_str(), nullptr, 16)));
+            }
 
             if (!(line[i] == '-' || isDigit(line[i])))
                 std::cerr << "Expected arg: FLOAT for " << opname << std::endl;
@@ -272,9 +326,9 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
 
                 while (isDigit(line[i]))
                     i++;
-                return Emulator::AsmToken(opcode, FloatAsValue((float)std::stof(line.substr(numstart, i-numstart))));
+                return Emulator::AsmToken(opcode, FloatAsValue((float)std::stof(line.substr(numstart))));
             } else {
-                return Emulator::AsmToken(opcode, IntAsValue(std::stoi(line.substr(numstart, i-numstart))));
+                return Emulator::AsmToken(opcode, IntAsValue((int16_t)std::stoi(line.substr(numstart))));
             }
 
         } else if (arg == ArgType::SYSCALL) {
@@ -336,6 +390,17 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
             while (isWhitespace(line[i])) {
                 i++;
                 continue;
+            }
+
+            if (isDigit(line[i])) {
+                auto numstart = i;
+
+                while (isDigit(line[i++])) {
+                }
+
+                auto jmp = (int16_t)std::stoi(line.substr(numstart));
+
+                return Emulator::AsmToken(opcode, jmp);
             }
 
             auto labelstart = i;
@@ -434,8 +499,93 @@ void assemble(std::vector<Emulator::AsmToken> lines, Emulator::Program &program)
             } else if (std::holds_alternative<std::pair<SysCall, RuntimeValue>>(*token.arg)) {
                 auto value = std::get<std::pair<SysCall, RuntimeValue>>(*token.arg);
                 program.addSyscall(token.opcode, value.first, value.second);
+            } else {
+                std::cerr << "Error in assemble" << std::endl;
             }
         } 
     }
+}
+
+std::vector<Emulator::AsmToken> disassemble(Emulator::Program &program) {
+    std::vector<Emulator::AsmToken> tokens;
+
+    size_t pc = 0;
+    while (pc < program.size()) {
+        OpCode opcode = program.fetch(pc++);
+        auto opname = OpCodeAsString(opcode);
+        auto op = def[opname];
+        auto arg = op.second;
+
+        if (arg == ArgType::NONE) {
+            tokens.push_back(Emulator::AsmToken(opcode));
+        } else if (arg == ArgType::SHORT) {
+            tokens.push_back(Emulator::AsmToken(opcode, program.readShort(pc)));
+            pc += 2;
+        } else if (arg == ArgType::FLOAT) {
+            tokens.push_back(Emulator::AsmToken(opcode, program.readFloat(pc)));
+            pc += 4;
+        } else if (arg == ArgType::POINTER) {
+            tokens.push_back(Emulator::AsmToken(opcode, (int32_t)program.readPointer(pc)));
+            pc += 3;
+        } else if (arg == ArgType::VALUE) {
+            tokens.push_back(Emulator::AsmToken(opcode, program.readValue(pc)));
+            pc += 4;
+        } else if (arg == ArgType::SYSCALL) {
+            tokens.push_back(Emulator::AsmToken(opcode, std::pair<SysCall, RuntimeValue>((SysCall)program.readShort(pc), (RuntimeValue)program.readShort(pc+2))));
+            pc += 2+2;
+        } else if (arg == ArgType::STRING) {
+            std::string str = "";
+            while (uint8_t b = program.readByte(pc)) {
+                str += (char)b;
+                pc += 1;
+            }
+
+            tokens.push_back(Emulator::AsmToken(opcode, str));
+        } else if (arg == ArgType::LABEL) {
+            tokens.push_back(Emulator::AsmToken(opcode, program.readShort(pc)));
+            pc += 2;
+        } else {
+            std::cerr << "Error in disassemble" << std::endl;
+        }
+    }
+
+    return tokens;
+}
+
+std::string AsmTokenAsString(const Emulator::AsmToken &token) {
+    std::ostringstream s;
+
+    s << Emulator::OpCodeAsString(token.opcode);
+
+    if (token.arg != std::nullopt) {
+        s << " ";
+
+        if (std::holds_alternative<int16_t>(*token.arg)) {
+            auto value = std::get<int16_t>(*token.arg);
+            s << value;
+        } else if (std::holds_alternative<float>(*token.arg)) {
+            auto value = std::get<float>(*token.arg);
+            s << value;
+        } else if (std::holds_alternative<int32_t>(*token.arg)) {
+            auto value = std::get<int32_t>(*token.arg);
+            s << "0x" << std::hex << (vmpointer_t)value;
+        } else if (std::holds_alternative<value_t>(*token.arg)) {
+            auto value = std::get<value_t>(*token.arg);
+
+            if (IS_POINTER(value))
+                s << "0x" << std::hex << ValueAsPointer(value);
+            else
+                s << Emulator::ValueToString(value);
+        } else if (std::holds_alternative<std::string>(*token.arg)) {
+            auto value = std::get<std::string>(*token.arg);
+            s << "\"" << value << "\"";
+        } else if (std::holds_alternative<std::pair<SysCall, RuntimeValue>>(*token.arg)) {
+            auto value = std::get<std::pair<SysCall, RuntimeValue>>(*token.arg);
+            auto syscall = getSysCall(value.first, value.second);
+            s << syscall.first << " " << syscall.second;
+        }
+    }
+
+    return s.str();
 }
 

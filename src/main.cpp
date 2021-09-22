@@ -161,6 +161,15 @@ int main(int argc, char **argv) {
         0, // Required?
         0, // Number of args expected.
         0, // Delimiter if expecting multiple args.
+        "Disassemble", // Help description.
+        "-p"     // Flag token.
+    );
+
+    opt.add(
+        "", // Default.
+        0, // Required?
+        0, // Number of args expected.
+        0, // Delimiter if expecting multiple args.
         "Turbo mode (66MHz)", // Help description.
         "-t",     // Flag token.
         "-turbo",   // Flag token.
@@ -211,6 +220,16 @@ int main(int argc, char **argv) {
             program = loadBasic(*opt.lastArgs[0], opt.isSet("-d"));
         } else {
             program = loadAssembly(*opt.lastArgs[0]);
+        }
+
+        if (opt.isSet("-p")) {
+            auto tokens = disassemble(*program);
+
+            for (auto token : tokens) {
+                std::cout << AsmTokenAsString(token) << std::endl; 
+            }
+
+            exit(0);
         }
     } else {
         program = std::make_shared<Emulator::Program>();
