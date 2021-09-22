@@ -15,7 +15,6 @@
 namespace Emulator {
     enum class ArgType {
         NONE,
-        BYTE,
         SHORT,
         FLOAT,
         POINTER,
@@ -26,19 +25,23 @@ namespace Emulator {
     };
 
     struct AsmToken {
-        OpCode type;
-        std::optional<std::variant<uint8_t, int16_t, float, uint32_t>> arg;
+        OpCode opcode;
+        std::optional<std::variant<int16_t, float, uint32_t, std::string>> arg;
 
-        AsmToken(OpCode type, uint8_t b) : type(type), arg(b) {
+        AsmToken(OpCode opcode) : opcode(opcode) {
+            arg = std::nullopt;
         }
 
-        AsmToken(OpCode type, int16_t i) : type(type), arg(i) {
+        AsmToken(OpCode opcode, int16_t i) : opcode(opcode), arg(i) {
         }
 
-        AsmToken(OpCode type, float f) : type(type), arg(f) {
+        AsmToken(OpCode opcode, float f) : opcode(opcode), arg(f) {
         }
 
-        AsmToken(OpCode type, uint32_t vp) : type(type), arg(vp) {
+        AsmToken(OpCode opcode, uint32_t vp) : opcode(opcode), arg(vp) {
+        }
+
+        AsmToken(OpCode opcode, const std::string &str) : opcode(opcode), arg(str) {
         }
 
     };
@@ -46,5 +49,7 @@ namespace Emulator {
 
 Emulator::AsmToken parseAsmLine(const std::string &line);
 std::vector<Emulator::AsmToken> parseAsmFile(const std::string &filename);
+
+void assemble(std::vector<Emulator::AsmToken> lines, Emulator::Program &program);
 
 #endif //__EMULATOR_ASSEMBLER_H__

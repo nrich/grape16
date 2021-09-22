@@ -131,9 +131,69 @@ Emulator::AsmToken parseAsmLine(const std::string &line) {
         while (isAlpha(line[i++])) {
         }
 
-        auto op = line.substr(start, i-start);
+        auto opname = line.substr(start, i-start-1);
 
-        
+        std::cerr << opname <<std::endl;
+
+        auto op = def.find(opname);
+        if (op == def.end()) {
+            std::cerr << "Uknown opcode `" << opname << "'" << std::endl;
+            exit(-1);
+        }
+
+        auto opcode = op->second.first;
+        auto arg = op->second.second;
+
+        if (arg == ArgType::NONE) {
+            return Emulator::AsmToken(opcode);
+        } else if (arg == ArgType::SHORT) {
+            while (isWhitespace(line[i])) {
+                i++;
+                continue;
+            }
+
+            int numstart = i;
+
+            while (i < line.size()) {
+                if (!isDigit(line[i])) {
+                    std::cerr << "Expected arg: INT  for " << opname << std::endl;
+                    exit(-1);
+                }
+                i++;
+            }
+
+            std::cerr << line.substr(numstart, i-numstart) << std::endl;
+
+            return Emulator::AsmToken(opcode, (int16_t)std::stoi(line.substr(numstart, i-numstart)));
+        } else if (arg == ArgType::FLOAT) {
+            while (isWhitespace(line[i])) {
+                i++;
+                continue;
+            }
+
+            int numstart = i;
+
+            while (isDigit(line[i]))
+                i++;
+
+            if (line[i] == '.' && isDigit(line[i+1])) {
+                i++;
+
+                while (isDigit(line[i]))
+                    i++;
+            } else {
+                std::cerr << "Expected arg: FLOAT  for " << opname << std::endl;
+                exit(-1);
+            }
+
+            std::cerr << line.substr(numstart, i-numstart) << std::endl;
+
+            return Emulator::AsmToken(opcode, (float)std::stof(line.substr(numstart, i-numstart)));
+
+        } else {
+            std::cerr << "TODO " << opname;
+            exit(-1);
+        }
     }
 }
 
@@ -148,9 +208,27 @@ std::vector<Emulator::AsmToken> parseAsmFile(const std::string &filename) {
     }
 
     while (std::getline(infile, line)) {
-        auto data = parseAsmLine(line);
+        auto token = parseAsmLine(line);
+        tokens.push_back(token);
     }
 
     return tokens;
+}
+
+void assemble(std::vector<Emulator::AsmToken> lines, Emulator::Program &program) {
+    for (auto token : lines) {
+        if (token.arg == std::nullopt) {
+            program.add(token.opcode);
+        } else {
+            if (std::holds_alternative<int16_t>(*token.arg)) {
+                auto value = std::get<int16_t>(*token.arg);
+                program.addShort(token.opcode, value);
+            } else if (std::holds_alternative<float>(*token.arg)) {
+                auto value = std::get<float>(*token.arg);
+                program.addFloat(token.opcode, value);
+            } else {
+            }
+        } 
+    }
 }
 

@@ -38,6 +38,7 @@
 
 #include "Emulator/VM.h"
 #include "Emulator/Basic.h"
+#include "Emulator/Assembler.h"
 
 #include "Client/DebugState.h"
 #include "Client/DisplayMenuState.h"
@@ -80,6 +81,16 @@ std::shared_ptr<Emulator::Program> loadBasic(const std::string &input, bool debu
 
     return std::make_shared<Emulator::Program>(program);
 }
+
+std::shared_ptr<Emulator::Program> loadAssembly(const std::string &input, bool debug) {
+    Emulator::Program program;
+    auto lines = parseAsmFile(input);
+
+    assemble(lines, program);
+
+    return std::make_shared<Emulator::Program>(program);
+}
+
 
 int main(int argc, char **argv) {
     ez::ezOptionParser opt;
@@ -139,6 +150,17 @@ int main(int argc, char **argv) {
         0, // Required?
         0, // Number of args expected.
         0, // Delimiter if expecting multiple args.
+        "Assembly file input", // Help description.
+        "-a",     // Flag token.
+        "-asm",   // Flag token.
+        "--asm"  // Flag token.
+    );
+
+    opt.add(
+        "", // Default.
+        0, // Required?
+        0, // Number of args expected.
+        0, // Delimiter if expecting multiple args.
         "Turbo mode (66MHz)", // Help description.
         "-t",     // Flag token.
         "-turbo",   // Flag token.
@@ -183,7 +205,9 @@ int main(int argc, char **argv) {
     std::shared_ptr<Emulator::Program> program;
 
     if (opt.lastArgs.size() == 1) {
-        if (opt.isSet("-b")) {
+        if (opt.isSet("-a")) {
+            program = loadAssembly(*opt.lastArgs[0], opt.isSet("-d"));
+        } else if (opt.isSet("-b")) {
             program = loadBasic(*opt.lastArgs[0], opt.isSet("-d"));
         } else {
             program = loadAssembly(*opt.lastArgs[0]);
