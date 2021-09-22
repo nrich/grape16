@@ -393,7 +393,7 @@ std::map<uint32_t, std::vector<BasicToken>> parseFile(const std::string &filenam
     return tokens;
 }
 
-void error(uint32_t linenumber, const std::string &err) {
+static void error(uint32_t linenumber, const std::string &err) {
     std::cerr << "Error on line " << linenumber << " at position " << current << ": " << err <<std::endl;
     exit(-1);
 }

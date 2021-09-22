@@ -122,6 +122,11 @@ static bool isWhitespace(char c) {
     return (c == ' ') || (c == '\t');
 }
 
+static void error(uint32_t linenumber, const std::string &err) {
+    std::cerr << "Error on line " << linenumber << ": " << err << std::endl;
+    exit(-1);
+}
+
 std::pair<SysCall, RuntimeValue> getSyscall(const std::string &syscallname, const std::string &rtname) {
     RuntimeValue rt;
     SysCall syscall;
@@ -258,18 +263,18 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
                 continue;
             }
 
-            if (line[i] != '0' && line[i+1] =='x') {
-                std::cerr << "Expected arg: UINT  for " << opname << std::endl;
+            if (line.size() > 2 && line[i] == '0' && line[i+1] =='x') {
+                i+=2;
+                int numstart = i;
+
+                while (isDigit(line[i]))
+                    i++;
+
+                return Emulator::AsmToken(opcode, (int32_t)(std::strtoul(line.substr(numstart).c_str(), nullptr, 16)));
+            } else {
+                std::cerr << "Expected arg: POINTER for " << opname << std::endl;
                 exit(-1);
             }
-
-            i+=2;
-            int numstart = i;
-
-            while (isDigit(line[i]))
-                i++;
-
-            return Emulator::AsmToken(opcode, (int32_t)(std::strtoul(line.substr(numstart).c_str(), nullptr, 16)));
         } else if (arg == ArgType::FLOAT) {
             while (isWhitespace(line[i])) {
                 i++;
@@ -279,7 +284,7 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
             int numstart = i;
 
             if (!(line[i] == '-' || isDigit(line[i])))
-                std::cerr << "Expected arg: VALUE for " << opname << std::endl;
+                std::cerr << "Expected arg: FLOAT for " << opname << std::endl;
             i++;
 
             while (isDigit(line[i]))
@@ -304,7 +309,7 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
 
             int numstart = i;
 
-            if (line[i] == '0' && line[i+1] =='x') {
+            if (line.size() > 2 && line[i] == '0' && line[i+1] =='x') {
                 i+=2;
                 numstart = i;
 
