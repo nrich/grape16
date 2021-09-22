@@ -86,6 +86,7 @@ COMMON_OBJS := \
 	src/Common/Colour.o \
 	src/Common/DisplayMode.o \
         src/Emulator/VM.o \
+        src/Emulator/Assembler.o \
         src/Emulator/Basic.o \
 	src/Renderer/Base.o \
 	src/Renderer/Immediate.o \
