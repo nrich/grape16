@@ -2,6 +2,9 @@
 
 using namespace Emulator;
 
+static std::map<std::string, uint32_t> labels;
+static std::map<uint32_t, std::string> jumps;
+
 std::map<std::string, std::pair<OpCode, ArgType>> def = {
     {"NOP", {OpCode::NOP, ArgType::NONE}}, 
 
@@ -82,9 +85,9 @@ std::map<std::string, std::pair<OpCode, ArgType>> def = {
     {"PUSHIDX", {OpCode::PUSHIDX, ArgType::NONE}},
     {"POPIDX", {OpCode::POPIDX, ArgType::NONE}},
 
-    {"JMP", {OpCode::JMP, ArgType::SHORT}},
-    {"JMPEZ", {OpCode::JMPEZ, ArgType::SHORT}},
-    {"JMPNZ", {OpCode::JMPNZ, ArgType::SHORT}},
+    {"JMP", {OpCode::JMP, ArgType::LABEL}},
+    {"JMPEZ", {OpCode::JMPEZ, ArgType::LABEL}},
+    {"JMPNZ", {OpCode::JMPNZ, ArgType::LABEL}},
 
     {"IDATA", {OpCode::IDATA, ArgType::SHORT}},
     {"FDATA", {OpCode::FDATA, ArgType::FLOAT}},
@@ -117,7 +120,48 @@ static bool isWhitespace(char c) {
     return (c == ' ') || (c == '\t');
 }
 
-Emulator::AsmToken parseAsmLine(const std::string &line) {
+std::pair<SysCall, RuntimeValue> getSyscall(const std::string &syscallname, const std::string &rtname) {
+    RuntimeValue rt;
+    SysCall syscall;
+
+    if (syscallname == "CLS") {
+        syscall = SysCall::CLS;
+    } else if (syscallname == "WRITE") {
+        syscall = SysCall::WRITE;
+    } else if (syscallname == "READ") {
+        syscall = SysCall::READ;
+    } else if (syscallname == "READKEY") {
+        syscall = SysCall::READKEY;
+    } else if (syscallname == "DRAW") {
+        syscall = SysCall::DRAW;
+    } else if (syscallname == "DRAWLINE") {
+        syscall = SysCall::DRAWLINE;
+    } else if (syscallname == "BLIT") {
+        syscall = SysCall::BLIT;
+    } else {
+        std::cerr << "Unknown SysCall " << syscallname << std::endl;
+        exit(-1);
+    }
+
+    if (rtname == "NONE") {
+        rt = RuntimeValue::NONE;
+    } else if (rtname == "A") {
+        rt = RuntimeValue::A;
+    } else if (rtname == "B") {
+        rt = RuntimeValue::B;
+    } else if (rtname == "C") {
+        rt = RuntimeValue::C;
+    } else if (rtname == "IDX") {
+        rt = RuntimeValue::IDX;
+    } else {
+        std::cerr << "Unknown RuntimeValue " << syscallname << std::endl;
+        exit(-1);
+    }
+
+    return std::pair<SysCall, RuntimeValue>(syscall, rt);
+}
+
+static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset, uint32_t linenum, uint32_t statement) {
     size_t i = 0;
 
     while (i < line.size()) {
@@ -132,8 +176,6 @@ Emulator::AsmToken parseAsmLine(const std::string &line) {
         }
 
         auto opname = line.substr(start, i-start-1);
-
-        std::cerr << opname <<std::endl;
 
         auto op = def.find(opname);
         if (op == def.end()) {
@@ -154,6 +196,10 @@ Emulator::AsmToken parseAsmLine(const std::string &line) {
 
             int numstart = i;
 
+            if (!(line[i] == '-' || isDigit(line[i])))
+                std::cerr << "Expected arg: INT  for " << opname << std::endl;
+            i++;
+
             while (i < line.size()) {
                 if (!isDigit(line[i])) {
                     std::cerr << "Expected arg: INT  for " << opname << std::endl;
@@ -162,9 +208,24 @@ Emulator::AsmToken parseAsmLine(const std::string &line) {
                 i++;
             }
 
-            std::cerr << line.substr(numstart, i-numstart) << std::endl;
-
             return Emulator::AsmToken(opcode, (int16_t)std::stoi(line.substr(numstart, i-numstart)));
+        } else if (arg == ArgType::POINTER) {
+            while (isWhitespace(line[i])) {
+                i++;
+                continue;
+            }
+
+            int numstart = i;
+
+            while (i < line.size()) {
+                if (!isDigit(line[i])) {
+                    std::cerr << "Expected arg: UINT  for " << opname << std::endl;
+                    exit(-1);
+                }
+                i++;
+            }
+
+            return Emulator::AsmToken(opcode, (int32_t)std::stoi(line.substr(numstart, i-numstart)));
         } else if (arg == ArgType::FLOAT) {
             while (isWhitespace(line[i])) {
                 i++;
@@ -172,6 +233,10 @@ Emulator::AsmToken parseAsmLine(const std::string &line) {
             }
 
             int numstart = i;
+
+            if (!(line[i] == '-' || isDigit(line[i])))
+                std::cerr << "Expected arg: VALUE for " << opname << std::endl;
+            i++;
 
             while (isDigit(line[i]))
                 i++;
@@ -186,10 +251,107 @@ Emulator::AsmToken parseAsmLine(const std::string &line) {
                 exit(-1);
             }
 
-            std::cerr << line.substr(numstart, i-numstart) << std::endl;
-
             return Emulator::AsmToken(opcode, (float)std::stof(line.substr(numstart, i-numstart)));
+        } else if (arg == ArgType::VALUE) {
+            while (isWhitespace(line[i])) {
+                i++;
+                continue;
+            }
 
+            int numstart = i;
+
+            if (!(line[i] == '-' || isDigit(line[i])))
+                std::cerr << "Expected arg: FLOAT for " << opname << std::endl;
+            i++;
+
+            while (isDigit(line[i]))
+                i++;
+
+            if (line[i] == '.' && isDigit(line[i+1])) {
+                i++;
+
+                while (isDigit(line[i]))
+                    i++;
+                return Emulator::AsmToken(opcode, FloatAsValue((float)std::stof(line.substr(numstart, i-numstart))));
+            } else {
+                return Emulator::AsmToken(opcode, IntAsValue(std::stoi(line.substr(numstart, i-numstart))));
+            }
+
+        } else if (arg == ArgType::SYSCALL) {
+            while (isWhitespace(line[i])) {
+                i++;
+                continue;
+            }
+
+            int syscallstart = i;
+
+            while (isAlpha(line[i++])) {
+            }
+
+            auto syscall = line.substr(syscallstart, i-syscallstart-1);
+
+            while (isWhitespace(line[i])) {
+                i++;
+                continue;
+            }
+
+            int rtstart = i;
+
+            while (isAlpha(line[i++])) {
+            }
+
+            auto rt  = line.substr(rtstart, i-rtstart-1);
+
+            return Emulator::AsmToken(opcode, getSyscall(syscall, rt));
+        } else if (arg == ArgType::STRING) {
+            while (isWhitespace(line[i])) {
+                i++;
+                continue;
+            }
+
+            if (line[i] != '"') {
+                std::cerr << "Expected arg: STRING  for " << opname << std::endl;
+                exit(-1);
+            }
+
+            i++;
+
+            std::string str;
+            while (line[i++] != '"') {
+                char c = line[i-1];
+
+                if (c == '\\' && line[i] == 'n') {
+                    c = '\n';
+                    i++;
+                } else if (c == '\\' && line[i] == '"') {
+                    c = '"';
+                    i++;
+                }
+
+                str += c;
+            }
+
+            return Emulator::AsmToken(opcode, str);
+        } else if (arg == ArgType::LABEL) {
+            while (isWhitespace(line[i])) {
+                i++;
+                continue;
+            }
+
+            auto labelstart = i;
+            while (isAlpha(line[i++])) {
+            }
+
+            auto label = line.substr(labelstart, i-labelstart-1);
+            auto jump = labels.find(label);
+
+            if (jump != labels.end()) {
+                return Emulator::AsmToken(opcode, (int16_t)jump->second);
+            }
+
+            jumps[statement] = label;
+
+            return Emulator::AsmToken(opcode, (int16_t)0);
         } else {
             std::cerr << "TODO " << opname;
             exit(-1);
@@ -202,14 +364,48 @@ std::vector<Emulator::AsmToken> parseAsmFile(const std::string &filename) {
     std::string line;
     std::ifstream infile(filename);
 
+    uint32_t offset = 0;
+    uint32_t linenum = 0;
+    uint32_t statement = 0;
+
     if (!infile.is_open()) {
         std::cerr << "Could not open `" << filename << "'" << std::endl;
         exit(-1);
     }
 
+    labels.clear();
+
     while (std::getline(infile, line)) {
-        auto token = parseAsmLine(line);
+        linenum++;
+
+        auto pos = line.find_last_not_of("\n \t");
+        if (pos != std::string::npos)
+            line = line.substr(0, pos+1);
+
+        if (line[0] == ';')
+            continue;
+
+        if (line[line.size()-1] == ':') {
+            auto label = line.substr(0, line.size()-1);
+            labels[label] = offset;
+            continue;
+        }
+
+        auto token = parseAsmLine(line, offset, linenum, statement);
+        statement++;
+        offset += token.size();
         tokens.push_back(token);
+    }
+
+    for (auto jump : jumps) {
+        auto label = labels.find(jump.second);
+
+        if (label == labels.end()) {
+            std::cerr << "Unknown label `" << jump.second << "'" << std::endl;
+            exit(-1);
+        }
+
+        tokens[jump.first].arg = (int16_t)label->second;
     }
 
     return tokens;
@@ -226,7 +422,18 @@ void assemble(std::vector<Emulator::AsmToken> lines, Emulator::Program &program)
             } else if (std::holds_alternative<float>(*token.arg)) {
                 auto value = std::get<float>(*token.arg);
                 program.addFloat(token.opcode, value);
-            } else {
+            } else if (std::holds_alternative<int32_t>(*token.arg)) {
+                auto value = std::get<int32_t>(*token.arg);
+                program.addPointer(token.opcode, (vmpointer_t)value);
+            } else if (std::holds_alternative<value_t>(*token.arg)) {
+                auto value = std::get<value_t>(*token.arg);
+                program.addValue(token.opcode, value);
+            } else if (std::holds_alternative<std::string>(*token.arg)) {
+                auto value = std::get<std::string>(*token.arg);
+                program.addString(token.opcode, value);
+            } else if (std::holds_alternative<std::pair<SysCall, RuntimeValue>>(*token.arg)) {
+                auto value = std::get<std::pair<SysCall, RuntimeValue>>(*token.arg);
+                program.addSyscall(token.opcode, value.first, value.second);
             }
         } 
     }

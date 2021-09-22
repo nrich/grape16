@@ -10,9 +10,9 @@ using namespace Emulator;
 #define READ_INDEX "DATA"
 
 static int current = 0;
-std::map<uint32_t, std::string> jumps;
-std::stack<std::pair<uint32_t,uint32_t>> while_loops;
-std::stack<std::tuple<uint32_t,uint32_t,std::string>> for_loops;
+static std::map<uint32_t, std::string> jumps;
+static std::stack<std::pair<uint32_t,uint32_t>> while_loops;
+static std::stack<std::tuple<uint32_t,uint32_t,std::string>> for_loops;
 
 static bool isDigit(char c) {
     return c >= '0' && c <= '9';

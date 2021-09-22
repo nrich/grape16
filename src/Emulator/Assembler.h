@@ -21,12 +21,13 @@ namespace Emulator {
         STRING,
         VALUE,
         SYSCALL,
+        LABEL,
         COUNT
     };
 
     struct AsmToken {
         OpCode opcode;
-        std::optional<std::variant<int16_t, float, uint32_t, std::string>> arg;
+        std::optional<std::variant<int16_t, float, int32_t, value_t, std::string, std::pair<SysCall, RuntimeValue>>> arg;
 
         AsmToken(OpCode opcode) : opcode(opcode) {
             arg = std::nullopt;
@@ -38,16 +39,41 @@ namespace Emulator {
         AsmToken(OpCode opcode, float f) : opcode(opcode), arg(f) {
         }
 
-        AsmToken(OpCode opcode, uint32_t vp) : opcode(opcode), arg(vp) {
+        AsmToken(OpCode opcode, int32_t p) : opcode(opcode), arg(p) {
+        }
+
+        AsmToken(OpCode opcode, value_t v) : opcode(opcode), arg(v) {
         }
 
         AsmToken(OpCode opcode, const std::string &str) : opcode(opcode), arg(str) {
         }
 
+        AsmToken(OpCode opcode, std::pair<SysCall, RuntimeValue> syscall) : opcode(opcode), arg(syscall) {
+        }
+
+        size_t size() const {
+            if (arg == std::nullopt) {
+                return 1;
+            } else {
+                if (std::holds_alternative<int16_t>(*arg)) {
+                    return 1+2;
+                } else if (std::holds_alternative<float>(*arg)) {
+                    return 1+4;
+                } else if (std::holds_alternative<int32_t>(*arg)) {
+                    return 1+3;
+                } else if (std::holds_alternative<value_t>(*arg)) {
+                    return 1+4;
+                } else if (std::holds_alternative<std::string>(*arg)) {
+                    auto value = std::get<std::string>(*arg);
+                    return 1 + value.size();
+                } else if (std::holds_alternative<std::pair<SysCall, RuntimeValue>>(*arg)) {
+                    return 1+2+2;
+                }
+            }
+        }
     };
 };
 
-Emulator::AsmToken parseAsmLine(const std::string &line);
 std::vector<Emulator::AsmToken> parseAsmFile(const std::string &filename);
 
 void assemble(std::vector<Emulator::AsmToken> lines, Emulator::Program &program);
