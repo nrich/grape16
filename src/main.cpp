@@ -223,12 +223,15 @@ int main(int argc, char **argv) {
         }
 
         if (opt.isSet("-p")) {
+/*
             auto tokens = disassemble(*program);
 
             for (auto token : tokens) {
                 std::cout << AsmTokenAsString(token) << std::endl; 
             }
+*/
 
+            std::cout << ProgramAsString(*program, true);
             exit(0);
         }
     } else {

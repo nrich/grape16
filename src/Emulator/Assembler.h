@@ -79,7 +79,8 @@ namespace Emulator {
 std::vector<Emulator::AsmToken> parseAsmFile(const std::string &filename);
 
 void assemble(std::vector<Emulator::AsmToken> lines, Emulator::Program &program);
-std::vector<Emulator::AsmToken> disassemble(Emulator::Program &program);
+std::vector<Emulator::AsmToken> disassemble(const Emulator::Program &program);
 std::string AsmTokenAsString(const Emulator::AsmToken &token);
+std::string ProgramAsString(const Emulator::Program &program, bool resolve_jumps=false);
 
 #endif //__EMULATOR_ASSEMBLER_H__

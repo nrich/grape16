@@ -409,7 +409,7 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
             }
 
             auto labelstart = i;
-            while (isAlpha(line[i++])) {
+            while (isAlpha(line[i++]) || isDigit(line[i++])) {
             }
 
             auto label = line.substr(labelstart, i-labelstart-1);
@@ -511,7 +511,7 @@ void assemble(std::vector<Emulator::AsmToken> lines, Emulator::Program &program)
     }
 }
 
-std::vector<Emulator::AsmToken> disassemble(Emulator::Program &program) {
+std::vector<Emulator::AsmToken> disassemble(const Emulator::Program &program) {
     std::vector<Emulator::AsmToken> tokens;
 
     size_t pc = 0;
@@ -594,3 +594,104 @@ std::string AsmTokenAsString(const Emulator::AsmToken &token) {
     return s.str();
 }
 
+std::string ProgramAsString(const Emulator::Program &program, bool resolve_jumps) {
+    std::ostringstream s;
+
+    std::map<uint32_t, std::string> labels;
+
+    if (resolve_jumps) {
+        size_t pc = 0;
+        while (pc < program.size()) {
+            OpCode opcode = program.fetch(pc++);
+            auto opname = OpCodeAsString(opcode);
+            auto op = def[opname];
+            auto arg = op.second;
+
+            if (arg == ArgType::NONE) {
+            } else if (arg == ArgType::SHORT) {
+                pc += 2;
+            } else if (arg == ArgType::FLOAT) {
+                pc += 4;
+            } else if (arg == ArgType::POINTER) {
+                pc += 3;
+            } else if (arg == ArgType::VALUE) {
+                pc += 4;
+            } else if (arg == ArgType::SYSCALL) {
+                pc += 2+2;
+            } else if (arg == ArgType::STRING) {
+                while (uint8_t b = program.readByte(pc)) {
+                    pc += 1;
+                }
+            } else if (arg == ArgType::LABEL) {
+                auto dst = program.readShort(pc);
+                //labels[dst] = std::string("LABEL_") + std::to_string(dst);
+                labels[dst] = std::string("LABEL_") + std::to_string(labels.size());
+                pc += 2;
+            } else {
+                std::cerr << "Error in disassemble" << std::endl;
+            }
+        }
+    }
+
+    size_t pc = 0;
+    while (pc < program.size()) {
+        OpCode opcode = program.fetch(pc++);
+        auto opname = OpCodeAsString(opcode);
+        auto op = def[opname];
+        auto arg = op.second;
+
+        if (resolve_jumps) {
+            auto label = labels.find(pc-1);
+
+            if (label != labels.end()) {
+                s << label->second << ":" << std::endl;
+            }
+        }
+
+        if (arg == ArgType::NONE) {
+            s << AsmTokenAsString(Emulator::AsmToken(opcode)) << std::endl;
+        } else if (arg == ArgType::SHORT) {
+            s << AsmTokenAsString(Emulator::AsmToken(opcode, program.readShort(pc))) << std::endl;
+            pc += 2;
+        } else if (arg == ArgType::FLOAT) {
+            s << AsmTokenAsString(Emulator::AsmToken(opcode, program.readFloat(pc))) << std::endl;
+            pc += 4;
+        } else if (arg == ArgType::POINTER) {
+            s << AsmTokenAsString(Emulator::AsmToken(opcode, (int32_t)program.readPointer(pc))) << std::endl;
+            pc += 3;
+        } else if (arg == ArgType::VALUE) {
+            s << AsmTokenAsString(Emulator::AsmToken(opcode, program.readValue(pc))) << std::endl;
+            pc += 4;
+        } else if (arg == ArgType::SYSCALL) {
+            s << AsmTokenAsString(Emulator::AsmToken(opcode, std::pair<SysCall, RuntimeValue>((SysCall)program.readShort(pc), (RuntimeValue)program.readShort(pc+2)))) << std::endl;
+            pc += 2+2;
+        } else if (arg == ArgType::STRING) {
+            std::string str = "";
+            while (uint8_t b = program.readByte(pc)) {
+                str += (char)b;
+                pc += 1;
+            }
+
+            s << AsmTokenAsString(Emulator::AsmToken(opcode, str)) << std::endl;
+        } else if (arg == ArgType::LABEL) {
+            if (resolve_jumps) {
+                auto label = labels.find(program.readShort(pc));
+
+                if (label != labels.end()) {
+                    s << AsmTokenAsString(Emulator::AsmToken(opcode)) << " " << label->second << std::endl;
+                } else {
+                    s << AsmTokenAsString(Emulator::AsmToken(opcode, program.readShort(pc))) << std::endl;
+                }
+
+            } else {
+                s << AsmTokenAsString(Emulator::AsmToken(opcode, program.readShort(pc))) << std::endl;
+            }
+            pc += 2;
+        } else {
+            std::cerr << "Error in disassemble" << std::endl;
+        }
+    }
+
+
+    return s.str();
+}
