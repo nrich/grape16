@@ -233,6 +233,11 @@ int main(int argc, char **argv) {
             program = loadAssembly(*opt.lastArgs[0]);
         }
 
+        if (opt.isSet("-O")) {
+            auto optimized = optimize(*program);
+            program = std::make_shared<Emulator::Program>(optimized);
+        }
+
         if (opt.isSet("-p")) {
 /*
             auto tokens = disassemble(*program);
@@ -242,7 +247,7 @@ int main(int argc, char **argv) {
             }
 */
 
-            std::cout << ProgramAsString(*program, true, opt.isSet("-O"));
+            std::cout << ProgramAsString(*program, true);
             exit(0);
         }
     } else {
