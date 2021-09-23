@@ -595,8 +595,9 @@ std::string AsmTokenAsString(const Emulator::AsmToken &token) {
     return s.str();
 }
 
-std::string ProgramAsString(const Emulator::Program &program, bool resolve_jumps) {
+std::string ProgramAsString(const Emulator::Program &code, bool resolve_jumps, bool optimize) {
     std::ostringstream s;
+    Emulator::Program program(code);
 
     std::map<uint32_t, std::string> labels;
 
@@ -620,13 +621,75 @@ std::string ProgramAsString(const Emulator::Program &program, bool resolve_jumps
             } else if (arg == ArgType::SYSCALL) {
                 pc += 2+2;
             } else if (arg == ArgType::STRING) {
-                while (uint8_t b = program.readByte(pc)) {
+                while (program.readByte(pc)) {
                     pc += 1;
                 }
             } else if (arg == ArgType::LABEL) {
                 auto dst = program.readShort(pc);
                 //labels[dst] = std::string("LABEL_") + std::to_string(dst);
                 labels[dst] = std::string("LABEL_") + std::to_string(labels.size());
+                pc += 2;
+            } else {
+                std::cerr << "Error in disassemble" << std::endl;
+            }
+        }
+    }
+
+    if (optimize) {
+        size_t pc = 0;
+        while (pc < program.size()) {
+            OpCode current = program.fetch(pc++);
+            auto opname = OpCodeAsString(current);
+            auto op = def[opname];
+            auto arg = op.second;
+
+            if (arg == ArgType::NONE) {
+                OpCode next = program.fetch(pc);
+
+                if (current == OpCode::PUSHC && next == OpCode::POPC) {
+                    program.update(pc-1, OpCode::NOP);
+                    program.update(pc, OpCode::NOP);
+                } else if (current == OpCode::PUSHC && next == OpCode::POPA) {
+                    program.update(pc-1, OpCode::MOVCA);
+                    program.update(pc, OpCode::NOP);
+                } else if (current == OpCode::PUSHC && next == OpCode::POPB) {
+                    program.update(pc-1, OpCode::MOVCB);
+                    program.update(pc, OpCode::NOP);
+                } else if (current == OpCode::PUSHC && next == OpCode::POPIDX) {
+                    program.update(pc-1, OpCode::MOVCIDX);
+                    program.update(pc, OpCode::NOP);
+                }
+            } else if (arg == ArgType::SHORT) {
+                OpCode next = program.fetch(pc+2);
+
+                if (current == OpCode::SETC && next == OpCode::POPC) {
+                    program.update(pc+2, OpCode::NOP);
+                } else if (current == OpCode::SETC && next == OpCode::POPA) {
+                    program.update(pc-1, OpCode::SETA);
+                    program.update(pc+2, OpCode::NOP);
+                } else if (current == OpCode::SETC && next == OpCode::POPB) {
+                    program.update(pc-1, OpCode::SETB);
+                    program.update(pc+2, OpCode::NOP);
+                } else if (current == OpCode::SETC && next == OpCode::POPIDX) {
+                    program.update(pc-1, OpCode::SETIDX);
+                    program.update(pc+2, OpCode::NOP);
+                }
+
+
+                pc += 2;
+            } else if (arg == ArgType::FLOAT) {
+                pc += 4;
+            } else if (arg == ArgType::POINTER) {
+                pc += 3;
+            } else if (arg == ArgType::VALUE) {
+                pc += 4;
+            } else if (arg == ArgType::SYSCALL) {
+                pc += 2+2;
+            } else if (arg == ArgType::STRING) {
+                while (program.readByte(pc)) {
+                    pc += 1;
+                }
+            } else if (arg == ArgType::LABEL) {
                 pc += 2;
             } else {
                 std::cerr << "Error in disassemble" << std::endl;
@@ -692,7 +755,6 @@ std::string ProgramAsString(const Emulator::Program &program, bool resolve_jumps
             std::cerr << "Error in disassemble" << std::endl;
         }
     }
-
 
     return s.str();
 }

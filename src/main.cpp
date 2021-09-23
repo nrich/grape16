@@ -170,6 +170,17 @@ int main(int argc, char **argv) {
         0, // Required?
         0, // Number of args expected.
         0, // Delimiter if expecting multiple args.
+        "optimize output", // Help description.
+        "-O",     // Flag token.
+        "--optimize"  // Flag token.
+    );
+
+
+    opt.add(
+        "", // Default.
+        0, // Required?
+        0, // Number of args expected.
+        0, // Delimiter if expecting multiple args.
         "Turbo mode (66MHz)", // Help description.
         "-t",     // Flag token.
         "-turbo",   // Flag token.
@@ -231,7 +242,7 @@ int main(int argc, char **argv) {
             }
 */
 
-            std::cout << ProgramAsString(*program, true);
+            std::cout << ProgramAsString(*program, true, opt.isSet("-O"));
             exit(0);
         }
     } else {

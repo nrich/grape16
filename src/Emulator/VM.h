@@ -322,6 +322,9 @@ namespace Emulator {
             }
 
             void update(uint32_t pos, int16_t s);
+            void update(uint32_t pos, OpCode opcode) {
+                code[pos] = (uint8_t)opcode;
+            }
 
             size_t size() const {
                 return code.size();
