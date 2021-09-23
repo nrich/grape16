@@ -218,7 +218,7 @@ namespace Emulator {
             virtual void cls() = 0;
 
             virtual void write(const uint8_t c) = 0;
-            virtual uint8_t read() = 0;
+            virtual uint8_t read(bool noecho) = 0;
 
             virtual void puts(const std::string &str) = 0;
             virtual std::string gets() = 0; 
@@ -251,7 +251,7 @@ namespace Emulator {
         public:
             Program();
             Program(const std::vector<uint8_t> &data);
-            Program(const Program &) = default;    
+            Program(const Program &) = default;
 
             uint32_t addLabel(const std::string &label, uint32_t pos);
             uint32_t addLabel(const std::string &label) {

@@ -20,7 +20,7 @@ namespace Client {
 
             }
 
-            uint8_t read() {
+            uint8_t read(bool noecho) {
                 return 0;
             }
 

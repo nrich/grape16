@@ -28,7 +28,7 @@ namespace Client {
 
             void write(uint8_t c);
 
-            uint8_t read();
+            uint8_t read(bool noecho);
 
             void puts(const std::string &str);
 

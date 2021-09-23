@@ -65,13 +65,14 @@ void SystemIO::write(uint8_t c) {
 
 }
 
-uint8_t SystemIO::read() {
+uint8_t SystemIO::read(bool noecho) {
     if (inputBuffer.size() == 0)
         return 0;
 
     uint8_t c = (uint8_t)inputBuffer.front();
 
-    write(c);
+    if (!noecho)
+        write(c);
 
     inputBuffer.pop();
 

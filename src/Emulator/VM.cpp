@@ -477,7 +477,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                 }
 
                 uint8_t chr;
-                while ((chr = sysIO->read()) != '\n') {
+                while ((chr = sysIO->read(false)) != '\n') {
                     --cycle_budget;
 
                     if (chr == 0)
@@ -495,13 +495,13 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
         case SysCall::READKEY:
             switch (rvalue) {
                 case RuntimeValue::A:
-                    a = IntAsValue(sysIO->read());
+                    a = IntAsValue(sysIO->read(true));
                     break;
                 case RuntimeValue::B:
-                    b = IntAsValue(sysIO->read());
+                    b = IntAsValue(sysIO->read(true));
                     break;
                 case RuntimeValue::C:
-                    c = IntAsValue(sysIO->read());
+                    c = IntAsValue(sysIO->read(true));
                     break;
                 default:
                     error("Cannot readkey to register");
