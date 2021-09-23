@@ -16,7 +16,7 @@ namespace Sys {
             void clientKeyUp(Client::State &clientState, const int ch) const;
 
             std::shared_ptr<WINDOW> window;
-            std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+            const std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
          public:
             NCurses(const std::string &title, std::shared_ptr<WINDOW> window);
             ~NCurses();
