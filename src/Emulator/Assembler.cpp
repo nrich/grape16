@@ -1,6 +1,7 @@
 #include "Emulator/Assembler.h"
 
 #include <sstream>
+#include <iomanip>
 
 using namespace Emulator;
 
@@ -98,7 +99,7 @@ std::map<std::string, std::pair<OpCode, ArgType>> def = {
 
     {"SYSCALL", {OpCode::SYSCALL, ArgType::SYSCALL}},
 
-    {"CALL", {OpCode::CALL, ArgType::SHORT}},
+    {"CALL", {OpCode::CALL, ArgType::LABEL}},
     {"RETURN", {OpCode::RETURN, ArgType::NONE}},
 
     {"IRQ", {OpCode::IRQ, ArgType::SHORT}},
@@ -573,12 +574,12 @@ std::string AsmTokenAsString(const Emulator::AsmToken &token) {
             s << value;
         } else if (std::holds_alternative<int32_t>(*token.arg)) {
             auto value = std::get<int32_t>(*token.arg);
-            s << "0x" << std::hex << (vmpointer_t)value;
+            s << "0x" << std::setfill('0') << std::setw(6) << std::uppercase << std::hex << (vmpointer_t)value;
         } else if (std::holds_alternative<value_t>(*token.arg)) {
             auto value = std::get<value_t>(*token.arg);
 
             if (IS_POINTER(value))
-                s << "0x" << std::hex << ValueAsPointer(value);
+                s << "0x" << std::setfill('0') << std::setw(6) << std::uppercase << std::hex << ValueAsPointer(value);
             else
                 s << Emulator::ValueToString(value);
         } else if (std::holds_alternative<std::string>(*token.arg)) {
