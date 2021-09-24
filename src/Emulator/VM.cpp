@@ -603,6 +603,13 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                 sysIO->blit(x, y, buffer);
             }
             break;
+        case SysCall::SOUND: {
+                auto frequency = ValueAsInt(a);
+                auto duration = ValueAsInt(b);
+
+                sysIO->sound(frequency, duration);
+            }
+            break;
         default:
             error("Unknown SYSCALL");
     }

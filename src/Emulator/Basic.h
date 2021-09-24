@@ -58,6 +58,7 @@ namespace Emulator {
         COLON,
         COMMA,
 
+        BEEP,
         CLS,
         DATA,
         DEF,
@@ -78,6 +79,7 @@ namespace Emulator {
         READ,
         REM,
         RETURN,
+        SOUND,
         STEP,
         SWAP,
         THEN,

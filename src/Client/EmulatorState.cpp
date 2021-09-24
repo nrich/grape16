@@ -96,6 +96,10 @@ void SystemIO::blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) {
     std::memcpy(ptr, buffer.data(), buffer.size());
 }
 
+void SystemIO::sound(int16_t frequency, int16_t sound) {
+
+}
+
 void EmulatorState::onRender(State *state, const uint32_t time) {
     state->getRenderer()->drawBuffer(sysio->getScreen().data(), 320, 180);
 

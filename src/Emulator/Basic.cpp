@@ -89,6 +89,10 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     break;
+                case 'B':
+                    if (token == "BEEP") {
+                        tokenType = BasicTokenType::BEEP;
+                    }
                 case 'C':
                     if (token == "CLS") {
                         tokenType = BasicTokenType::CLS;
@@ -236,6 +240,10 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                     else
                     if (token == "SQR") {
                         tokenType = BasicTokenType::FUNCTION;
+                    }
+                    else
+                    if (token == "SOUND") {
+                        tokenType = BasicTokenType::SOUND;
                     }
                     else
                     if (token == "STEP") {
@@ -938,6 +946,22 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.add(OpCode::YIELD);
 
         current += 1;
+    } else if (tokens[current].type == BasicTokenType::BEEP) {
+        current += 1;
+        program.addValue(OpCode::SETA, IntAsValue(800));
+        program.addValue(OpCode::SETB, IntAsValue(250));
+        program.addSyscall(OpCode::SYSCALL, SysCall::SOUND, RuntimeValue::C);
+    } else if (tokens[current].type == BasicTokenType::SOUND) {
+        current += 1;
+
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+
+        program.add(OpCode::POPB);
+        program.add(OpCode::POPA);
+
+        program.addSyscall(OpCode::SYSCALL, SysCall::SOUND, RuntimeValue::C);
     } else if (tokens[current].type == BasicTokenType::SWAP) {
         current += 1;
 

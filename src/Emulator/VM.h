@@ -207,6 +207,7 @@ namespace Emulator {
         DRAW,
         DRAWLINE,
         BLIT,
+        SOUND,
         COUNT
     };
 
@@ -227,6 +228,8 @@ namespace Emulator {
             virtual uint8_t getpixel(uint16_t x, uint16_t y) = 0;
 
             virtual void blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) = 0;
+
+            virtual void sound(int16_t frequency, int16_t sound) = 0;
     };
 
     class Debugger {

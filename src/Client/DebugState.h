@@ -41,6 +41,9 @@ namespace Client {
 
             void blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) {
             }
+
+            void sound(int16_t frequency, int16_t sound) {
+            }
     };
 
     class DebugState : public BaseState {
