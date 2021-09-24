@@ -43,6 +43,12 @@ namespace Sys {
                 wclear(window.get());
             }
 
+            void sound(int16_t frequency, uint16_t duration) {
+                if (frequency == 800 && duration == 250) {
+                    beep();
+                }
+            }
+
             void keyRepeat(bool enable) {
             }
     };

@@ -178,6 +178,10 @@ bool Sys::SFML::handleEvents(Client::State &clientState) {
     return run;
 }
 
+void Sys::SFML::sound(int16_t frequency, uint16_t duration) {
+
+}
+
 Sys::SFML::SFML(const std::string &title) : title(std::string("SFML ") + title), isFullscreen(false) {
     uint32_t style = sf::Style::Default;
 

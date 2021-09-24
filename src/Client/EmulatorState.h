@@ -2,6 +2,7 @@
 #define __CLIENT_EMULATORSTATE_H__
 
 #include <queue>
+#include <optional>
 
 #include "Math/Point2.h"
 #include "Emulator/VM.h"
@@ -21,6 +22,7 @@ namespace Client {
             std::array<uint8_t, 320*180> screen;
 
             std::queue<char> inputBuffer;
+            std::queue<std::pair<int16_t, uint16_t>> soundBuffer;
         public:
             SystemIO();
 
@@ -56,10 +58,19 @@ namespace Client {
 
             void blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer);
 
-            void sound(int16_t frequency, int16_t sound);
+            void sound(int16_t frequency, uint16_t duration);
 
             std::array<uint8_t, 320*180> getScreen() {
                 return screen;
+            }
+
+            std::optional<std::pair<int16_t, uint16_t>> nextSound() {
+                if (soundBuffer.size() == 0)
+                    return std::nullopt;
+
+                auto sound = soundBuffer.front();
+                soundBuffer.pop();
+                return sound;
             }
     };
 

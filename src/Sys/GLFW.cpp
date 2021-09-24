@@ -330,6 +330,10 @@ void Sys::GLFW::keyRepeat(bool enable) {
     RepeatKeys = enable;
 }
 
+void Sys::GLFW::sound(int16_t frequency, uint16_t duration) {
+
+}
+
 Sys::GLFW::GLFW(const std::string &title) {
     if (!glfwInit())
         exit(EXIT_FAILURE);

@@ -43,6 +43,8 @@ namespace Sys {
             void keyRepeat(bool enable) {
                 window.setKeyRepeatEnabled(enable);
             }
+
+            void sound(int16_t frequency, uint16_t duration);
     };
 }; // Sys
 

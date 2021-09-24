@@ -45,6 +45,8 @@ namespace Sys {
             void keyRepeat(bool enable) {
                 repeatKeys = enable;
             }
+
+            void sound(int16_t frequency, uint16_t duration);
     };
 }; // Sys
 

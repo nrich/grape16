@@ -457,6 +457,10 @@ bool Sys::SDL2::handleEvents(Client::State &clientState) {
     return run;
 }
 
+void Sys::SDL2::sound(int16_t frequency, uint16_t duration) {
+
+}
+
 Sys::SDL2::SDL2(const std::string &title) : repeatKeys(false) {
     SDL_Init(SDL_INIT_EVERYTHING);
 

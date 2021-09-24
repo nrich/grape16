@@ -604,8 +604,8 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
             }
             break;
         case SysCall::SOUND: {
-                auto frequency = ValueAsInt(a);
-                auto duration = ValueAsInt(b);
+                int16_t frequency = ValueAsInt(a);
+                uint16_t duration = (uint16_t)ValueAsInt(b);
 
                 sysIO->sound(frequency, duration);
             }
