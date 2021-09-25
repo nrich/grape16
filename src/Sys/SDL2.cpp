@@ -46,7 +46,7 @@ static int sym2key(int sym) {
         case SDLK_COMMA:
             return Common::Keys::Comma;
         case SDLK_MINUS:
-            return Common::Keys::Subtract;
+            return Common::Keys::Hyphen;
         case SDLK_PERIOD:
             return Common::Keys::Period;
         case SDLK_SLASH:
@@ -94,7 +94,7 @@ static int sym2key(int sym) {
         case SDLK_CARET:
             return Common::Keys::Num6;
         case SDLK_UNDERSCORE:
-            return Common::Keys::Subtract;
+            return Common::Keys::Hyphen;
         case SDLK_BACKQUOTE:
             return Common::Keys::Backquote;
         case SDLK_a:
