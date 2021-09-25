@@ -5,13 +5,35 @@
 
 #include <memory>
 #include <functional>
+#include <queue>
+
+#include <portaudio.h>
 
 #include "Sys/Base.h"
 #include "Client/State.h"
 
 namespace Sys {
+    struct ToneObject {
+        double freq;
+        int samplesLeft;
+    };
+
+    class PortAudioTone {
+        private:
+            double v;
+            std::queue<ToneObject> tones;
+        public:
+            PortAudioTone() {}
+            ~PortAudioTone() {}
+            void tone(int16_t freq, uint16_t duration);
+            void generateSamples(int16_t *stream, int length);
+            void wait();
+    };
+
     class GLFW : public Base {
             std::shared_ptr<GLFWwindow> window;
+            PaStream *stream;
+            PortAudioTone tone;
         public:
             GLFW(const std::string &title);
             ~GLFW();
