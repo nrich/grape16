@@ -522,7 +522,7 @@ Sys::SDL2::SDL2(const std::string &title) : repeatKeys(false) {
 
     int i, count = SDL_GetNumAudioDevices(0);
 
-    std::cout << "[SDL] Audio driver: " << SDL_GetCurrentAudioDriver() << std::endl;
+    SDL_Log("Audio driver: %s", SDL_GetCurrentAudioDriver());
 
     for (i = 0; i < count; ++i) {
         SDL_Log("Audio device %d: %s", i, SDL_GetAudioDeviceName(i, 0));
@@ -538,7 +538,6 @@ Sys::SDL2::SDL2(const std::string &title) : repeatKeys(false) {
             SDL_Log("We didn't get audio format.");
         } else {
             // start play audio
-            SDL_Log("Unpause audio");
             SDL_PauseAudioDevice(dev, 0);
         }
     }
