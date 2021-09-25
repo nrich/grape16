@@ -26,7 +26,6 @@
 #if MINBUILD
 #else
 #include "Sys/SDL2.h"
-#include "Sys/SFML.h"
 #endif
 
 #include "Sys/GLFW.h"
@@ -34,6 +33,7 @@
 #ifndef _WIN32
 #include "Sys/NCurses.h"
 #include "Renderer/NCurses.h"
+#include "Sys/SFML.h"
 #endif
 
 #include "Emulator/VM.h"
@@ -269,11 +269,11 @@ int main(int argc, char **argv) {
     } else if (sysname == "sdl2") {
         sys = std::make_shared<Sys::SDL2>("Grape16");
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
+#endif
+#ifndef _WIN32
     } else if (sysname == "sfml") {
         sys = std::make_shared<Sys::SFML>("Grape16");
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
-#endif
-#ifndef _WIN32
     } else if (sysname == "ncurses") {
         initscr();
 
