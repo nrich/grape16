@@ -33,7 +33,7 @@ void Audio::Tone::generateSamples(float *stream, int length) {
         to.samplesLeft -= samplesToDo - i;
 
         while (i < samplesToDo) {
-            stream[i] = AMPLITUDE * std::sin(v * 2 * M_PI / FREQUENCY);
+            stream[i] = (float)(1.0 * std::sin(v * 2 * M_PI / FREQUENCY));
             i++;
             v += to.freq;
         }

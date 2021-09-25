@@ -5,7 +5,6 @@
 #include <queue>
 
 namespace Audio {
-    const int AMPLITUDE = 14000;
     const int FREQUENCY = 44100;
 
     struct ToneObject {

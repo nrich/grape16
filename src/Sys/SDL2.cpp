@@ -3,6 +3,7 @@
 
 #include <SDL.h>
 #include <SDL_opengl.h>
+#include <SDL_audio.h>
 
 #include <algorithm>
 
@@ -458,7 +459,9 @@ bool Sys::SDL2::handleEvents(Client::State &clientState) {
 }
 
 void Sys::SDL2::sound(float frequency, uint16_t duration) {
+    SDL_LockAudioDevice(dev);
     tone.tone(frequency, duration);
+    SDL_UnlockAudioDevice(dev);
 }
 
 static void audio_callback(void *_tone, uint8_t *_stream, int _length) {
@@ -468,7 +471,6 @@ static void audio_callback(void *_tone, uint8_t *_stream, int _length) {
 
     tone->generateSamples(stream, length);
 }
-
 
 Sys::SDL2::SDL2(const std::string &title) : repeatKeys(false) {
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -506,25 +508,45 @@ Sys::SDL2::SDL2(const std::string &title) : repeatKeys(false) {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    SDL_AudioSpec desiredSpec;
+    SDL_AudioSpec want;
+    SDL_zero(want);
 
-    desiredSpec.freq = Audio::FREQUENCY;
-    desiredSpec.format = AUDIO_F32;
-    desiredSpec.channels = 1;
-    desiredSpec.samples = 256;
-    desiredSpec.callback = audio_callback;
-    desiredSpec.userdata = &tone;
+    want.freq = Audio::FREQUENCY;
+    want.format = AUDIO_F32;
+    want.channels = 1;
+    want.samples = 4096*1;
+    want.callback = audio_callback;
+    want.userdata = &tone;
 
-    SDL_AudioSpec obtainedSpec;
+    SDL_AudioSpec have;
+
+    int i, count = SDL_GetNumAudioDevices(0);
+
+    std::cout << "[SDL] Audio driver: " << SDL_GetCurrentAudioDriver() << std::endl;
+
+    for (i = 0; i < count; ++i) {
+        SDL_Log("Audio device %d: %s", i, SDL_GetAudioDeviceName(i, 0));
+    }
 
     // you might want to look for errors here
-    SDL_OpenAudio(&desiredSpec, &obtainedSpec);
+    dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
 
-    // start play audio
-    SDL_PauseAudio(0);
+    if (dev == 0) {
+        SDL_Log("Failed to open audio: %s", SDL_GetError());
+    } else {
+        if (have.format != want.format) {
+            SDL_Log("We didn't get audio format.");
+        } else {
+            // start play audio
+            SDL_Log("Unpause audio");
+            SDL_PauseAudioDevice(dev, 0);
+        }
+    }
 }
 
 Sys::SDL2::~SDL2() {
+    SDL_CloseAudioDevice(dev);
+    SDL_CloseAudio();
     SDL_GL_DeleteContext(context);
     SDL_Quit();
 }

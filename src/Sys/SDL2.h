@@ -13,6 +13,7 @@
 namespace Sys {
     class SDL2 : public Base {
             std::shared_ptr<SDL_Window> window;
+            SDL_AudioDeviceID dev;
             SDL_GLContext context;
 
             void setWindow(std::shared_ptr<SDL_Window> window) {
