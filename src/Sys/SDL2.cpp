@@ -343,6 +343,23 @@ Common::DisplayMode Sys::SDL2::changeDisplayMode(const Common::DisplayMode &disp
     return displayMode;
 }
 
+static int RefreshRate(SDL_Window *Window) {
+    SDL_DisplayMode Mode;
+
+    int DisplayIndex = SDL_GetWindowDisplayIndex(Window);
+
+    int DefaultRefreshRate = 60;
+    if (SDL_GetDesktopDisplayMode(DisplayIndex, &Mode) != 0) {
+        return DefaultRefreshRate;
+    }
+
+    if (Mode.refresh_rate == 0) {
+        return DefaultRefreshRate;
+    }
+
+    return Mode.refresh_rate;
+}
+
 std::vector<Common::DisplayMode> Sys::SDL2::getDisplayModes() const {
     std::vector<Common::DisplayMode> modes;
     int primayDisplay = 0;
@@ -360,6 +377,9 @@ std::vector<Common::DisplayMode> Sys::SDL2::getDisplayModes() const {
         }
 
         Common::DisplayMode displayMode(mode.w, mode.h, mode.refresh_rate);
+
+        if (displayMode.Refresh() != RefreshRate(window.get()))
+            continue;
 
         if (displayMode.Ratio() != Common::AspectRatio::Ignore) { 
             modes.push_back(displayMode);
@@ -387,7 +407,6 @@ Common::DisplayMode Sys::SDL2::findDisplayMode(uint16_t width, uint16_t height) 
 Common::DisplayMode Sys::SDL2::currentDisplayMode() const {
     uint32_t flags = SDL_GetWindowFlags(window.get());
     SDL_DisplayMode mode = {SDL_PIXELFORMAT_UNKNOWN, 0, 0, 0, 0};
-
 
     if (flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_FULLSCREEN_DESKTOP)) {
         SDL_GetWindowDisplayMode(window.get(), &mode);
