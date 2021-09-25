@@ -77,6 +77,7 @@ default: all
 .PHONY: all default clean strip
  
 COMMON_OBJS := \
+	src/Audio/Tone.o \
 	src/Client/BaseState.o \
 	src/Client/DebugState.o \
 	src/Client/DisplayMenuState.o \
