@@ -6,8 +6,11 @@
 #include <memory>
 #include <functional>
 
+#include <portaudio.h>
+
 #include "Sys/Base.h"
 #include "Client/State.h"
+#include "Audio/Tone.h"
 
 namespace Sys {
     class SFML : public Base {
@@ -16,7 +19,8 @@ namespace Sys {
 
             const std::string title;
             bool isFullscreen;
-
+            Audio::Tone tone;
+            PaStream *stream;
         public:
             SFML(const std::string &title);
             ~SFML();

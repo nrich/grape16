@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+#include <SFML/Audio.hpp>
+
 static void clientKeyDown(Client::State &clientState, const sf::Event::KeyEvent &sfEvent) {
     Client::KeyPress event;
 
@@ -178,8 +180,55 @@ bool Sys::SFML::handleEvents(Client::State &clientState) {
     return run;
 }
 
-void Sys::SFML::sound(float frequency, uint16_t duration) {
+#if 0
+class ToneStream : public sf::SoundStream {
+        Audio::Tone tone;
+        std::vector<int16_t> m_samples;
+        std::size_t m_currentSample;
 
+    public:
+        ToneStream(Audio::Tone tone) : tone(tone) {
+
+        }
+
+        void SetBufSize(int sz, int numChannel, int sampleRate) {
+            m_samples.resize(sz, 0);
+            m_currentSample = 0;
+            initialize(numChannel, sampleRate);
+        }
+
+        virtual bool onGetData(Chunk& data) {
+            data.samples = &m_samples[m_currentSample];
+            data.sampleCount = 256;
+            m_currentSample = 0;
+
+            tone.generateSamples(&m_samples[m_currentSample], 256);
+
+            return true;
+        }
+
+        virtual void onSeek(sf::Time timeOffset) {
+            m_currentSample = static_cast<std::size_t>(timeOffset.asSeconds() * getSampleRate() * getChannelCount());
+        }
+
+        ~ToneStream() {
+
+        }
+};
+#endif
+
+static int tonecallback(const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void *userData) {
+    Audio::Tone *tone = (Audio::Tone *)userData;
+
+    float *out = (float *)outputBuffer;
+
+    tone->generateSamples(out, framesPerBuffer);
+
+    return 0;
+}
+
+void Sys::SFML::sound(float frequency, uint16_t duration) {
+    tone.tone(frequency, duration);
 }
 
 Sys::SFML::SFML(const std::string &title) : title(std::string("SFML ") + title), isFullscreen(false) {
@@ -199,9 +248,28 @@ Sys::SFML::SFML(const std::string &title) : title(std::string("SFML ") + title),
     clock.restart();
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+//    ToneStream stream(tone);
+//    stream.SetBufSize(256, 1, Audio::FREQUENCY);
+//    stream.play();
+
+    if (Pa_Initialize() == paNoError && Pa_OpenDefaultStream(
+        &stream,
+        0,          // no input channels
+        1,          // mono output
+        paFloat32,
+        Audio::FREQUENCY,
+        256,        // frames per buffer
+        tonecallback,
+        &tone
+    ) == paNoError && Pa_StartStream(stream) == paNoError);
+
 }
 
 Sys::SFML::~SFML() {
+    Pa_CloseStream(stream);
+    Pa_Terminate();
+
     window.setActive(false);
     window.close();
 }

@@ -458,8 +458,17 @@ bool Sys::SDL2::handleEvents(Client::State &clientState) {
 }
 
 void Sys::SDL2::sound(float frequency, uint16_t duration) {
-
+    tone.tone(frequency, duration);
 }
+
+static void audio_callback(void *_tone, uint8_t *_stream, int _length) {
+    float *stream = (float *) _stream;
+    int length = _length / 4;
+    Audio::Tone *tone = (Audio::Tone *) _tone;
+
+    tone->generateSamples(stream, length);
+}
+
 
 Sys::SDL2::SDL2(const std::string &title) : repeatKeys(false) {
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -496,6 +505,23 @@ Sys::SDL2::SDL2(const std::string &title) : repeatKeys(false) {
     SDL_GL_SetSwapInterval(0);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    SDL_AudioSpec desiredSpec;
+
+    desiredSpec.freq = Audio::FREQUENCY;
+    desiredSpec.format = AUDIO_F32;
+    desiredSpec.channels = 1;
+    desiredSpec.samples = 256;
+    desiredSpec.callback = audio_callback;
+    desiredSpec.userdata = &tone;
+
+    SDL_AudioSpec obtainedSpec;
+
+    // you might want to look for errors here
+    SDL_OpenAudio(&desiredSpec, &obtainedSpec);
+
+    // start play audio
+    SDL_PauseAudio(0);
 }
 
 Sys::SDL2::~SDL2() {

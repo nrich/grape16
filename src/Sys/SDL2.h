@@ -8,6 +8,7 @@
 
 #include "Sys/Base.h"
 #include "Client/State.h"
+#include "Audio/Tone.h"
 
 namespace Sys {
     class SDL2 : public Base {
@@ -19,6 +20,8 @@ namespace Sys {
             }
 
             bool repeatKeys;
+
+            Audio::Tone tone;
         public:
             SDL2(const std::string &title);
             ~SDL2();
