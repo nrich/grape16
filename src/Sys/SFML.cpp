@@ -178,7 +178,7 @@ bool Sys::SFML::handleEvents(Client::State &clientState) {
     return run;
 }
 
-void Sys::SFML::sound(int16_t frequency, uint16_t duration) {
+void Sys::SFML::sound(float frequency, uint16_t duration) {
 
 }
 

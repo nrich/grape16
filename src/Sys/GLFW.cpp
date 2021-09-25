@@ -333,7 +333,7 @@ void Sys::GLFW::keyRepeat(bool enable) {
 const int AMPLITUDE = 14000;
 const int FREQUENCY = 44100;
 
-void Sys::PortAudioTone::tone(int16_t freq, uint16_t duration) {
+void Sys::PortAudioTone::tone(float freq, uint16_t duration) {
     ToneObject to;
     to.freq = (double)freq;
     to.samplesLeft = duration * FREQUENCY / 1000;
@@ -341,7 +341,7 @@ void Sys::PortAudioTone::tone(int16_t freq, uint16_t duration) {
     tones.push(to);
 }
 
-void Sys::PortAudioTone::generateSamples(int16_t *stream, int length) {
+void Sys::PortAudioTone::generateSamples(float *stream, int length) {
     int i = 0;
     while (i < length) {
         if (tones.empty()) {
@@ -376,14 +376,14 @@ void Sys::PortAudioTone::wait() {
     } while (size > 0);
 }
 
-void Sys::GLFW::sound(int16_t frequency, uint16_t duration) {
+void Sys::GLFW::sound(float frequency, uint16_t duration) {
     tone.tone(frequency, duration);
 }
 
 static int tonecallback(const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void *userData) {
     Sys::PortAudioTone *tone = (Sys::PortAudioTone *)userData;
 
-    int16_t *out = (int16_t *)outputBuffer;
+    float *out = (float *)outputBuffer;
 
     tone->generateSamples(out, framesPerBuffer);
 
@@ -420,7 +420,7 @@ Sys::GLFW::GLFW(const std::string &title) {
         &stream,
         0,          // no input channels
         1,          // mono output
-        paInt16,
+        paFloat32,
         FREQUENCY,
         256,        // frames per buffer
         tonecallback,

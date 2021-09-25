@@ -25,8 +25,8 @@ namespace Sys {
         public:
             PortAudioTone() {}
             ~PortAudioTone() {}
-            void tone(int16_t freq, uint16_t duration);
-            void generateSamples(int16_t *stream, int length);
+            void tone(float freq, uint16_t duration);
+            void generateSamples(float *stream, int length);
             void wait();
     };
 
@@ -59,7 +59,7 @@ namespace Sys {
 
             void keyRepeat(bool enable);
 
-            void sound(int16_t frequency, uint16_t duration);
+            void sound(float frequency, uint16_t duration);
     };
 }; // Sys
 

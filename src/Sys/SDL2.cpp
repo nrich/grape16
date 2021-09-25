@@ -457,7 +457,7 @@ bool Sys::SDL2::handleEvents(Client::State &clientState) {
     return run;
 }
 
-void Sys::SDL2::sound(int16_t frequency, uint16_t duration) {
+void Sys::SDL2::sound(float frequency, uint16_t duration) {
 
 }
 

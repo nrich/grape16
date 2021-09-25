@@ -43,8 +43,8 @@ namespace Sys {
                 wclear(window.get());
             }
 
-            void sound(int16_t frequency, uint16_t duration) {
-                if (frequency == 800 && duration == 250) {
+            void sound(float frequency, uint16_t duration) {
+                if (frequency == 800.0f && duration == 250) {
                     beep();
                 }
             }

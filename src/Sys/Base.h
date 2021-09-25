@@ -28,7 +28,7 @@ namespace Sys {
             virtual void swapBuffers() = 0;
             virtual bool handleEvents(Client::State &clientState) = 0;
             virtual void keyRepeat(bool enable) = 0;
-            virtual void sound(int16_t frequency, uint16_t duration) = 0;
+            virtual void sound(float frequency, uint16_t duration) = 0;
     };
 }; // Sys
 
