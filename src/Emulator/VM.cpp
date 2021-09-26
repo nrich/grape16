@@ -82,6 +82,7 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
         case OpCode::RETURN: return "RETURN";
         case OpCode::IRQ: return "IRQ";
         case OpCode::ALLOC: return "ALLOC";
+        case OpCode::CALLOC: return "CALLOC";
         case OpCode::YIELD: return "YIELD";
         case OpCode::TRACE: return "TRACE";
         default: return "????";
@@ -1203,11 +1204,18 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 }
                 break;
             case OpCode::ALLOC:
-                if ((uint16_t)program.readShort(pc) < 1)
-                    error("ALLOC value must greater than zero");
                 heap -= (uint16_t)program.readShort(pc);
                 idx = heap;
                 pc += 2;
+                break;
+            case OpCode::CALLOC:
+                if (IS_INT(c))
+                    heap -= (uint16_t)ValueAsInt(c);
+                else if (IS_FLOAT(c))
+                    heap -= (uint16_t)ValueAsFloat(c);
+                else
+                    error("CALLOC is not a number");
+                idx = heap;
                 break;
             case OpCode::YIELD:
                 std::cerr << "Yield " << cycles << std::endl;

@@ -1164,43 +1164,47 @@ static void dim_declaration(Program &program, uint32_t linenumber, const std::ve
     std::stack<int16_t> data_lengths;
 
     check(linenumber, tokens[current++], BasicTokenType::LEFT_PAREN, "`(' expected");
-    check(linenumber, tokens[current], BasicTokenType::INT, "integer expected");
-
-    int16_t data = stol(tokens[current].str) + 1;
-
-    current++;
+    expression(program, linenumber, {tokens.begin(), tokens.end()});
 
     int size = 1;
 
-    int16_t subdata = data;
     while (tokens[current].type != BasicTokenType::RIGHT_PAREN) {
         check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
-        check(linenumber, tokens[current], BasicTokenType::INT, "integer expected");
-
-        data_lengths.push(subdata * size);
-        subdata = stol(tokens[current].str) + 1;
-        data *= subdata;
-        current++;
-
-        size = size * subdata;
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        size++;
     }
     check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
 
-    program.addShort(OpCode::ALLOC, data_lengths.size() + data + 1);
-    program.add(OpCode::PUSHIDX);
+    program.addValue(OpCode::SETC, IntAsValue(1));
+    program.add(OpCode::PUSHC);
+
+    for (int i = 0; i < size; i++) {
+        program.add(OpCode::POPB);
+
+        program.add(OpCode::POPA);
+        program.addValue(OpCode::INCA, IntAsValue(1));
+
+        program.add(OpCode::MUL);
+
+        program.add(OpCode::PUSHC);
+    }
+
     program.add(OpCode::POPC);
 
-    program.addPointer(OpCode::STOREC, program.Global(name));
+    program.addValue(OpCode::INCC, IntAsValue(size));
 
-    program.addShort(OpCode::IDATA, data);
-    program.addValue(OpCode::INCIDX, IntAsValue(1));
+    program.add(OpCode::CALLOC);
+    program.addPointer(OpCode::SAVEIDX, program.Global(name));
 
-    while (!data_lengths.empty()) {
-        auto len = data_lengths.top();
-        data_lengths.pop();
+    program.add(OpCode::WRITECX);
+    program.addValue(OpCode::INCC, IntAsValue(-size));
 
-        program.addShort(OpCode::IDATA, len);
+    for (int i = 1; i < size; i++) {
         program.addValue(OpCode::INCIDX, IntAsValue(1));
+        program.add(OpCode::WRITEBX);
+        program.add(OpCode::MOVCA);
+        program.add(OpCode::IDIV);
+        program.add(OpCode::MOVCB);
     }
 }
 

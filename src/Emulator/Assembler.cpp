@@ -105,6 +105,7 @@ std::map<std::string, std::pair<OpCode, ArgType>> def = {
     {"IRQ", {OpCode::IRQ, ArgType::SHORT}},
 
     {"ALLOC", {OpCode::ALLOC, ArgType::SHORT}},
+    {"CALLOC", {OpCode::CALLOC, ArgType::NONE}},
 
     {"YIELD", {OpCode::YIELD, ArgType::NONE}},
 

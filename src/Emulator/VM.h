@@ -181,6 +181,7 @@ namespace Emulator {
         IRQ,
 
         ALLOC,
+        CALLOC,
 
         YIELD,
 
