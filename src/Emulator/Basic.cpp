@@ -337,6 +337,9 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                 case ':':
                     tokens.push_back(BasicToken(BasicTokenType::COLON, ":"));
                     break;
+                case '\'':
+                    tokens.push_back(BasicToken(BasicTokenType::QUOTE, "'"));
+                    break;
                 case ',':
                     tokens.push_back(BasicToken(BasicTokenType::COMMA, ","));
                     break;
@@ -1089,6 +1092,10 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
 
         program.add(OpCode::POPC);
         program.addPointer(OpCode::STOREC, program.Global(name));
+    } else if (tokens[current].type == BasicTokenType::REM || tokens[current].type == BasicTokenType::QUOTE) {
+        program.add(OpCode::NOP);
+        while (tokens[current].type == BasicTokenType::EOL)
+            current++;
     } else if (tokens[current].type == BasicTokenType::IDENTIFIER && tokens[current+1].type == BasicTokenType::LEFT_PAREN) {
         auto name = identifier(linenumber, tokens[current++]);
 
@@ -1272,8 +1279,6 @@ void compile(const std::map<uint32_t, std::vector<BasicToken>> &lines, Program &
         if (tokens[current].type == BasicTokenType::LET) {
             current++;
             declaration(program, linenumber, tokens);
-        } else if (tokens[current].type == BasicTokenType::REM) {
-            program.add(OpCode::NOP);
         } else if (tokens[current].type == BasicTokenType::DATA) {
             program.add(OpCode::NOP);
         } else if (tokens[current].type == BasicTokenType::DIM) {
