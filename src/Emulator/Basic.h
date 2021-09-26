@@ -57,6 +57,7 @@ namespace Emulator {
         SEMICOLON,
         COLON,
         COMMA,
+        QUOTE,
 
         BEEP,
         CLS,
