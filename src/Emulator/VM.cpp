@@ -825,9 +825,9 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 else if (IS_INT(a) && IS_FLOAT(b))
                     c = FloatAsValue((float)ValueAsInt(a) + ValueAsFloat(b));
                 else if (IS_POINTER(a) && IS_INT(b))
-                    c = PointerAsValue(ValueAsPointer(a) + (uint16_t)ValueAsInt(b));
+                    c = PointerAsValue(ValueAsPointer(a) + ValueAsInt(b));
                 else if (IS_INT(a) && IS_POINTER(b))
-                    c = PointerAsValue(ValueAsPointer(b) + (uint16_t)ValueAsInt(a));
+                    c = PointerAsValue(ValueAsPointer(b) + ValueAsInt(a));
                 else if (IS_POINTER(a) && IS_FLOAT(b))
                     c = PointerAsValue(ValueAsPointer(a) + (uint16_t)ValueAsFloat(b));
                 else if (IS_FLOAT(a) && IS_POINTER(b))
@@ -851,9 +851,9 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 else if (IS_INT(a) && IS_FLOAT(b))
                     c = FloatAsValue((float)ValueAsInt(a) - ValueAsFloat(b));
                 else if (IS_POINTER(a) && IS_INT(b))
-                    c = PointerAsValue(ValueAsPointer(a) - (uint16_t)ValueAsInt(b));
+                    c = PointerAsValue(ValueAsPointer(a) - ValueAsInt(b));
                 else if (IS_INT(a) && IS_POINTER(b))
-                    c = PointerAsValue(ValueAsPointer(b) - (uint16_t)ValueAsInt(a));
+                    c = PointerAsValue(ValueAsPointer(b) - ValueAsInt(a));
                 else if (IS_POINTER(a) && IS_FLOAT(b))
                     c = PointerAsValue(ValueAsPointer(a) - (uint16_t)ValueAsFloat(b));
                 else if (IS_FLOAT(a) && IS_POINTER(b))
