@@ -321,8 +321,12 @@ namespace Emulator {
                 return datacells++;
             }
 
-            uint32_t DataCells() {
+            uint32_t DataCells() const {
                 return datacells;
+            }
+
+            uint32_t locals() const {
+                return datacells + globals.size();
             }
 
             void update(uint32_t pos, int16_t s);

@@ -31,6 +31,7 @@ namespace Emulator {
         FLOAT,
         INT,
         FUNCTION,
+        USRFUNCTION,
 
         EQUAL,
         GREATER,

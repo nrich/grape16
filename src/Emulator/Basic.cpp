@@ -9,6 +9,18 @@ using namespace Emulator;
 
 #define READ_INDEX "DATA"
 
+struct UserFunction {
+    uint32_t call;
+    std::vector<std::string> args;
+
+    UserFunction(uint32_t call, std::vector<std::string> args) {
+        this->call = call;
+        this->args = args;
+    }
+};
+
+static std::map<std::string, UserFunction> userfunctions;
+
 static int current = 0;
 static std::map<uint32_t, std::string> jumps;
 static std::stack<std::pair<uint32_t,uint32_t>> while_loops;
@@ -69,7 +81,7 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
             size_t start = i++;
             auto tokenType = BasicTokenType::IDENTIFIER;
 
-            while((isAlpha(line[i]) || isDigit(line[i])) && tokenType == BasicTokenType::IDENTIFIER)
+            while((isAlpha(line[i]) || isDigit(line[i])))
                 i++;
 
             auto token = line.substr(start, i-start);
@@ -139,6 +151,10 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                     else
                     if (token == "FIX") {
                         tokenType = BasicTokenType::FUNCTION;
+                    }
+                    else
+                    if (token.substr(0,2) == "FN") {
+                        tokenType = BasicTokenType::USRFUNCTION;
                     }
                     break;
                 case 'G':
@@ -516,6 +532,54 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
     }
 }
 
+static void usrfunction(Program &program, uint32_t linenumber, const std::vector<BasicToken> &tokens) {
+    auto token = tokens[current];
+
+    static uint32_t locals = program.locals();
+
+    check(linenumber, tokens[current+1], BasicTokenType::LEFT_PAREN, "`(' expected");
+
+    current += 2;
+
+    auto find = userfunctions.find(token.str);
+    if (find == userfunctions.end()) {
+        error(linenumber, std::string("Unknown user defined function `") + token.str + std::string("'"));
+    }
+
+    auto userfunction = find->second;
+
+    size_t argcount = 0;
+
+    if (tokens[current].type != BasicTokenType::RIGHT_PAREN) {
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        argcount++;
+
+        program.add(OpCode::POPC);
+        program.addPointer(OpCode::STOREC, locals++);
+    }
+
+    while (tokens[current].type != BasicTokenType::RIGHT_PAREN) {
+        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        argcount++;
+
+        program.add(OpCode::POPC);
+        program.addPointer(OpCode::STOREC, locals++);
+    }
+    check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
+
+    if (argcount != userfunction.args.size()) {
+        error(linenumber, std::string("Argument count mismath for `") + token.str + std::string("': ") + std::to_string(argcount) + " vs " + std::to_string(userfunction.args.size()));
+    }
+
+    std::cerr << token.str << "," << argcount << "," << userfunction.args.size() << "," << (int16_t)userfunction.call << std::endl;
+
+    program.addShort(OpCode::CALL, (int16_t)userfunction.call);
+
+    locals -= argcount;
+}
+
+
 static void TokenAsValue(Program &program, uint32_t linenumber, const std::vector<BasicToken> &tokens) {
     auto token = tokens[current];
 
@@ -536,6 +600,8 @@ static void TokenAsValue(Program &program, uint32_t linenumber, const std::vecto
         program.add(OpCode::PUSHC);
     } else if (token.type == BasicTokenType::FUNCTION) {
         function(program, linenumber, tokens);
+    } else if (token.type == BasicTokenType::USRFUNCTION) {
+        usrfunction(program, linenumber, tokens);
     } else {
         error(linenumber, std::string("value expected, got `") + token.str + "'");
     }
@@ -1092,6 +1158,38 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
 
         program.add(OpCode::POPC);
         program.addPointer(OpCode::STOREC, program.Global(name));
+    } else if (tokens[current].type == BasicTokenType::DEF) {
+        current++;
+        check(linenumber, tokens[current], BasicTokenType::USRFUNCTION, "`<FN...>' expected");
+        auto func = tokens[current++];
+        check(linenumber, tokens[current++], BasicTokenType::LEFT_PAREN, "`(' expected");
+
+        std::vector<std::string> args;
+
+        if (tokens[current].type != BasicTokenType::RIGHT_PAREN) {
+            auto arg = identifier(linenumber, tokens[current++]);
+            args.push_back(arg);
+        }
+
+        while (tokens[current].type != BasicTokenType::RIGHT_PAREN) {
+            check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+            auto arg = identifier(linenumber, tokens[current++]);
+            args.push_back(arg);
+        }
+        check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
+
+        check(linenumber, tokens[current++], BasicTokenType::EQUAL, "`=' expected");
+
+        auto skip = program.addShort(OpCode::JMP, 0);
+        auto call = program.add(OpCode::NOP);
+
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+
+        userfunctions.insert(std::make_pair(func.str, UserFunction(call, args)));
+
+        program.add(OpCode::RETURN);
+        auto end = program.add(OpCode::NOP);
+        program.update(skip+1, end);
     } else if (tokens[current].type == BasicTokenType::REM || tokens[current].type == BasicTokenType::QUOTE) {
         program.add(OpCode::NOP);
         while (tokens[current].type == BasicTokenType::EOL)
@@ -1150,7 +1248,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         expression(program, linenumber, tokens);
     }
 
-    if (tokens[current].type == BasicTokenType::SEMICOLON) {
+    if (tokens[current].type == BasicTokenType::SEMICOLON || tokens[current].type == BasicTokenType::COLON) {
         current++;
         statement(program, linenumber, tokens);
     }
@@ -1229,6 +1327,7 @@ void compile(const std::map<uint32_t, std::vector<BasicToken>> &lines, Program &
         }
     );
 
+    int datacount = 0;
     for (auto dataline : datalines) {
         uint32_t linenumber = dataline.first;
         const std::vector<BasicToken> &tokens = dataline.second;
@@ -1242,15 +1341,18 @@ void compile(const std::map<uint32_t, std::vector<BasicToken>> &lines, Program &
             if (token.type == BasicTokenType::INT) {
                 program.addPointer(OpCode::SETIDX, program.reserveDataCell());
                 program.addShort(OpCode::IDATA, (int16_t)std::stol(token.str));
+                datacount++;
             } else if (token.type == BasicTokenType::FLOAT) {
                 program.addPointer(OpCode::SETIDX, program.reserveDataCell());
                 program.addFloat(OpCode::FDATA, (float)std::stof(token.str));
+                datacount++;
             } else if (token.type == BasicTokenType::STRING) {
                 program.addShort(OpCode::ALLOC, token.str.size()+1);
                 program.addString(OpCode::SDATA, token.str);
                 program.add(OpCode::PUSHIDX);
                 program.add(OpCode::POPC);
                 program.addPointer(OpCode::STOREC, program.reserveDataCell());
+                datacount++;
             } else if (token.type == BasicTokenType::COMMA) {
                 if (comma_expected) {
                     check(linenumber, token, BasicTokenType::COMMA, "`,' expected");
