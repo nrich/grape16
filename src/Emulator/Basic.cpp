@@ -9,6 +9,8 @@ using namespace Emulator;
 
 #define READ_INDEX "DATA"
 
+static void error(uint32_t linenumber, const std::string &err);
+
 struct UserFunction {
     uint32_t call;
     std::vector<std::string> args;
@@ -19,12 +21,65 @@ struct UserFunction {
     }
 };
 
+class Environment {
+    private:
+        std::map<const std::string, uint32_t> vars;
+        std::shared_ptr<Environment> parent;
+        const uint32_t offset;
+    public:
+        Environment(uint32_t offset) : parent(NULL), offset(offset) {
+        }
+
+        Environment(std::shared_ptr<Environment> parent) : parent(parent), offset(parent->Offset() + parent->size()) {
+        }
+
+        const size_t Offset() const {
+            return offset;
+        }
+
+        const size_t size() const {
+            return vars.size();
+        }
+
+        uint32_t get(const std::string &name) const {
+            auto found = vars.find(name);
+
+            if (found != vars.end()) {
+                return found->second;
+            } else {
+                if (parent) {
+                    return parent->get(name);
+                } else {
+                    throw std::invalid_argument("Unknown variable `" + name + "'");
+                }
+            }
+        }
+
+        uint32_t create(const std::string &name) {
+            auto existing = vars.find(name);
+            if (existing != vars.end()) {
+                std::cerr << "Tried to create existing var `" << name << "'" << std::endl;
+                return existing->second;
+            }
+
+            uint32_t next = Offset() + vars.size();
+            vars.insert(std::make_pair(name, next));
+            return next;
+        }
+
+        std::shared_ptr<Environment> Parent() const {
+            return parent;
+        }
+};
+
 static std::map<std::string, UserFunction> userfunctions;
 
 static int current = 0;
 static std::map<uint32_t, std::string> jumps;
 static std::stack<std::pair<uint32_t,uint32_t>> while_loops;
 static std::stack<std::tuple<uint32_t,uint32_t,std::string>> for_loops;
+
+static std::shared_ptr<Environment> env;
 
 static bool isDigit(char c) {
     return c >= '0' && c <= '9';
@@ -525,7 +580,7 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
     } else if (token.str == "VARPTR") {
         auto name = identifier(linenumber, tokens[current++]);
         check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
-        program.addValue(OpCode::SETC, PointerAsValue(program.Global(name)));
+        program.addValue(OpCode::SETC, PointerAsValue(env->get(name)));
         program.add(OpCode::PUSHC);
     } else {
         error(linenumber, std::string("Unknown function `") + token.str + std::string("'"));
@@ -535,7 +590,7 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
 static void usrfunction(Program &program, uint32_t linenumber, const std::vector<BasicToken> &tokens) {
     auto token = tokens[current];
 
-    static uint32_t locals = program.locals();
+    env = std::make_shared<Environment>(env);
 
     check(linenumber, tokens[current+1], BasicTokenType::LEFT_PAREN, "`(' expected");
 
@@ -552,19 +607,21 @@ static void usrfunction(Program &program, uint32_t linenumber, const std::vector
 
     if (tokens[current].type != BasicTokenType::RIGHT_PAREN) {
         expression(program, linenumber, {tokens.begin(), tokens.end()});
-        argcount++;
 
         program.add(OpCode::POPC);
-        program.addPointer(OpCode::STOREC, locals++);
+        program.addPointer(OpCode::STOREC, env->create(userfunction.args[argcount]));
+
+        argcount++;
     }
 
     while (tokens[current].type != BasicTokenType::RIGHT_PAREN) {
         check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
         expression(program, linenumber, {tokens.begin(), tokens.end()});
-        argcount++;
 
         program.add(OpCode::POPC);
-        program.addPointer(OpCode::STOREC, locals++);
+        program.addPointer(OpCode::STOREC, env->create(userfunction.args[argcount]));
+
+        argcount++;
     }
     check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
 
@@ -576,7 +633,7 @@ static void usrfunction(Program &program, uint32_t linenumber, const std::vector
 
     program.addShort(OpCode::CALL, (int16_t)userfunction.call);
 
-    locals -= argcount;
+    env = env->Parent();
 }
 
 
@@ -596,7 +653,7 @@ static void TokenAsValue(Program &program, uint32_t linenumber, const std::vecto
         program.addValue(OpCode::SETC, FloatAsValue(std::stof(token.str)));
         program.add(OpCode::PUSHC);
     } else if (token.type == BasicTokenType::IDENTIFIER) {
-        program.addValue(OpCode::LOADC, program.Global(token.str));
+        program.addValue(OpCode::LOADC, env->get(token.str));
         program.add(OpCode::PUSHC);
     } else if (token.type == BasicTokenType::FUNCTION) {
         function(program, linenumber, tokens);
@@ -834,7 +891,7 @@ static void for_statement(Program &program, uint32_t linenumber, const std::vect
     check(linenumber, tokens[current++], BasicTokenType::EQUAL, "`=' expected");
     expression(program, linenumber, tokens);
     program.add(OpCode::POPC);
-    program.addPointer(OpCode::STOREC, program.Global(name));
+    program.addPointer(OpCode::STOREC, env->create(name));
 
     check(linenumber, tokens[current++], BasicTokenType::TO, "`TO' expected");
     expression(program, linenumber, tokens);
@@ -849,7 +906,7 @@ static void for_statement(Program &program, uint32_t linenumber, const std::vect
     }
 
     auto cmp = program.add(OpCode::NOP);
-    program.addPointer(OpCode::LOADA, program.Global(name));
+    program.addPointer(OpCode::LOADA, env->get(name));
     program.add(OpCode::POPC); 
     program.add(OpCode::POPB); 
     program.add(OpCode::PUSHB); 
@@ -866,10 +923,10 @@ static void next_statement(Program &program, uint32_t linenumber, const std::vec
     auto loop = for_loops.top();
     for_loops.pop();
 
-    program.addPointer(OpCode::LOADA, program.Global(std::get<2>(loop)));
+    program.addPointer(OpCode::LOADA, env->get(std::get<2>(loop)));
     program.add(OpCode::POPB);
     program.add(OpCode::ADD);
-    program.addPointer(OpCode::STOREC, program.Global(std::get<2>(loop)));
+    program.addPointer(OpCode::STOREC, env->get(std::get<2>(loop)));
     program.add(OpCode::PUSHB);
 
     program.addShort(OpCode::JMP, std::get<0>(loop));
@@ -896,7 +953,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
 
             program.addShort(OpCode::ALLOC, 81);
             program.addSyscall(OpCode::SYSCALL, SysCall::READ, RuntimeValue::IDX);
-            program.addPointer(OpCode::SAVEIDX, program.Global(name));
+            program.addPointer(OpCode::SAVEIDX, env->create(name));
 
             current += 3;
         } else if (tokens[current+1].type == BasicTokenType::IDENTIFIER) {
@@ -904,7 +961,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
 
             program.addShort(OpCode::ALLOC, 81);
             program.addSyscall(OpCode::SYSCALL, SysCall::READ, RuntimeValue::IDX);
-            program.addPointer(OpCode::SAVEIDX, program.Global(name));
+            program.addPointer(OpCode::SAVEIDX, env->create(name));
 
             current += 2;
         } else {
@@ -915,7 +972,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
 
         if (tokens[current+2].type == BasicTokenType::LEFT_PAREN) {
             current += 3;
-            program.addPointer(OpCode::LOADIDX, program.Global(name));
+            program.addPointer(OpCode::LOADIDX, env->get(name));
 
             expression(program, linenumber, {tokens.begin(), tokens.end()});
 
@@ -953,11 +1010,11 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
             program.add(OpCode::PUSHIDX);
 
             program.addValue(OpCode::SETA, PointerAsValue(0));
-            program.addValue(OpCode::LOADB, program.Global(READ_INDEX));
+            program.addValue(OpCode::LOADB, env->get(READ_INDEX));
             program.add(OpCode::ADD);
 
             program.addValue(OpCode::INCB, IntAsValue(1));
-            program.addPointer(OpCode::STOREB, program.Global(READ_INDEX));
+            program.addPointer(OpCode::STOREB, env->get(READ_INDEX));
 
             program.add(OpCode::PUSHC);
             program.add(OpCode::POPIDX);
@@ -969,17 +1026,17 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
 
         } else {
             program.addValue(OpCode::SETA, PointerAsValue(0));
-            program.addValue(OpCode::LOADB, program.Global(READ_INDEX));
+            program.addValue(OpCode::LOADB, env->get(READ_INDEX));
             program.add(OpCode::ADD);
 
             program.addValue(OpCode::INCB, IntAsValue(1));
-            program.addPointer(OpCode::STOREB, program.Global(READ_INDEX));
+            program.addPointer(OpCode::STOREB, env->get(READ_INDEX));
 
             program.add(OpCode::PUSHC);
             program.add(OpCode::POPIDX);
 
             program.add(OpCode::IDXC);
-            program.addPointer(OpCode::STOREC, program.Global(name));
+            program.addPointer(OpCode::STOREC, env->get(name));
         }
     } else if (tokens[current].type == BasicTokenType::GOTO) {
         if (tokens[current+1].type != BasicTokenType::INT)
@@ -1041,10 +1098,10 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         expression(program, linenumber, {tokens.begin(), tokens.end()});
 
         program.add(OpCode::POPC);
-        program.addPointer(OpCode::STOREC, program.Global(left));
+        program.addPointer(OpCode::STOREC, env->get(left));
 
         program.add(OpCode::POPC);
-        program.addPointer(OpCode::STOREC, program.Global(right));
+        program.addPointer(OpCode::STOREC, env->get(right));
     } else if (tokens[current].type == BasicTokenType::CLS) {
         program.addSyscall(OpCode::SYSCALL, SysCall::CLS, RuntimeValue::C);
     } else if (tokens[current].type == BasicTokenType::END) {
@@ -1092,7 +1149,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
         auto dst = identifier(linenumber, tokens[current++]);
 
-        program.addPointer(OpCode::LOADIDX, program.Global(dst));
+        program.addPointer(OpCode::LOADIDX, env->get(dst));
 
         program.add(OpCode::IDXC);
         program.addValue(OpCode::INCIDX, IntAsValue(1));
@@ -1157,7 +1214,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         expression(program, linenumber, {tokens.begin(), tokens.end()});
 
         program.add(OpCode::POPC);
-        program.addPointer(OpCode::STOREC, program.Global(name));
+        program.addPointer(OpCode::STOREC, env->create(name));
     } else if (tokens[current].type == BasicTokenType::DEF) {
         current++;
         check(linenumber, tokens[current], BasicTokenType::USRFUNCTION, "`<FN...>' expected");
@@ -1199,7 +1256,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
 
         check(linenumber, tokens[current++], BasicTokenType::LEFT_PAREN, "`(' expected");
 
-        program.addPointer(OpCode::LOADIDX, program.Global(name));
+        program.addPointer(OpCode::LOADIDX, env->get(name));
 
         expression(program, linenumber, {tokens.begin(), tokens.end()});
 
@@ -1261,7 +1318,7 @@ static void declaration(Program &program, uint32_t linenumber, const std::vector
     expression(program, linenumber, {tokens.begin(), tokens.end()});
 
     program.add(OpCode::POPC); 
-    program.addPointer(OpCode::STOREC, program.Global(name));
+    program.addPointer(OpCode::STOREC, env->create(name));
 }
 
 static void dim_declaration(Program &program, uint32_t linenumber, const std::vector<BasicToken> &tokens) {
@@ -1299,7 +1356,7 @@ static void dim_declaration(Program &program, uint32_t linenumber, const std::ve
     program.addValue(OpCode::INCC, IntAsValue(size));
 
     program.add(OpCode::CALLOC);
-    program.addPointer(OpCode::SAVEIDX, program.Global(name));
+    program.addPointer(OpCode::SAVEIDX, env->create(name));
 
     program.add(OpCode::WRITECX);
     program.addValue(OpCode::INCC, IntAsValue(-size));
@@ -1339,11 +1396,10 @@ void compile(const std::map<uint32_t, std::vector<BasicToken>> &lines, Program &
                 continue;
 
             if (token.type == BasicTokenType::INT) {
-                program.addPointer(OpCode::SETIDX, program.reserveDataCell());
+                program.addPointer(OpCode::SETIDX, datacount++);
                 program.addShort(OpCode::IDATA, (int16_t)std::stol(token.str));
-                datacount++;
             } else if (token.type == BasicTokenType::FLOAT) {
-                program.addPointer(OpCode::SETIDX, program.reserveDataCell());
+                program.addPointer(OpCode::SETIDX, datacount++);
                 program.addFloat(OpCode::FDATA, (float)std::stof(token.str));
                 datacount++;
             } else if (token.type == BasicTokenType::STRING) {
@@ -1351,8 +1407,7 @@ void compile(const std::map<uint32_t, std::vector<BasicToken>> &lines, Program &
                 program.addString(OpCode::SDATA, token.str);
                 program.add(OpCode::PUSHIDX);
                 program.add(OpCode::POPC);
-                program.addPointer(OpCode::STOREC, program.reserveDataCell());
-                datacount++;
+                program.addPointer(OpCode::STOREC, datacount++);
             } else if (token.type == BasicTokenType::COMMA) {
                 if (comma_expected) {
                     check(linenumber, token, BasicTokenType::COMMA, "`,' expected");
@@ -1369,7 +1424,9 @@ void compile(const std::map<uint32_t, std::vector<BasicToken>> &lines, Program &
         }
     }
 
-    program.Global(READ_INDEX);
+    env = std::make_shared<Environment>(datacount);
+
+    env->create(READ_INDEX);
 
     for (auto line : lines) {
         current = 0;

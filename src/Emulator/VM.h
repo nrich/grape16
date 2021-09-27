@@ -243,8 +243,6 @@ namespace Emulator {
             uint32_t entry;
             std::vector<uint8_t> code;
             std::map<const std::string, uint32_t> labels;
-            std::map<const std::string, uint32_t> globals;
-            uint32_t datacells;
 
             void addByte(uint8_t b);
             void addShort(int16_t s);
@@ -303,30 +301,6 @@ namespace Emulator {
 
             uint32_t Entry() const {
                 return entry;
-            }
-
-            uint32_t Global(const std::string &name) {
-                if (globals.find(name) == globals.end()) {
-                    globals[name] = globals.size() + datacells;
-                }
-
-                return globals.at(name);
-            }
-
-            uint32_t reserveDataCell() {
-                if (globals.size()) {
-                    throw std::invalid_argument("Tring to add a data cell after globals set");
-                }
-
-                return datacells++;
-            }
-
-            uint32_t DataCells() const {
-                return datacells;
-            }
-
-            uint32_t locals() const {
-                return datacells + globals.size();
             }
 
             void update(uint32_t pos, int16_t s);
