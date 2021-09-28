@@ -146,7 +146,6 @@ void Debugger::debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack,
 
 Program::Program() {
     entry = 0;
-    datacells = 0;
 }
 
 Program::Program(const std::vector<uint8_t> &data) {
@@ -302,6 +301,15 @@ void Program::update(uint32_t pos, int16_t s) {
     code[pos+0] = bytes[0];
     code[pos+1] = bytes[1];
 }
+
+void Program::update(uint32_t pos, vmpointer_t p) {
+    uint8_t *bytes = (uint8_t *)&p;
+
+    code[pos+0] = bytes[0];
+    code[pos+1] = bytes[1];
+    code[pos+2] = (bytes[2] & 0x7F);
+}
+
 
 OpCode Program::fetch(uint32_t pos) const {
     if (pos >= code.size()) {
