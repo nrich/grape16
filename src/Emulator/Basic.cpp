@@ -8,6 +8,7 @@ using namespace Emulator;
 #include <variant>
 
 #define READ_INDEX "DATA"
+#define FRAME_INDEX "FRAME"
 
 static void error(uint32_t linenumber, const std::string &err);
 
@@ -26,12 +27,16 @@ class Environment {
         std::map<const std::string, uint32_t> vars;
         std::shared_ptr<Environment> parent;
         const uint32_t offset;
+
     public:
-        Environment(uint32_t offset) : parent(NULL), offset(offset) {
+        Environment(uint32_t offset) : parent(NULL), offset(offset), Get(OpCode::LOADC), Set(OpCode::STOREC) {
         }
 
-        Environment(std::shared_ptr<Environment> parent) : parent(parent), offset(parent->Offset() + parent->size()) {
+        Environment(std::shared_ptr<Environment> parent) : parent(parent), offset(1), Get(OpCode::IDXC), Set(OpCode::WRITECX) {
         }
+
+        const OpCode Get;
+        const OpCode Set;
 
         const size_t Offset() const {
             return offset;
@@ -58,7 +63,6 @@ class Environment {
         uint32_t create(const std::string &name) {
             auto existing = vars.find(name);
             if (existing != vars.end()) {
-                std::cerr << "Tried to create existing var `" << name << "'" << std::endl;
                 return existing->second;
             }
 
@@ -590,15 +594,13 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
 static void usrfunction(Program &program, uint32_t linenumber, const std::vector<BasicToken> &tokens) {
     auto token = tokens[current];
 
-    env = std::make_shared<Environment>(env);
-
     check(linenumber, tokens[current+1], BasicTokenType::LEFT_PAREN, "`(' expected");
 
     current += 2;
 
     auto find = userfunctions.find(token.str);
     if (find == userfunctions.end()) {
-        error(linenumber, std::string("Unknown user defined function `") + token.str + std::string("'"));
+        error(linenumber, "Undefined User Function");
     }
 
     auto userfunction = find->second;
@@ -607,20 +609,12 @@ static void usrfunction(Program &program, uint32_t linenumber, const std::vector
 
     if (tokens[current].type != BasicTokenType::RIGHT_PAREN) {
         expression(program, linenumber, {tokens.begin(), tokens.end()});
-
-        program.add(OpCode::POPC);
-        program.addPointer(OpCode::STOREC, env->create(userfunction.args[argcount]));
-
         argcount++;
     }
 
     while (tokens[current].type != BasicTokenType::RIGHT_PAREN) {
         check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
         expression(program, linenumber, {tokens.begin(), tokens.end()});
-
-        program.add(OpCode::POPC);
-        program.addPointer(OpCode::STOREC, env->create(userfunction.args[argcount]));
-
         argcount++;
     }
     check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
@@ -632,8 +626,6 @@ static void usrfunction(Program &program, uint32_t linenumber, const std::vector
     std::cerr << token.str << "," << argcount << "," << userfunction.args.size() << "," << (int16_t)userfunction.call << std::endl;
 
     program.addShort(OpCode::CALL, (int16_t)userfunction.call);
-
-    env = env->Parent();
 }
 
 
@@ -653,7 +645,14 @@ static void TokenAsValue(Program &program, uint32_t linenumber, const std::vecto
         program.addValue(OpCode::SETC, FloatAsValue(std::stof(token.str)));
         program.add(OpCode::PUSHC);
     } else if (token.type == BasicTokenType::IDENTIFIER) {
-        program.addValue(OpCode::LOADC, env->get(token.str));
+        if (env->Get == OpCode::LOADC) {
+            program.addPointer(OpCode::LOADC, env->get(token.str));
+        } else {
+            program.addPointer(OpCode::LOADIDX, env->get(FRAME_INDEX));
+std::cerr << env->get(token.str) << std::endl;
+            program.addValue(OpCode::INCIDX, IntAsValue(env->get(token.str)));
+            program.add(OpCode::IDXC);
+        }
         program.add(OpCode::PUSHC);
     } else if (token.type == BasicTokenType::FUNCTION) {
         function(program, linenumber, tokens);
@@ -855,13 +854,13 @@ static void if_statement(Program &program, uint32_t linenumber, const std::vecto
         auto _true = program.addShort(OpCode::JMP, 0);
         auto _else = program.add(OpCode::NOP);
         statement(program, linenumber, tokens);
-        program.update(_false+1, (int16_t)_else);
+        program.updateShort(_false+1, _else);
 
         auto end = program.add(OpCode::NOP);
-        program.update(_true+1, (int16_t)end);
+        program.updateShort(_true+1, end);
     } else {
         auto end = program.add(OpCode::NOP);
-        program.update(_false+1, (int16_t)end);
+        program.updateShort(_false+1, end);
     }
 }
 
@@ -883,7 +882,7 @@ static void wend_statement(Program &program, uint32_t linenumber, const std::vec
 
     program.addShort(OpCode::JMP, loop.first);
     auto pos = program.add(OpCode::NOP);
-    program.update(loop.second+1, pos);
+    program.updateShort(loop.second+1, pos);
 }
 
 static void for_statement(Program &program, uint32_t linenumber, const std::vector<BasicToken> &tokens) {
@@ -933,7 +932,7 @@ static void next_statement(Program &program, uint32_t linenumber, const std::vec
     auto pos = program.add(OpCode::NOP);
     program.add(OpCode::POPA);
     program.add(OpCode::POPB);
-    program.update(std::get<1>(loop)+1, pos);
+    program.updateShort(std::get<1>(loop)+1, pos);
 }
 
 static void statement(Program &program, uint32_t linenumber, const std::vector<BasicToken> &tokens) {
@@ -1010,7 +1009,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
             program.add(OpCode::PUSHIDX);
 
             program.addValue(OpCode::SETA, PointerAsValue(0));
-            program.addValue(OpCode::LOADB, env->get(READ_INDEX));
+            program.addPointer(OpCode::LOADB, env->get(READ_INDEX));
             program.add(OpCode::ADD);
 
             program.addValue(OpCode::INCB, IntAsValue(1));
@@ -1026,7 +1025,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
 
         } else {
             program.addValue(OpCode::SETA, PointerAsValue(0));
-            program.addValue(OpCode::LOADB, env->get(READ_INDEX));
+            program.addPointer(OpCode::LOADB, env->get(READ_INDEX));
             program.add(OpCode::ADD);
 
             program.addValue(OpCode::INCB, IntAsValue(1));
@@ -1240,13 +1239,26 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         auto skip = program.addShort(OpCode::JMP, 0);
         auto call = program.add(OpCode::NOP);
 
+        program.addPointer(OpCode::LOADIDX, env->get(FRAME_INDEX));
+        program.addValue(OpCode::INCIDX, IntAsValue(1));
+
+        env = std::make_shared<Environment>(env);
+
+        for (size_t i = 0; i< args.size(); i++) {
+            program.add(OpCode::POPC);
+            program.add(OpCode::WRITECX);
+            program.addValue(OpCode::INCIDX, IntAsValue(1));
+            env->create(args[i]);
+        }
+
         expression(program, linenumber, {tokens.begin(), tokens.end()});
 
         userfunctions.insert(std::make_pair(func.str, UserFunction(call, args)));
+        env = env->Parent();
 
         program.add(OpCode::RETURN);
         auto end = program.add(OpCode::NOP);
-        program.update(skip+1, end);
+        program.updateShort(skip+1, end);
     } else if (tokens[current].type == BasicTokenType::REM || tokens[current].type == BasicTokenType::QUOTE) {
         program.add(OpCode::NOP);
         while (tokens[current].type == BasicTokenType::EOL)
@@ -1427,6 +1439,10 @@ void compile(const std::map<uint32_t, std::vector<BasicToken>> &lines, Program &
     env = std::make_shared<Environment>(datacount);
 
     env->create(READ_INDEX);
+    env->create(FRAME_INDEX);
+
+    auto frame = program.addValue(OpCode::SETC, PointerAsValue(0));
+    program.addPointer(OpCode::STOREC, env->create(FRAME_INDEX));
 
     for (auto line : lines) {
         current = 0;
@@ -1449,6 +1465,8 @@ void compile(const std::map<uint32_t, std::vector<BasicToken>> &lines, Program &
     }
 
     for (auto jump : jumps) {
-        program.update(jump.first, program.getLabel(jump.second));
+        program.updateShort(jump.first, program.getLabel(jump.second));
     }
+
+    program.updateValue(frame+1, PointerAsValue(env->Offset() + env->size()));
 }

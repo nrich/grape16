@@ -479,7 +479,11 @@ bool Sys::SDL2::handleEvents(Client::State &clientState) {
 
 void Sys::SDL2::sound(float frequency, uint16_t duration) {
     SDL_LockAudioDevice(dev);
-    tone.tone(frequency, duration);
+    if (duration == 0) {
+        SDL_PauseAudioDevice(dev, 1);
+    } else {
+        tone.tone(frequency, duration);
+    }
     SDL_UnlockAudioDevice(dev);
 }
 

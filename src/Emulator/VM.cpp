@@ -80,6 +80,7 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
         case OpCode::SYSCALL: return "SYSCALL";
         case OpCode::CALL: return "CALL";
         case OpCode::RETURN: return "RETURN";
+        case OpCode::FRAME: return "FRAME";
         case OpCode::IRQ: return "IRQ";
         case OpCode::ALLOC: return "ALLOC";
         case OpCode::CALLOC: return "CALLOC";
@@ -294,15 +295,14 @@ uint32_t Program::addLabel(const std::string &label, uint32_t pos) {
     return pos;
 }
 
-
-void Program::update(uint32_t pos, int16_t s) {
+void Program::updateShort(uint32_t pos, int16_t s) {
     uint8_t *bytes = (uint8_t *)&s;
 
     code[pos+0] = bytes[0];
     code[pos+1] = bytes[1];
 }
 
-void Program::update(uint32_t pos, vmpointer_t p) {
+void Program::updatePointer(uint32_t pos, vmpointer_t p) {
     uint8_t *bytes = (uint8_t *)&p;
 
     code[pos+0] = bytes[0];
@@ -310,6 +310,14 @@ void Program::update(uint32_t pos, vmpointer_t p) {
     code[pos+2] = (bytes[2] & 0x7F);
 }
 
+void Program::updateValue(uint32_t pos, value_t v) {
+    uint8_t *bytes = (uint8_t *)&v;
+
+    code[pos+0] = bytes[0];
+    code[pos+1] = bytes[1];
+    code[pos+2] = bytes[2];
+    code[pos+3] = bytes[3];
+}
 
 OpCode Program::fetch(uint32_t pos) const {
     if (pos >= code.size()) {
@@ -633,7 +641,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
     return 1;
 }
 
-VM::VM(uint32_t _ptrspace) : idx(0),  pc(0), sp(0), ptrspace(_ptrspace) {
+VM::VM(uint32_t _ptrspace) : idx(0),  pc(0), sp(0), frame(1024), fp(0), ptrspace(_ptrspace) {
     a = IntAsValue(0);
     b = IntAsValue(0);
     c = IntAsValue(0);
@@ -643,6 +651,8 @@ VM::VM(uint32_t _ptrspace) : idx(0),  pc(0), sp(0), ptrspace(_ptrspace) {
     mem.resize(ptrspace+1, QNAN);
 
     heap = mem.size();
+
+    framestack[0] = frame;
 }
 
 int VM::compare(vmpointer_t a, vmpointer_t b) {
@@ -1192,12 +1202,18 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 break;
             case OpCode::CALL:
                 callstack[++sp] = pc + 2; 
+                framestack[++fp] = frame;
                 pc = program.readShort(pc);
                 break;
             case OpCode::RETURN:
                 if (sp == 0)
                     error("RETURN without CALL");
                 pc = callstack[sp--];
+                frame = framestack[fp--];
+                break;
+            case OpCode::FRAME:
+                frame += (uint16_t)program.readShort(pc);
+                pc += 2;
                 break;
             case OpCode::IRQ: {
                     auto signal = program.readShort(pc);

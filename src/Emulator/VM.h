@@ -177,6 +177,7 @@ namespace Emulator {
 
         CALL,
         RETURN,
+        FRAME,
 
         IRQ,
 
@@ -303,8 +304,9 @@ namespace Emulator {
                 return entry;
             }
 
-            void update(uint32_t pos, int16_t s);
-            void update(uint32_t pos, vmpointer_t p);
+            void updateShort(uint32_t pos, int16_t s);
+            void updatePointer(uint32_t pos, vmpointer_t p);
+            void updateValue(uint32_t pos, value_t v);
             void update(uint32_t pos, OpCode opcode) {
                 code[pos] = (uint8_t)opcode;
             }
@@ -329,6 +331,10 @@ namespace Emulator {
             uint8_t sp;
             std::array<uint32_t, 256> callstack;
 
+            vmpointer_t frame;
+            uint8_t fp;
+            std::array<uint32_t, 256> framestack;
+
             std::vector<value_t> mem;
 
             const uint32_t ptrspace;
@@ -336,6 +342,7 @@ namespace Emulator {
             std::map<uint32_t, std::function<void(VM*)>> interupts;
 
             std::stack<value_t> stack;
+
 
             void error(const std::string &err);
 
