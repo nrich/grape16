@@ -1257,11 +1257,14 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
 
         env = std::make_shared<Environment>(env);
 
-        for (size_t i = 0; i< args.size(); i++) {
+        auto rargs = args;
+        std::reverse(rargs.begin(), rargs.end());
+
+        for (size_t i = 0; i< rargs.size(); i++) {
             program.add(OpCode::POPC);
             program.add(OpCode::WRITECX);
             program.addValue(OpCode::INCIDX, IntAsValue(1));
-            env->create(args[i]);
+            env->create(rargs[i]);
         }
 
         program.addPointer(OpCode::LOADC, env->get(FRAME_INDEX));
