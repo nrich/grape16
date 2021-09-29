@@ -27,7 +27,6 @@ class Environment {
         std::map<const std::string, uint32_t> vars;
         std::shared_ptr<Environment> parent;
         const uint32_t offset;
-
     public:
         Environment(uint32_t offset) : parent(NULL), offset(offset), Get(OpCode::LOADC), Set(OpCode::STOREC) {
         }
@@ -658,8 +657,9 @@ static void TokenAsValue(Program &program, uint32_t linenumber, const std::vecto
             program.add(OpCode::PUSHC);
         } else {
             program.add(OpCode::PUSHIDX);
-            program.addPointer(OpCode::LOADA, env->get(FRAME_INDEX));
-            program.add(OpCode::PUSHA);
+            program.addPointer(OpCode::LOADIDX, env->get(FRAME_INDEX));
+            program.add(OpCode::IDXB);
+            program.add(OpCode::PUSHB);
             program.add(OpCode::POPIDX);
             program.addValue(OpCode::INCIDX, IntAsValue(env->get(token.str)));
             program.add(OpCode::IDXC);
@@ -1267,7 +1267,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.addPointer(OpCode::LOADC, env->get(FRAME_INDEX));
         program.add(OpCode::WRITECX);
 
-        program.addValue(OpCode::STOREIDX, PointerAsValue(env->get(FRAME_INDEX)));
+        program.addPointer(OpCode::SAVEIDX, env->get(FRAME_INDEX));
 
         expression(program, linenumber, {tokens.begin(), tokens.end()});
 
@@ -1275,7 +1275,10 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         env = env->Parent();
 
         program.addPointer(OpCode::LOADIDX, env->get(FRAME_INDEX));
-        program.addValue(OpCode::STOREIDX, PointerAsValue(env->get(FRAME_INDEX)));
+        program.add(OpCode::IDXA);
+        program.add(OpCode::PUSHA);
+        program.add(OpCode::POPIDX);
+        program.addPointer(OpCode::SAVEIDX, env->get(FRAME_INDEX));
 
         program.add(OpCode::RETURN);
         auto end = program.add(OpCode::NOP);

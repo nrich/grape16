@@ -79,7 +79,7 @@ namespace Emulator {
         if (IS_FLOAT(value))
             return std::to_string(ValueAsFloat(value));
         if (IS_POINTER(value))
-            return std::to_string(ValueAsPointer(value));
+            return std::string("&") +  std::to_string(ValueAsPointer(value));
 
         return "";
     }

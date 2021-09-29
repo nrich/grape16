@@ -1261,6 +1261,21 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
         }
     }
 
+    if (done) {
+        idx = 0;
+        pc = 0;
+        sp = 0;
+        a = IntAsValue(0);
+        b = IntAsValue(0);
+        c = IntAsValue(0);
+
+        callstack.fill(0);
+
+        std::fill(mem.begin(), mem.end(), QNAN);
+
+        heap = mem.size();
+    }
+
     return done;
 }
 
