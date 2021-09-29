@@ -101,7 +101,6 @@ std::map<std::string, std::pair<OpCode, ArgType>> def = {
 
     {"CALL", {OpCode::CALL, ArgType::LABEL}},
     {"RETURN", {OpCode::RETURN, ArgType::NONE}},
-    {"FRAME", {OpCode::FRAME, ArgType::SHORT}},
 
     {"IRQ", {OpCode::IRQ, ArgType::SHORT}},
 
