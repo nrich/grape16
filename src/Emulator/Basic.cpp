@@ -60,6 +60,16 @@ class Environment {
             }
         }
 
+        bool isGlobal(const std::string &name) {
+            auto found = vars.find(name);
+
+            if (found != vars.end() && parent) {
+                return false;
+            }
+
+            return true;
+        }
+
         uint32_t create(const std::string &name) {
             auto existing = vars.find(name);
             if (existing != vars.end()) {
@@ -623,8 +633,6 @@ static void usrfunction(Program &program, uint32_t linenumber, const std::vector
         error(linenumber, std::string("Argument count mismath for `") + token.str + std::string("': ") + std::to_string(argcount) + " vs " + std::to_string(userfunction.args.size()));
     }
 
-    std::cerr << token.str << "," << argcount << "," << userfunction.args.size() << "," << (int16_t)userfunction.call << std::endl;
-
     program.addShort(OpCode::CALL, (int16_t)userfunction.call);
 }
 
@@ -645,16 +653,19 @@ static void TokenAsValue(Program &program, uint32_t linenumber, const std::vecto
         program.addValue(OpCode::SETC, FloatAsValue(std::stof(token.str)));
         program.add(OpCode::PUSHC);
     } else if (token.type == BasicTokenType::IDENTIFIER) {
-        if (env->Get == OpCode::LOADC) {
+        if (env->isGlobal(token.str)) {
             program.addPointer(OpCode::LOADC, env->get(token.str));
+            program.add(OpCode::PUSHC);
         } else {
+            program.add(OpCode::PUSHIDX);
             program.addPointer(OpCode::LOADA, env->get(FRAME_INDEX));
             program.add(OpCode::PUSHA);
             program.add(OpCode::POPIDX);
             program.addValue(OpCode::INCIDX, IntAsValue(env->get(token.str)));
             program.add(OpCode::IDXC);
+            program.add(OpCode::POPIDX);
+            program.add(OpCode::PUSHC);
         }
-        program.add(OpCode::PUSHC);
     } else if (token.type == BasicTokenType::FUNCTION) {
         function(program, linenumber, tokens);
     } else if (token.type == BasicTokenType::USRFUNCTION) {
@@ -791,6 +802,7 @@ static void Op(Program &program, uint32_t linenumber, const std::vector<BasicTok
         program.add(OpCode::ADD);
 
         program.add(OpCode::PUSHC);
+
         program.add(OpCode::POPIDX);
         program.add(OpCode::IDXC);
 
@@ -1255,7 +1267,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.addPointer(OpCode::LOADC, env->get(FRAME_INDEX));
         program.add(OpCode::WRITECX);
 
-        program.addValue(OpCode::STOREIDX, env->get(FRAME_INDEX));
+        program.addValue(OpCode::STOREIDX, PointerAsValue(env->get(FRAME_INDEX)));
 
         expression(program, linenumber, {tokens.begin(), tokens.end()});
 
