@@ -177,7 +177,6 @@ namespace Emulator {
 
         CALL,
         RETURN,
-        FRAME,
 
         IRQ,
 
@@ -236,7 +235,7 @@ namespace Emulator {
 
     class Debugger {
         public:
-            virtual void debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack, value_t a, value_t b, value_t c, vmpointer_t idx, value_t memidx, uint32_t heap, size_t stack);
+            virtual void debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack, value_t a, value_t b, value_t c, vmpointer_t idx, value_t memidx, uint32_t heap, std::stack<value_t> stack, std::vector<value_t> mem);
     };
 
     class Program {
@@ -330,10 +329,6 @@ namespace Emulator {
 
             uint8_t sp;
             std::array<uint32_t, 256> callstack;
-
-            vmpointer_t frame;
-            uint8_t fp;
-            std::array<uint32_t, 256> framestack;
 
             std::vector<value_t> mem;
 

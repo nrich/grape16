@@ -80,7 +80,6 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
         case OpCode::SYSCALL: return "SYSCALL";
         case OpCode::CALL: return "CALL";
         case OpCode::RETURN: return "RETURN";
-        case OpCode::FRAME: return "FRAME";
         case OpCode::IRQ: return "IRQ";
         case OpCode::ALLOC: return "ALLOC";
         case OpCode::CALLOC: return "CALLOC";
@@ -90,7 +89,7 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
     }
 }
 
-void Debugger::debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack, value_t a, value_t b, value_t c, vmpointer_t idx, value_t memidx, uint32_t heap, size_t stack) {
+void Debugger::debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack, value_t a, value_t b, value_t c, vmpointer_t idx, value_t memidx, uint32_t heap, std::stack<value_t> stack, std::vector<value_t> mem) {
     std::cerr << "[" << pc << "] " << (int)opcode << ":" << OpCodeAsString(opcode) << " sp: " << (uint32_t)sp << " callstack: " << callstack << " [";
 
     if (IS_BYTE(a) && 0)
@@ -140,7 +139,7 @@ void Debugger::debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack,
     std::cerr << "]";
 
     std::cerr << " heap: " << heap;
-    std::cerr << " stack: " << stack;
+    std::cerr << " stack: " << stack.size();
 
     std::cerr << std::endl;
 }
@@ -641,7 +640,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
     return 1;
 }
 
-VM::VM(uint32_t _ptrspace) : idx(0),  pc(0), sp(0), frame(1024), fp(0), ptrspace(_ptrspace) {
+VM::VM(uint32_t _ptrspace) : idx(0),  pc(0), sp(0), ptrspace(_ptrspace) {
     a = IntAsValue(0);
     b = IntAsValue(0);
     c = IntAsValue(0);
@@ -651,8 +650,6 @@ VM::VM(uint32_t _ptrspace) : idx(0),  pc(0), sp(0), frame(1024), fp(0), ptrspace
     mem.resize(ptrspace+1, QNAN);
 
     heap = mem.size();
-
-    framestack[0] = frame;
 }
 
 int VM::compare(vmpointer_t a, vmpointer_t b) {
@@ -688,7 +685,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
         uint32_t cost = 1;
 
         if (debugger)
-            debugger->debug(program.fetch(pc), pc, sp, callstack[sp], a, b, c, idx, mem[idx], heap, stack.size());
+            debugger->debug(program.fetch(pc), pc, sp, callstack[sp], a, b, c, idx, mem[idx], heap, stack, {mem.begin(), mem.begin()+10});
 
         switch (program.fetch(pc++)) {
             case OpCode::NOP:
@@ -1202,18 +1199,12 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 break;
             case OpCode::CALL:
                 callstack[++sp] = pc + 2; 
-                framestack[++fp] = frame;
                 pc = program.readShort(pc);
                 break;
             case OpCode::RETURN:
                 if (sp == 0)
                     error("RETURN without CALL");
                 pc = callstack[sp--];
-                frame = framestack[fp--];
-                break;
-            case OpCode::FRAME:
-                frame += (uint16_t)program.readShort(pc);
-                pc += 2;
                 break;
             case OpCode::IRQ: {
                     auto signal = program.readShort(pc);

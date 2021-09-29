@@ -2,6 +2,11 @@
 #include "Client/DebugState.h"
 #include "Common/Keys.h"
 
+#include "Emulator/VM.h"
+
+#include <stack>
+#include <vector>
+
 using namespace Client;
 
 class Debugger : public Emulator::Debugger {
@@ -16,9 +21,10 @@ class Debugger : public Emulator::Debugger {
         Emulator::vmpointer_t idx;
         Emulator::value_t memidx;
         uint32_t heap;
-        size_t stack;
+        std::stack<Emulator::value_t> stack;
+        std::vector<Emulator::value_t> mem;
 
-        void debug(Emulator::OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack, Emulator::value_t a, Emulator::value_t b, Emulator::value_t c, Emulator::vmpointer_t idx, Emulator::value_t memidx, uint32_t heap, size_t stack) {
+        void debug(Emulator::OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack, Emulator::value_t a, Emulator::value_t b, Emulator::value_t c, Emulator::vmpointer_t idx, Emulator::value_t memidx, uint32_t heap, std::stack<Emulator::value_t> stack, std::vector<Emulator::value_t> mem) {
             this->opcode = opcode;
             this->pc = pc;
             this->sp = sp;
@@ -30,6 +36,9 @@ class Debugger : public Emulator::Debugger {
             this->memidx = memidx;
             this->heap = heap;
             this->stack = stack;
+
+            //std::copy(mem.begin(), mem.end(), std::back_inserter(this->mem));
+            this->mem = mem;
         }
 };
 
@@ -50,8 +59,22 @@ void DebugState::onRender(State *state, const uint32_t time) {
     renderer->drawString(0, 48, 8, 8, std::string("IDX: ") + std::to_string(debugger->idx)); 
     renderer->drawString(120, 48, 8, 8, std::string("MEM@IDX: ") + Emulator::ValueToString(debugger->memidx)); 
 
-    renderer->drawString(0, 64, 8, 8, std::string("STACK: ") + std::to_string(debugger->stack)); 
+
+    if (debugger->stack.size() > 0) {
+        renderer->drawString(0, 64, 8, 8, std::string("STACK: ") + Emulator::ValueToString(debugger->stack.top()));
+    } else {
+        renderer->drawString(0, 64, 8, 8, std::string("STACK: <EMPTY>"));
+    }
+
+    renderer->drawString(120, 64, 8, 8, std::string("SIZE: ") + std::to_string(debugger->stack.size())); 
+
     renderer->drawString(0, 72, 8, 8, std::string("HEAP: ") + std::to_string(debugger->heap)); 
+
+    for (size_t i = 0; i < debugger->mem.size(); i++) {
+        //renderer->drawString(i*8, 88, 8, 8, std::string(Emulator::ValueToString(debugger->mem[i])));
+        renderer->drawString(i*32, 88, 8, 8, std::to_string(i));
+        renderer->drawString(i*32, 96, 8, 8, std::string(Emulator::ValueToString(debugger->mem[i])));
+    }
 }
 
 void DebugState::onTick(State *state, const uint32_t time) {
