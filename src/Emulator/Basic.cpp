@@ -648,8 +648,9 @@ static void TokenAsValue(Program &program, uint32_t linenumber, const std::vecto
         if (env->Get == OpCode::LOADC) {
             program.addPointer(OpCode::LOADC, env->get(token.str));
         } else {
-            program.addPointer(OpCode::LOADIDX, env->get(FRAME_INDEX));
-std::cerr << env->get(token.str) << std::endl;
+            program.addPointer(OpCode::LOADA, env->get(FRAME_INDEX));
+            program.add(OpCode::PUSHA);
+            program.add(OpCode::POPIDX);
             program.addValue(OpCode::INCIDX, IntAsValue(env->get(token.str)));
             program.add(OpCode::IDXC);
         }
@@ -1251,10 +1252,18 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
             env->create(args[i]);
         }
 
+        program.addPointer(OpCode::LOADC, env->get(FRAME_INDEX));
+        program.add(OpCode::WRITECX);
+
+        program.addValue(OpCode::STOREIDX, env->get(FRAME_INDEX));
+
         expression(program, linenumber, {tokens.begin(), tokens.end()});
 
         userfunctions.insert(std::make_pair(func.str, UserFunction(call, args)));
         env = env->Parent();
+
+        program.addPointer(OpCode::LOADIDX, env->get(FRAME_INDEX));
+        program.addValue(OpCode::STOREIDX, PointerAsValue(env->get(FRAME_INDEX)));
 
         program.add(OpCode::RETURN);
         auto end = program.add(OpCode::NOP);
