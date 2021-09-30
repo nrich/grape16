@@ -854,7 +854,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 if (IS_INT(a) && IS_INT(b)) {
                     overflow = ValueAsInt(a) - ValueAsInt(b);
                     if (overflow > INT16_MAX || overflow < INT16_MIN) {
-                        std::cerr << std::string("SUB overflow: ") << std::to_string(overflow) << "=" << ValueAsInt(a) << "-" << ValueAsInt(b) << std::endl;
+                        //std::cerr << std::string("SUB overflow: ") << std::to_string(overflow) << "=" << ValueAsInt(a) << "-" << ValueAsInt(b) << std::endl;
                         c = FloatAsValue((float)overflow);
                     } else 
                         c = IntAsValue(overflow);

@@ -37,7 +37,6 @@ class Debugger : public Emulator::Debugger {
             this->heap = heap;
             this->stack = stack;
 
-            //std::copy(mem.begin(), mem.end(), std::back_inserter(this->mem));
             this->mem = mem;
         }
 };
@@ -52,12 +51,12 @@ void DebugState::onRender(State *state, const uint32_t time) {
     renderer->drawString(0, 16, 8, 8, std::string("SP: ") + std::to_string(debugger->sp)); 
     renderer->drawString(0, 24, 8, 8, std::string("CS: ") + std::to_string(debugger->callstack)); 
 
-    renderer->drawString(120, 0, 8, 8, std::string("A: ") + Emulator::ValueToString(debugger->a)); 
-    renderer->drawString(120, 8, 8, 8, std::string("B: ") + Emulator::ValueToString(debugger->b)); 
-    renderer->drawString(120, 16, 8, 8, std::string("C: ") + Emulator::ValueToString(debugger->c)); 
+    renderer->drawString(136, 0, 8, 8, std::string("A: ") + Emulator::ValueToString(debugger->a));
+    renderer->drawString(136, 8, 8, 8, std::string("B: ") + Emulator::ValueToString(debugger->b));
+    renderer->drawString(136, 16, 8, 8, std::string("C: ") + Emulator::ValueToString(debugger->c));
 
     renderer->drawString(0, 48, 8, 8, std::string("IDX: ") + std::to_string(debugger->idx)); 
-    renderer->drawString(120, 48, 8, 8, std::string("MEM@IDX: ") + Emulator::ValueToString(debugger->memidx)); 
+    renderer->drawString(136, 48, 8, 8, std::string("MEM@IDX: ") + Emulator::ValueToString(debugger->memidx));
 
 
     if (debugger->stack.size() > 0) {
@@ -66,14 +65,13 @@ void DebugState::onRender(State *state, const uint32_t time) {
         renderer->drawString(0, 64, 8, 8, std::string("STACK: <EMPTY>"));
     }
 
-    renderer->drawString(120, 64, 8, 8, std::string("SIZE: ") + std::to_string(debugger->stack.size())); 
+    renderer->drawString(136, 64, 8, 8, std::string("SIZE: ") + std::to_string(debugger->stack.size()));
 
-    renderer->drawString(0, 72, 8, 8, std::string("HEAP: ") + std::to_string(debugger->heap)); 
+    renderer->drawString(0, 72, 8, 8, std::string("HEAP: ") + std::to_string(debugger->heap));
 
     for (size_t i = 0; i < debugger->mem.size(); i++) {
-        //renderer->drawString(i*8, 88, 8, 8, std::string(Emulator::ValueToString(debugger->mem[i])));
-        renderer->drawString(i*32, 88, 8, 8, std::to_string(i));
-        renderer->drawString(i*32, 96, 8, 8, std::string(Emulator::ValueToString(debugger->mem[i])));
+        renderer->drawString(0, 88+(i*8), 8, 8, std::to_string(i));
+        renderer->drawString(24, 88+(i*8), 8, 8, std::string(Emulator::ValueToString(debugger->mem[i])));
     }
 }
 
