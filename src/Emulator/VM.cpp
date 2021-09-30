@@ -1002,7 +1002,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 break;
             case OpCode::INT:
                 if (IS_INT(c)) {
-                    c = IntAsValue(overflow);
+                    c = IntAsValue(c);
                 }
                 else if (IS_FLOAT(c)) {
                     overflow = (int32_t)ValueAsFloat(c);
@@ -1261,7 +1261,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
         }
     }
 
-    if (done) {
+    if (done && 1) {
         idx = 0;
         pc = 0;
         sp = 0;
