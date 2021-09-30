@@ -51,12 +51,12 @@ void DebugState::onRender(State *state, const uint32_t time) {
     renderer->drawString(0, 16, 8, 8, std::string("SP: ") + std::to_string(debugger->sp)); 
     renderer->drawString(0, 24, 8, 8, std::string("CS: ") + std::to_string(debugger->callstack)); 
 
-    renderer->drawString(136, 0, 8, 8, std::string("A: ") + Emulator::ValueToString(debugger->a));
-    renderer->drawString(136, 8, 8, 8, std::string("B: ") + Emulator::ValueToString(debugger->b));
-    renderer->drawString(136, 16, 8, 8, std::string("C: ") + Emulator::ValueToString(debugger->c));
+    renderer->drawString(144, 0, 8, 8, std::string("A: ") + Emulator::ValueToString(debugger->a));
+    renderer->drawString(144, 8, 8, 8, std::string("B: ") + Emulator::ValueToString(debugger->b));
+    renderer->drawString(144, 16, 8, 8, std::string("C: ") + Emulator::ValueToString(debugger->c));
 
     renderer->drawString(0, 48, 8, 8, std::string("IDX: ") + std::to_string(debugger->idx)); 
-    renderer->drawString(136, 48, 8, 8, std::string("MEM@IDX: ") + Emulator::ValueToString(debugger->memidx));
+    renderer->drawString(144, 48, 8, 8, std::string("MEM@IDX: ") + Emulator::ValueToString(debugger->memidx));
 
 
     if (debugger->stack.size() > 0) {
@@ -65,7 +65,7 @@ void DebugState::onRender(State *state, const uint32_t time) {
         renderer->drawString(0, 64, 8, 8, std::string("STACK: <EMPTY>"));
     }
 
-    renderer->drawString(136, 64, 8, 8, std::string("SIZE: ") + std::to_string(debugger->stack.size()));
+    renderer->drawString(144, 64, 8, 8, std::string("SIZE: ") + std::to_string(debugger->stack.size()));
 
     renderer->drawString(0, 72, 8, 8, std::string("HEAP: ") + std::to_string(debugger->heap));
 
