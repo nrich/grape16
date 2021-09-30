@@ -8,8 +8,8 @@ namespace Audio {
     const int FREQUENCY = 44100;
 
     struct ToneObject {
-        double freq;
-        int samplesLeft;
+        double freq = 0.0;
+        int samplesLeft = 0;
     };
 
     class Tone {
@@ -17,7 +17,7 @@ namespace Audio {
             double v;
             std::queue<ToneObject> tones;
         public:
-            Tone() {}
+            Tone() { v = 0.0; }
             ~Tone() {}
             void tone(float freq, uint16_t duration);
             void generateSamples(float *stream, int length);

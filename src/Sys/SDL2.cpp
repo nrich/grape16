@@ -537,7 +537,7 @@ Sys::SDL2::SDL2(const std::string &title) : repeatKeys(false) {
     want.freq = Audio::FREQUENCY;
     want.format = AUDIO_F32;
     want.channels = 1;
-    want.samples = 4096*1;
+    want.samples = 4096;
     want.callback = audio_callback;
     want.userdata = &tone;
 
