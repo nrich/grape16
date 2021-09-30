@@ -17,6 +17,11 @@ void Audio::Tone::tone(float freq, uint16_t duration) {
     tones.push(to);
 }
 
+static double cot(double x) {
+    //return std::cos(x)/std::sin(x);
+    return 1.0/std::tan(x);
+}
+
 void Audio::Tone::generateSamples(float *stream, int length) {
     int i = 0;
     while (i < length) {
@@ -33,9 +38,22 @@ void Audio::Tone::generateSamples(float *stream, int length) {
         to.samplesLeft -= samplesToDo - i;
 
         while (i < samplesToDo) {
-            stream[i] = (float)(1.0 * std::sin(v * 2 * M_PI / FREQUENCY));
-            i++;
+            float pos = fmod(v/FREQUENCY,1.0);
             v += to.freq;
+
+            // SINE
+            //stream[i] = std::sin(pos*2*M_PI);
+
+            // SAW
+            //stream[i] = pos*2 - 1;
+
+            // TRIANGLE
+            //stream[i] = 1-std::fabs(pos-0.5)*4;
+
+            // SQUARE
+            stream[i] = std::sin(pos*2*M_PI) >= 0 ? 1.0 : -1.0;
+
+            i++;
         }
 
         if (to.samplesLeft == 0) {
