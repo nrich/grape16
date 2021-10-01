@@ -8,8 +8,6 @@
 #include "Common/Shared.h"
 #include "Common/DisplayMode.h"
 
-#define VOICE_COUNT 4
-
 namespace Client {
     class State;
 };
@@ -30,7 +28,7 @@ namespace Sys {
             virtual void swapBuffers() = 0;
             virtual bool handleEvents(Client::State &clientState) = 0;
             virtual void keyRepeat(bool enable) = 0;
-            virtual void sound(float frequency, uint16_t duration, int waveForm) = 0;
+            virtual void sound(uint8_t voice, float frequency, uint16_t duration, int waveForm) = 0;
     };
 }; // Sys
 

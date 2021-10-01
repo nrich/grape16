@@ -51,7 +51,7 @@ namespace Sys {
                 repeatKeys = enable;
             }
 
-            void sound(float frequency, uint16_t duration, int waveForm);
+            void sound(uint8_t voice, float frequency, uint16_t duration, int waveForm);
     };
 }; // Sys
 

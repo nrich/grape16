@@ -36,4 +36,6 @@ typedef vecf vec4f[4];
 #include <random>
 typedef std::mt19937 RngT;
 
+#define VOICE_COUNT 4
+
 #endif //__COMMON_SHARED_H__

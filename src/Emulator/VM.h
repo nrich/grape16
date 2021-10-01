@@ -209,9 +209,19 @@ namespace Emulator {
         DRAWLINE,
         BLIT,
         SOUND,
+        VOICE,
         COUNT
     };
 
+    enum class VoiceSetting {
+        VOLUME,
+        WAVEFORM,
+        ATTACK,
+        DECAY,
+        SUSTAIN,
+        RELEASE,
+        COUNT
+    };
 
     std::string OpCodeAsString(OpCode opcode);
 
@@ -230,7 +240,8 @@ namespace Emulator {
 
             virtual void blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) = 0;
 
-            virtual void sound(float frequency, uint16_t duration, int waveForm) = 0;
+            virtual void sound(uint8_t voice, float frequency, uint16_t duration) = 0;
+            virtual void voice(uint8_t voice, VoiceSetting setting, uint8_t value) = 0;
     };
 
     class Debugger {

@@ -629,7 +629,15 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                 }
                 uint16_t duration = (uint16_t)ValueAsInt(b);
 
-                sysIO->sound(frequency, duration, ValueAsInt(c));
+                sysIO->sound(ValueAsInt(c), frequency, duration);
+            }
+            break;
+        case SysCall::VOICE: {
+                uint8_t voice = ValueAsByte(a);
+                VoiceSetting setting = (VoiceSetting)ValueAsByte(b);
+                uint8_t value = ValueAsByte(c);
+
+                sysIO->voice(voice, setting, value);
             }
             break;
         default:

@@ -1,6 +1,7 @@
 #include "Client/State.h"
 #include "Client/EmulatorState.h"
 #include "Common/Keys.h"
+#include "Common/WaveForm.h"
 
 #include <vector>
 
@@ -11,6 +12,17 @@ SystemIO::SystemIO() : cursor(0,0) {
     screenbuffer[cursor.Y()][cursor.X()] = 228;
 
     screen.fill(0);
+
+    for (size_t i = 0; i < voiceSettings.size(); i++) {
+        voiceSettings[i] = {
+            {Emulator::VoiceSetting::VOLUME, 255},
+            {Emulator::VoiceSetting::WAVEFORM, Common::WaveForm::SINE},
+            {Emulator::VoiceSetting::ATTACK, 0},
+            {Emulator::VoiceSetting::DECAY, 0},
+            {Emulator::VoiceSetting::SUSTAIN, 0},
+            {Emulator::VoiceSetting::RELEASE, 0}
+        };
+    }
 }
 
 void SystemIO::cls() {
@@ -96,8 +108,13 @@ void SystemIO::blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) {
     std::memcpy(ptr, buffer.data(), buffer.size());
 }
 
-void SystemIO::sound(float frequency, uint16_t duration, int waveForm) {
-    soundBuffer.push(SoundBufferObject(frequency, duration, waveForm));
+void SystemIO::sound(uint8_t voice, float frequency, uint16_t duration) {
+    int waveForm = (int)voiceSettings[voice][Emulator::VoiceSetting::WAVEFORM];
+    soundBuffer.push(SoundBufferObject(voice, frequency, duration, waveForm));
+}
+
+void SystemIO::voice(uint8_t voice, Emulator::VoiceSetting setting, uint8_t value) {
+    voiceSettings[voice][setting] = value;
 }
 
 void EmulatorState::onRender(State *state, const uint32_t time) {
@@ -157,7 +174,7 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
     std::optional<SoundBufferObject> s = sysio->nextSound();
     while (s != std::nullopt) {
         auto sound = *s;
-        state->getSys()->sound(sound.frequency, sound.duration, sound.waveForm);
+        state->getSys()->sound(sound.voice, sound.frequency, sound.duration, sound.waveForm);
         s = sysio->nextSound();
     }
 }

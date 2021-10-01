@@ -42,7 +42,10 @@ namespace Client {
             void blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) {
             }
 
-            void sound(float frequency, uint16_t duration, int waveForm) {
+            void sound(uint8_t voice, float frequency, uint16_t duration) {
+            }
+
+            void voice(uint8_t voice, Emulator::VoiceSetting setting, uint8_t value) {
             }
     };
 

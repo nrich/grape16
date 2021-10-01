@@ -4,6 +4,7 @@
 #include <queue>
 #include <optional>
 
+#include "Common/Shared.h"
 #include "Math/Point2.h"
 #include "Emulator/VM.h"
 #include "Emulator/Basic.h"
@@ -13,11 +14,12 @@ namespace Client {
     class State;
 
     struct SoundBufferObject {
+        uint8_t voice;
         float frequency;
         uint16_t duration;
         int waveForm = 0;
 
-        SoundBufferObject(float frequency, uint16_t duration, int waveForm = 0) : frequency(frequency), duration(duration), waveForm(waveForm) {
+        SoundBufferObject(uint8_t voice, float frequency, uint16_t duration, int waveForm = 0) : voice(voice), frequency(frequency), duration(duration), waveForm(waveForm) {
         }
     };
 
@@ -32,6 +34,7 @@ namespace Client {
 
             std::queue<char> inputBuffer;
             std::queue<SoundBufferObject> soundBuffer;
+            std::array<std::map<Emulator::VoiceSetting, uint8_t>, VOICE_COUNT> voiceSettings;
         public:
             SystemIO();
 
@@ -67,7 +70,8 @@ namespace Client {
 
             void blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer);
 
-            void sound(float frequency, uint16_t duration, int waveForm);
+            void sound(uint8_t voice, float frequency, uint16_t duration);
+            void voice(uint8_t voice, Emulator::VoiceSetting setting, uint8_t value);
 
             std::array<uint8_t, 320*180> getScreen() {
                 return screen;

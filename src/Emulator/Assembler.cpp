@@ -149,6 +149,8 @@ std::pair<SysCall, RuntimeValue> getSyscall(const std::string &syscallname, cons
         syscall = SysCall::BLIT;
     } else if (syscallname == "SOUND") {
         syscall = SysCall::SOUND;
+    } else if (syscallname == "VOICE") {
+        syscall = SysCall::VOICE;
     } else {
         std::cerr << "Unknown SysCall " << syscallname << std::endl;
         exit(-1);
@@ -192,6 +194,8 @@ std::pair<std::string, std::string> getSysCall(SysCall syscall, RuntimeValue rt)
         syscallname = "BLIT";
     } else if (syscall == SysCall::SOUND) {
         syscallname = "SOUND";
+    } else if (syscall == SysCall::VOICE) {
+        syscallname = "VOICE";
     } else {
         std::cerr << "Unknown SysCall " << (int)syscall << std::endl;
         exit(-1);
