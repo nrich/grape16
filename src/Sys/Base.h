@@ -8,6 +8,8 @@
 #include "Common/Shared.h"
 #include "Common/DisplayMode.h"
 
+#define VOICE_COUNT 3
+
 namespace Client {
     class State;
 };

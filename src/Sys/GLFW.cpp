@@ -331,15 +331,15 @@ void Sys::GLFW::keyRepeat(bool enable) {
 }
 
 void Sys::GLFW::sound(float frequency, uint16_t duration, int waveForm) {
-    tone.tone(frequency, duration, waveForm);
+    voices[0].tone(frequency, duration, waveForm);
 }
 
 static int tonecallback(const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void *userData) {
-    Audio::Tone *tone = (Audio::Tone *)userData;
+    Audio::Tone *voices = (Audio::Tone *)userData;
 
     float *out = (float *)outputBuffer;
 
-    tone->generateSamples(out, framesPerBuffer);
+    voices[0].generateSamples(out, framesPerBuffer);
 
     return 0;
 }
@@ -354,6 +354,9 @@ Sys::GLFW::GLFW(const std::string &title) {
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     auto mode = getDisplayModes().front();
+
+    for (int i = 0; i < VOICE_COUNT; i++)
+        voices[i] = Audio::Tone();
 
     window = std::shared_ptr<GLFWwindow>(
         glfwCreateWindow(mode.Width(), mode.Height(), (std::string("GLFW ") + title).c_str(), NULL, NULL),
@@ -376,7 +379,7 @@ Sys::GLFW::GLFW(const std::string &title) {
         Audio::FREQUENCY,
         256,        // frames per buffer
         tonecallback,
-        &tone
+        voices.data()
     ) == paNoError && Pa_StartStream(stream) == paNoError);
 }
 

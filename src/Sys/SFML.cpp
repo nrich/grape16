@@ -218,17 +218,17 @@ class ToneStream : public sf::SoundStream {
 #endif
 
 static int tonecallback(const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void *userData) {
-    Audio::Tone *tone = (Audio::Tone *)userData;
+    Audio::Tone *voices = (Audio::Tone *)userData;
 
     float *out = (float *)outputBuffer;
 
-    tone->generateSamples(out, framesPerBuffer);
+    voices[0].generateSamples(out, framesPerBuffer);
 
     return 0;
 }
 
 void Sys::SFML::sound(float frequency, uint16_t duration, int waveForm) {
-    tone.tone(frequency, duration, waveForm);
+    voices[0].tone(frequency, duration, waveForm);
 }
 
 Sys::SFML::SFML(const std::string &title) : title(std::string("SFML ") + title), isFullscreen(false) {
@@ -249,6 +249,9 @@ Sys::SFML::SFML(const std::string &title) : title(std::string("SFML ") + title),
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    for (int i = 0; i < VOICE_COUNT; i++)
+        voices[i] = Audio::Tone();
+
 //    ToneStream stream(tone);
 //    stream.SetBufSize(256, 1, Audio::FREQUENCY);
 //    stream.play();
@@ -261,7 +264,7 @@ Sys::SFML::SFML(const std::string &title) : title(std::string("SFML ") + title),
         Audio::FREQUENCY,
         256,        // frames per buffer
         tonecallback,
-        &tone
+        voices.data()
     ) == paNoError && Pa_StartStream(stream) == paNoError);
 
 }

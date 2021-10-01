@@ -6,6 +6,7 @@
 #include <memory>
 #include <functional>
 #include <queue>
+#include <vector>
 
 #include <portaudio.h>
 
@@ -18,7 +19,7 @@ namespace Sys {
     class GLFW : public Base {
             std::shared_ptr<GLFWwindow> window;
             PaStream *stream;
-            Audio::Tone tone;
+            std::array<Audio::Tone, VOICE_COUNT> voices;
         public:
             GLFW(const std::string &title);
             ~GLFW();

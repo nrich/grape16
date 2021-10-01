@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <functional>
+#include <array>
 
 #include <portaudio.h>
 
@@ -19,8 +20,8 @@ namespace Sys {
 
             const std::string title;
             bool isFullscreen;
-            Audio::Tone tone;
             PaStream *stream;
+            std::array<Audio::Tone, VOICE_COUNT> voices;
         public:
             SFML(const std::string &title);
             ~SFML();

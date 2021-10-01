@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <functional>
+#include <array>
 
 #include "Sys/Base.h"
 #include "Client/State.h"
@@ -22,7 +23,7 @@ namespace Sys {
 
             bool repeatKeys;
 
-            Audio::Tone tone;
+            std::array<Audio::Tone, VOICE_COUNT> voices;
         public:
             SDL2(const std::string &title);
             ~SDL2();

@@ -482,17 +482,17 @@ void Sys::SDL2::sound(float frequency, uint16_t duration, int waveForm) {
     if (duration == 0) {
         SDL_PauseAudioDevice(dev, 1);
     } else {
-        tone.tone(frequency, duration, waveForm);
+        voices[0].tone(frequency, duration, waveForm);
     }
     SDL_UnlockAudioDevice(dev);
 }
 
-static void audio_callback(void *_tone, uint8_t *_stream, int _length) {
+static void audio_callback(void *userData, uint8_t *_stream, int _length) {
     float *stream = (float *) _stream;
     int length = _length / 4;
-    Audio::Tone *tone = (Audio::Tone *) _tone;
+    Audio::Tone *voices = (Audio::Tone *)userData;
 
-    tone->generateSamples(stream, length);
+    voices[0].generateSamples(stream, length);
 }
 
 Sys::SDL2::SDL2(const std::string &title) : repeatKeys(false) {
@@ -531,6 +531,9 @@ Sys::SDL2::SDL2(const std::string &title) : repeatKeys(false) {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    for (int i = 0; i < VOICE_COUNT; i++)
+        voices[i] = Audio::Tone();
+
     SDL_AudioSpec want;
     SDL_zero(want);
 
@@ -539,7 +542,7 @@ Sys::SDL2::SDL2(const std::string &title) : repeatKeys(false) {
     want.channels = 1;
     want.samples = 4096;
     want.callback = audio_callback;
-    want.userdata = &tone;
+    want.userdata = voices.data();
 
     SDL_AudioSpec have;
 
