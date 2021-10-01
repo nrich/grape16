@@ -20,7 +20,7 @@ namespace Audio {
             double v;
             std::queue<ToneObject> tones;
         public:
-            Tone() { v = 0.0; }
+            Tone();
             ~Tone() {}
             void tone(float freq, uint16_t duration, int waveForm);
             void generateSamples(float *stream, int length, float amplitude=1.0f);

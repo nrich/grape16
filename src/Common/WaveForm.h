@@ -10,6 +10,7 @@ namespace Common {
             SAWTOOTH,
             TRIANGLE,
             SQUARE,
+            NOISE,
             COUNT
         };
     }; // namespace WaveForm
