@@ -482,7 +482,7 @@ void Sys::SDL2::sound(float frequency, uint16_t duration, int waveForm) {
     if (duration == 0) {
         SDL_PauseAudioDevice(dev, 1);
     } else {
-        voices[0].tone(frequency, duration, waveForm);
+        voices[waveForm].tone(frequency, duration, waveForm);
     }
     SDL_UnlockAudioDevice(dev);
 }
@@ -492,7 +492,15 @@ static void audio_callback(void *userData, uint8_t *_stream, int _length) {
     int length = _length / 4;
     Audio::Tone *voices = (Audio::Tone *)userData;
 
-    voices[0].generateSamples(stream, length);
+    std::vector<float> buffer;
+    buffer.resize(length, 0.0f);
+
+    voices[0].generateSamples(buffer.data(), length, 0.25);
+    voices[1].generateSamples(buffer.data(), length, 0.25);
+    voices[2].generateSamples(buffer.data(), length, 0.25);
+    voices[3].generateSamples(buffer.data(), length, 0.25);
+
+    std::memcpy(stream, buffer.data(), sizeof(float) * length);
 }
 
 Sys::SDL2::SDL2(const std::string &title) : repeatKeys(false) {

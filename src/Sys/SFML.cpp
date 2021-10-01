@@ -221,14 +221,21 @@ static int tonecallback(const void *inputBuffer, void *outputBuffer, unsigned lo
     Audio::Tone *voices = (Audio::Tone *)userData;
 
     float *out = (float *)outputBuffer;
+    std::vector<float> buffer;
+    buffer.resize(framesPerBuffer, 0.0f);
 
-    voices[0].generateSamples(out, framesPerBuffer);
+    voices[0].generateSamples(buffer.data(), framesPerBuffer, 0.25);
+    voices[1].generateSamples(buffer.data(), framesPerBuffer, 0.25);
+    voices[2].generateSamples(buffer.data(), framesPerBuffer, 0.25);
+    voices[3].generateSamples(buffer.data(), framesPerBuffer, 0.25);
+
+    std::memcpy(out, buffer.data(), sizeof(float) * framesPerBuffer);
 
     return 0;
 }
 
 void Sys::SFML::sound(float frequency, uint16_t duration, int waveForm) {
-    voices[0].tone(frequency, duration, waveForm);
+    voices[waveForm].tone(frequency, duration, waveForm);
 }
 
 Sys::SFML::SFML(const std::string &title) : title(std::string("SFML ") + title), isFullscreen(false) {

@@ -23,7 +23,7 @@ namespace Audio {
             Tone() { v = 0.0; }
             ~Tone() {}
             void tone(float freq, uint16_t duration, int waveForm);
-            void generateSamples(float *stream, int length);
+            void generateSamples(float *stream, int length, float amplitude=1.0f);
             void wait();
     };
 }; // Audio

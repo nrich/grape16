@@ -18,12 +18,12 @@ void Audio::Tone::tone(float freq, uint16_t duration, int waveForm) {
     tones.push(to);
 }
 
-void Audio::Tone::generateSamples(float *stream, int length) {
+void Audio::Tone::generateSamples(float *stream, int length, float amplitude) {
     int i = 0;
     while (i < length) {
         if (tones.empty()) {
             while (i < length) {
-                stream[i] = 0;
+                stream[i] += 0;
                 i++;
             }
             return;
@@ -39,16 +39,16 @@ void Audio::Tone::generateSamples(float *stream, int length) {
 
             switch (to.waveForm) {
                 case Common::WaveForm::SAWTOOTH:
-                    stream[i] = pos*2 - 1;
+                    stream[i] += amplitude * (pos*2 - 1);
                     break;
                 case Common::WaveForm::TRIANGLE:
-                    stream[i] = 1-std::fabs(pos-0.5)*4;
+                    stream[i] += amplitude * (1-std::fabs(pos-0.5)*4);
                     break;
                 case Common::WaveForm::SQUARE:
-                    stream[i] = std::sin(pos*2*M_PI) >= 0 ? 1.0 : -1.0;
+                    stream[i] += amplitude * (std::sin(pos*2*M_PI) >= 0 ? 1.0 : -1.0);
                     break;
                 default: // SINE
-                    stream[i] = std::sin(pos*2*M_PI);
+                    stream[i] += amplitude * (std::sin(pos*2*M_PI));
                     break;
             }
             i++;

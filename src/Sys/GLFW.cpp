@@ -331,15 +331,22 @@ void Sys::GLFW::keyRepeat(bool enable) {
 }
 
 void Sys::GLFW::sound(float frequency, uint16_t duration, int waveForm) {
-    voices[0].tone(frequency, duration, waveForm);
+    voices[waveForm].tone(frequency, duration, waveForm);
 }
 
 static int tonecallback(const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void *userData) {
     Audio::Tone *voices = (Audio::Tone *)userData;
 
     float *out = (float *)outputBuffer;
+    std::vector<float> buffer;
+    buffer.resize(framesPerBuffer, 0.0f);
 
-    voices[0].generateSamples(out, framesPerBuffer);
+    voices[0].generateSamples(buffer.data(), framesPerBuffer, 0.25);
+    voices[1].generateSamples(buffer.data(), framesPerBuffer, 0.25);
+    voices[2].generateSamples(buffer.data(), framesPerBuffer, 0.25);
+    voices[3].generateSamples(buffer.data(), framesPerBuffer, 0.25);
+
+    std::memcpy(out, buffer.data(), sizeof(float) * framesPerBuffer);
 
     return 0;
 }
