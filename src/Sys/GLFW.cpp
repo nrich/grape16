@@ -330,8 +330,8 @@ void Sys::GLFW::keyRepeat(bool enable) {
     RepeatKeys = enable;
 }
 
-void Sys::GLFW::sound(float frequency, uint16_t duration) {
-    tone.tone(frequency, duration);
+void Sys::GLFW::sound(float frequency, uint16_t duration, int waveForm) {
+    tone.tone(frequency, duration, waveForm);
 }
 
 static int tonecallback(const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void *userData) {

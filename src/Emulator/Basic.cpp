@@ -1088,7 +1088,8 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         current += 1;
         program.addValue(OpCode::SETA, IntAsValue(800));
         program.addValue(OpCode::SETB, IntAsValue(250));
-        program.addSyscall(OpCode::SYSCALL, SysCall::SOUND, RuntimeValue::C);
+        program.addValue(OpCode::SETC, IntAsValue(0));
+        program.addSyscall(OpCode::SYSCALL, SysCall::SOUND, RuntimeValue::NONE);
     } else if (tokens[current].type == BasicTokenType::SOUND) {
         current += 1;
 
@@ -1096,10 +1097,18 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
         expression(program, linenumber, {tokens.begin(), tokens.end()});
 
+        if (tokens[current].type == BasicTokenType::COMMA) {
+            current++;
+            expression(program, linenumber, {tokens.begin(), tokens.end()});
+            program.add(OpCode::POPC);
+        } else {
+            program.addValue(OpCode::SETC, IntAsValue(0));
+        }
+
         program.add(OpCode::POPB);
         program.add(OpCode::POPA);
 
-        program.addSyscall(OpCode::SYSCALL, SysCall::SOUND, RuntimeValue::C);
+        program.addSyscall(OpCode::SYSCALL, SysCall::SOUND, RuntimeValue::NONE);
     } else if (tokens[current].type == BasicTokenType::SWAP) {
         current += 1;
 

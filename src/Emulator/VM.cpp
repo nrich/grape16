@@ -629,7 +629,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                 }
                 uint16_t duration = (uint16_t)ValueAsInt(b);
 
-                sysIO->sound(frequency, duration);
+                sysIO->sound(frequency, duration, ValueAsInt(c));
             }
             break;
         default:

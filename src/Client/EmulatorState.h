@@ -12,6 +12,15 @@
 namespace Client {
     class State;
 
+    struct SoundBufferObject {
+        float frequency;
+        uint16_t duration;
+        int waveForm = 0;
+
+        SoundBufferObject(float frequency, uint16_t duration, int waveForm = 0) : frequency(frequency), duration(duration), waveForm(waveForm) {
+        }
+    };
+
     class SystemIO : public Emulator::SysIO {
             const static int32_t chars = 40;
             const static int32_t lines = 22;
@@ -22,7 +31,7 @@ namespace Client {
             std::array<uint8_t, 320*180> screen;
 
             std::queue<char> inputBuffer;
-            std::queue<std::pair<float, uint16_t>> soundBuffer;
+            std::queue<SoundBufferObject> soundBuffer;
         public:
             SystemIO();
 
@@ -58,13 +67,13 @@ namespace Client {
 
             void blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer);
 
-            void sound(float frequency, uint16_t duration);
+            void sound(float frequency, uint16_t duration, int waveForm);
 
             std::array<uint8_t, 320*180> getScreen() {
                 return screen;
             }
 
-            std::optional<std::pair<float, uint16_t>> nextSound() {
+            std::optional<SoundBufferObject> nextSound() {
                 if (soundBuffer.size() == 0)
                     return std::nullopt;
 

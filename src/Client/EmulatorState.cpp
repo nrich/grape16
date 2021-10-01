@@ -96,8 +96,8 @@ void SystemIO::blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) {
     std::memcpy(ptr, buffer.data(), buffer.size());
 }
 
-void SystemIO::sound(float frequency, uint16_t duration) {
-    soundBuffer.push(std::pair<float, uint16_t>(frequency, duration));
+void SystemIO::sound(float frequency, uint16_t duration, int waveForm) {
+    soundBuffer.push(SoundBufferObject(frequency, duration, waveForm));
 }
 
 void EmulatorState::onRender(State *state, const uint32_t time) {
@@ -154,10 +154,10 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
         }
     }
 
-    std::optional<std::pair<float, uint16_t>> s = sysio->nextSound();
+    std::optional<SoundBufferObject> s = sysio->nextSound();
     while (s != std::nullopt) {
         auto sound = *s;
-        state->getSys()->sound(sound.first, sound.second);
+        state->getSys()->sound(sound.frequency, sound.duration, sound.waveForm);
         s = sysio->nextSound();
     }
 }

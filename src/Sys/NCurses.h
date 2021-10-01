@@ -43,7 +43,7 @@ namespace Sys {
                 wclear(window.get());
             }
 
-            void sound(float frequency, uint16_t duration) {
+            void sound(float frequency, uint16_t duration, int waveForm) {
                 if (frequency == 800.0f && duration == 250) {
                     beep();
                 }

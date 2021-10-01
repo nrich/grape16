@@ -42,7 +42,7 @@ namespace Client {
             void blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) {
             }
 
-            void sound(float frequency, uint16_t duration) {
+            void sound(float frequency, uint16_t duration, int waveForm) {
             }
     };
 

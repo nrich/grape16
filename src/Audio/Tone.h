@@ -4,12 +4,15 @@
 #include <cstdint>
 #include <queue>
 
+#include "Common/WaveForm.h"
+
 namespace Audio {
     const int FREQUENCY = 44100;
 
     struct ToneObject {
         double freq = 0.0;
         int samplesLeft = 0;
+        int waveForm;
     };
 
     class Tone {
@@ -19,7 +22,7 @@ namespace Audio {
         public:
             Tone() { v = 0.0; }
             ~Tone() {}
-            void tone(float freq, uint16_t duration);
+            void tone(float freq, uint16_t duration, int waveForm);
             void generateSamples(float *stream, int length);
             void wait();
     };

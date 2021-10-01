@@ -9,17 +9,13 @@
 #include "Audio/Tone.h"
 #include "Common/Shared.h"
 
-void Audio::Tone::tone(float freq, uint16_t duration) {
+void Audio::Tone::tone(float freq, uint16_t duration, int waveForm) {
     ToneObject to;
     to.freq = (double)freq;
     to.samplesLeft = duration * FREQUENCY / 1000;
+    to.waveForm = waveForm;
 
     tones.push(to);
-}
-
-static double cot(double x) {
-    //return std::cos(x)/std::sin(x);
-    return 1.0/std::tan(x);
 }
 
 void Audio::Tone::generateSamples(float *stream, int length) {
@@ -41,18 +37,20 @@ void Audio::Tone::generateSamples(float *stream, int length) {
             float pos = fmod(v/FREQUENCY,1.0);
             v += to.freq;
 
-            // SINE
-            //stream[i] = std::sin(pos*2*M_PI);
-
-            // SAW
-            //stream[i] = pos*2 - 1;
-
-            // TRIANGLE
-            //stream[i] = 1-std::fabs(pos-0.5)*4;
-
-            // SQUARE
-            stream[i] = std::sin(pos*2*M_PI) >= 0 ? 1.0 : -1.0;
-
+            switch (to.waveForm) {
+                case Common::WaveForm::SAWTOOTH:
+                    stream[i] = pos*2 - 1;
+                    break;
+                case Common::WaveForm::TRIANGLE:
+                    stream[i] = 1-std::fabs(pos-0.5)*4;
+                    break;
+                case Common::WaveForm::SQUARE:
+                    stream[i] = std::sin(pos*2*M_PI) >= 0 ? 1.0 : -1.0;
+                    break;
+                default: // SINE
+                    stream[i] = std::sin(pos*2*M_PI);
+                    break;
+            }
             i++;
         }
 

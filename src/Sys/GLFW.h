@@ -44,7 +44,7 @@ namespace Sys {
 
             void keyRepeat(bool enable);
 
-            void sound(float frequency, uint16_t duration);
+            void sound(float frequency, uint16_t duration, int waveForm);
     };
 }; // Sys
 

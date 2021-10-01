@@ -230,7 +230,7 @@ namespace Emulator {
 
             virtual void blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) = 0;
 
-            virtual void sound(float frequency, uint16_t duration) = 0;
+            virtual void sound(float frequency, uint16_t duration, int waveForm) = 0;
     };
 
     class Debugger {

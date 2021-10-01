@@ -109,7 +109,7 @@ namespace Common {
             F15,          ///< The F15 key
             Pause         ///< The Pause key
         };
-    };
+    }; // namespace Keys
 }; // namespace Common
 
 #endif //__COMMON_KEYS_H__

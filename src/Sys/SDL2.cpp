@@ -477,12 +477,12 @@ bool Sys::SDL2::handleEvents(Client::State &clientState) {
     return run;
 }
 
-void Sys::SDL2::sound(float frequency, uint16_t duration) {
+void Sys::SDL2::sound(float frequency, uint16_t duration, int waveForm) {
     SDL_LockAudioDevice(dev);
     if (duration == 0) {
         SDL_PauseAudioDevice(dev, 1);
     } else {
-        tone.tone(frequency, duration);
+        tone.tone(frequency, duration, waveForm);
     }
     SDL_UnlockAudioDevice(dev);
 }

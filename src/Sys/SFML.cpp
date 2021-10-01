@@ -227,8 +227,8 @@ static int tonecallback(const void *inputBuffer, void *outputBuffer, unsigned lo
     return 0;
 }
 
-void Sys::SFML::sound(float frequency, uint16_t duration) {
-    tone.tone(frequency, duration);
+void Sys::SFML::sound(float frequency, uint16_t duration, int waveForm) {
+    tone.tone(frequency, duration, waveForm);
 }
 
 Sys::SFML::SFML(const std::string &title) : title(std::string("SFML ") + title), isFullscreen(false) {

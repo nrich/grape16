@@ -48,7 +48,7 @@ namespace Sys {
                 window.setKeyRepeatEnabled(enable);
             }
 
-            void sound(float frequency, uint16_t duration);
+            void sound(float frequency, uint16_t duration, int waveForm);
     };
 }; // Sys
 
