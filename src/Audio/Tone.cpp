@@ -6,31 +6,33 @@
 
 #include <cmath>
 #include <random>
+#include <array>
 
 #include "Audio/Tone.h"
 #include "Common/Shared.h"
 
 #define PINK_MAX_RANDOM_ROWS   (30)
 #define PINK_RANDOM_BITS       (24)
-#define PINK_RANDOM_SHIFT      ((sizeof(long)*8)-PINK_RANDOM_BITS)
+#define PINK_RANDOM_SHIFT      ((sizeof(int32_t)*8)-PINK_RANDOM_BITS)
 
 class PinkNoise {
     private:
-        int32_t rows[PINK_MAX_RANDOM_ROWS];
-        int32_t runningSum;   /* Used to optimize summing of generators. */
-        int32_t index;        /* Incremented each sample. */
-        int32_t indexMask;    /* Index wrapped by ANDing with this mask. */
-        float scalar;       /* Used to scale within range of -1.0 to +1.0 */
+        std::array<int32_t, PINK_MAX_RANDOM_ROWS> rows;
+        int32_t runningSum;     // Used to optimize summing of generators
+        int32_t index;          // Incremented each sample
+        int32_t indexMask;      // Index wrapped by ANDing with this mask
+        float scalar;           // Used to scale within range of -1.0 to +1.0
         uint32_t seed;
 
         uint32_t generateRandomNumber() {
-            // Change this seed for different random sequences
             static uint32_t randSeed = seed;
             randSeed = (randSeed * 196314165) + 907633515;
             return randSeed;
         }
     public:
         PinkNoise(int numRows) {
+            numRows = std::min(PINK_MAX_RANDOM_ROWS, numRows);
+
             seed = std::chrono::system_clock::now().time_since_epoch().count();
             index = 0;
             indexMask = (1<<numRows) - 1;
@@ -39,8 +41,7 @@ class PinkNoise {
             int32_t pmax = (numRows + 1) * (1<<(PINK_RANDOM_BITS-1));
             scalar = 1.0f / pmax;
 
-            for(int i=0; i<numRows; i++)
-                rows[i] = 0;
+            rows.fill(0);
             runningSum = 0;
         }
 
@@ -62,10 +63,9 @@ class PinkNoise {
                     n = n >> 1;
                     numZeros++;
                 }
-                /* Replace the indexed ROWS random value.
-                 * Subtract and add back to RunningSum instead of adding all the random
-                 * values together. Only one changes each time.
-                 */
+                // Replace the indexed ROWS random value.
+                // Subtract and add back to RunningSum instead of adding all the random
+                // values together. Only one changes each time.
                 runningSum -= rows[numZeros];
                 newRandom = ((int32_t)generateRandomNumber()) >> PINK_RANDOM_SHIFT;
                 runningSum += newRandom;
