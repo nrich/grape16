@@ -208,7 +208,11 @@ int main(int argc, char **argv) {
 #ifdef _WIN32
         "glfw", // Default.
 #else
+#ifdef __EMSCRIPTEN__
+        "sdl2", // Default.
+#else
         "ncurses", // Default.
+#endif
 #endif
         0, // Required?
         1, // Number of args expected.
@@ -268,7 +272,7 @@ int main(int argc, char **argv) {
     opt.get("-s")->getString(sysname);
 
 #ifdef __EMSCRIPTEN__
-    if (sysname == "glfw") {
+    if (sysname == "sdl2") {
         sys = std::make_shared<Sys::SDL2>("Grape16");
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
 #else

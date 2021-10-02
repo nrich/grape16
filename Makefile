@@ -40,7 +40,7 @@ endif
 ifdef CONFIG_JS
     CXX = em++
     INC = -I src
-    LDFLAGS = $(shell $(EMSDK)/upstream/emscripten/system/bin/sdl2-config --libs) -lGL -lGLU -s EXIT_RUNTIME=1 -s VERBOSE=0 -s FORCE_ALIGNED_MEMORY=0 -s ALLOW_MEMORY_GROWTH=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s USE_SDL=1 -s LEGACY_GL_EMULATION=1 -s WASM=1
+    LDFLAGS = $(shell $(EMSDK)/upstream/emscripten/system/bin/sdl2-config --libs) -lGL -lGLU -s EXIT_RUNTIME=1 -s VERBOSE=0 -s FORCE_ALIGNED_MEMORY=0 -s ALLOW_MEMORY_GROWTH=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s USE_SDL=2 -s LEGACY_GL_EMULATION=1 -s WASM=1
     CPPFLAGS = -std=c++17 $(INC) -Wall $(shell $(EMSDK)/upstream/emscripten/system/bin/sdl2-config --cflags)
 endif
 
@@ -75,8 +75,8 @@ ifdef CONFIG_W32
     TARG := grape16.exe
 else ifdef CONFIG_W64
     TARG := grape16x64.exe
-else ifdef CONFIG_W64
-    TARG := grape16.js
+else ifdef CONFIG_JS
+    TARG := grape16.html
 else
     TARG := grape16
 endif
