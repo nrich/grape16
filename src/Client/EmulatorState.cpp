@@ -40,7 +40,6 @@ uint8_t SystemIO::getpixel(uint16_t x, uint16_t y) {
     return screen[y*320 + x];
 }
 
-
 void SystemIO::write(uint8_t c) {
     char chr = (char)c;
 
