@@ -15,27 +15,29 @@
 #ifdef _WIN64
 #define VER_FILEDESCRIPTION_STR     "Grape16 (64-bit)"
 #define VER_ORIGINALFILENAME_STR    "grape16x64.exe"
+#define VERSION_STR "0.0.1"
 #else
 #define VER_FILEDESCRIPTION_STR     "Grape16"
 #define VER_ORIGINALFILENAME_STR    "grape16.exe"
+#define VERSION_STR "0.0.1"
 #endif
 
 1 VERSIONINFO
-FILEVERSION     1,0,0,0
-PRODUCTVERSION  1,0,0,0
+FILEVERSION     0,0,1,0
+PRODUCTVERSION  0,0,1,0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
     BLOCK "080904E4"
     BEGIN
       VALUE "CompanyName", "Neil Richardson"
-      VALUE "FileDescription", "Grape16"
-      VALUE "FileVersion", "0.0.1"
+      VALUE "FileDescription", VER_FILEDESCRIPTION_STR
+      VALUE "FileVersion", VERSION_STR
       VALUE "InternalName", "grape16"
       VALUE "LegalCopyright", "Copyright © 2021 Neil Richardson"
-      VALUE "OriginalFilename", "grape16.exe"
+      VALUE "OriginalFilename", VER_FILEDESCRIPTION_STR
       VALUE "ProductName", "Grape16"
-      VALUE "ProductVersion", "VERSION"
+      VALUE "ProductVersion", VERSION_STR
     END
   END
   BLOCK "VarFileInfo"
