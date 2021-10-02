@@ -6,7 +6,7 @@
 
 #include <SFML/Audio.hpp>
 
-static void clientKeyDown(Client::State &clientState, const sf::Event::KeyEvent &sfEvent) {
+static void clientKeyDown(std::shared_ptr<Client::State> clientState, const sf::Event::KeyEvent &sfEvent) {
     Client::KeyPress event;
 
     event.keyCode = sfEvent.code;
@@ -15,10 +15,10 @@ static void clientKeyDown(Client::State &clientState, const sf::Event::KeyEvent 
     event.altMod = sfEvent.alt;
     event.guiMod = sfEvent.system;
 
-    clientState.keyDown(event);
+    clientState->keyDown(event);
 }
 
-static void clientKeyUp(Client::State &clientState, const sf::Event::KeyEvent &sfEvent) {
+static void clientKeyUp(std::shared_ptr<Client::State> clientState, const sf::Event::KeyEvent &sfEvent) {
     Client::KeyPress event;
 
     event.keyCode = sfEvent.code;
@@ -27,10 +27,10 @@ static void clientKeyUp(Client::State &clientState, const sf::Event::KeyEvent &s
     event.altMod = sfEvent.alt;
     event.guiMod = sfEvent.system;
 
-    clientState.keyUp(event);
+    clientState->keyUp(event);
 }
 
-static void clientMouseMove(Client::State &clientState, const sf::Event::MouseMoveEvent &sfEvent) {
+static void clientMouseMove(std::shared_ptr<Client::State> clientState, const sf::Event::MouseMoveEvent &sfEvent) {
     Client::MouseMove event;
 
     event.x = sfEvent.x;
@@ -38,10 +38,10 @@ static void clientMouseMove(Client::State &clientState, const sf::Event::MouseMo
     event.xrel = sfEvent.x;
     event.yrel = sfEvent.y;
 
-    clientState.mouseMove(event);
+    clientState->mouseMove(event);
 }
 
-static void clientMouseButtonPress(Client::State &clientState, const sf::Event::MouseButtonEvent &sfEvent) {
+static void clientMouseButtonPress(std::shared_ptr<Client::State> clientState, const sf::Event::MouseButtonEvent &sfEvent) {
     Client::MouseClick event;
 
     event.x = sfEvent.x;
@@ -52,10 +52,10 @@ static void clientMouseButtonPress(Client::State &clientState, const sf::Event::
     event.x1Pressed = sfEvent.button == sf::Mouse::XButton1;
     event.x2Pressed = sfEvent.button == sf::Mouse::XButton2;
 
-    clientState.mouseButtonPress(event);
+    clientState->mouseButtonPress(event);
 }
 
-static void clientMouseButtonRelease(Client::State &clientState, const sf::Event::MouseButtonEvent &sfEvent) {
+static void clientMouseButtonRelease(std::shared_ptr<Client::State> clientState, const sf::Event::MouseButtonEvent &sfEvent) {
     Client::MouseClick event;
 
     event.x = sfEvent.x;
@@ -66,7 +66,7 @@ static void clientMouseButtonRelease(Client::State &clientState, const sf::Event
     event.x1Pressed = sfEvent.button == sf::Mouse::XButton1;
     event.x2Pressed = sfEvent.button == sf::Mouse::XButton2;
 
-    clientState.mouseButtonRelease(event);
+    clientState->mouseButtonRelease(event);
 }
 
 Common::DisplayMode Sys::SFML::changeDisplayMode(const Common::DisplayMode &displayMode, bool fullscreen) {
@@ -148,7 +148,7 @@ bool Sys::SFML::isFullScreen() const {
     return isFullscreen;
 }
 
-bool Sys::SFML::handleEvents(Client::State &clientState) {
+bool Sys::SFML::handleEvents(std::shared_ptr<Client::State> clientState) {
     sf::Event event;
     bool run = true;
 

@@ -320,8 +320,8 @@ bool Sys::GLFW::isFullScreen() const {
     return glfwGetWindowMonitor(window.get()) != nullptr;
 }
 
-bool Sys::GLFW::handleEvents(Client::State &clientState) {
-    glfwSetWindowUserPointer(window.get(), &clientState);
+bool Sys::GLFW::handleEvents(std::shared_ptr<Client::State> clientState) {
+    glfwSetWindowUserPointer(window.get(), clientState.get());
     glfwPollEvents();
     return !glfwWindowShouldClose(window.get());
 }

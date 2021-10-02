@@ -12,9 +12,6 @@
 
 namespace Sys {
     class NCurses : public Base {
-            void clientKeyDown(Client::State &clientState, const int ch) const;
-            void clientKeyUp(Client::State &clientState, const int ch) const;
-
             std::shared_ptr<WINDOW> window;
             const std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
          public:
@@ -28,7 +25,7 @@ namespace Sys {
             bool isFullScreen() const {
                 return true;
             };
-            bool handleEvents(Client::State &clientState);
+            bool handleEvents(std::shared_ptr<Client::State> clientState);
         
             void swapBuffers() {
                 box(window.get(), 0, 0);

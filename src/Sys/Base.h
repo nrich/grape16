@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 #include <utility>
+#include <memory>
 
 #include "Common/Shared.h"
 #include "Common/DisplayMode.h"
@@ -26,7 +27,7 @@ namespace Sys {
             virtual uint32_t getTicks() const = 0;
             virtual void clearScreen() const = 0;
             virtual void swapBuffers() = 0;
-            virtual bool handleEvents(Client::State &clientState) = 0;
+            virtual bool handleEvents(std::shared_ptr<Client::State> clientState) = 0;
             virtual void keyRepeat(bool enable) = 0;
             virtual void sound(uint8_t voice, float frequency, uint16_t duration, int waveForm) = 0;
             virtual ~Base() {}

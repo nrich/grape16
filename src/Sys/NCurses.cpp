@@ -16,7 +16,7 @@ static int _kbhit(void) {
     }
 }
 
-void Sys::NCurses::clientKeyDown(Client::State &clientState, const int ch) const {
+static void clientKeyDown(std::shared_ptr<Client::State> clientState, const int ch) {
     Client::KeyPress event;
 
     event.shiftMod = false;
@@ -429,7 +429,7 @@ void Sys::NCurses::clientKeyDown(Client::State &clientState, const int ch) const
         }
     }
     
-    clientState.keyDown(event);
+    clientState->keyDown(event);
 }
 
 Common::DisplayMode Sys::NCurses::changeDisplayMode(const Common::DisplayMode &displayMode, bool fullscreen) {
@@ -455,7 +455,7 @@ std::pair<Common::DisplayMode, Common::DisplayMode> Sys::NCurses::getPreviousNex
     return std::pair<Common::DisplayMode, Common::DisplayMode>(Common::DisplayMode(0, 0, 60), Common::DisplayMode(0, 0, 60));
 }
 
-bool Sys::NCurses::handleEvents(Client::State &clientState) {
+bool Sys::NCurses::handleEvents(std::shared_ptr<Client::State> clientState) {
     bool run = true;
     while (_kbhit())  {
         int ch = getch();

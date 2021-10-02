@@ -4,7 +4,10 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include <SDL_audio.h>
+
+#if defined(_WIN32)
 #include <SDL_syswm.h>
+#endif
 
 #include <algorithm>
 
@@ -257,7 +260,7 @@ static int sym2key(int sym) {
     }
 }
 
-static void clientKeyDown(Client::State &clientState, const SDL_KeyboardEvent &sdlEvent) {
+static void clientKeyDown(std::shared_ptr<Client::State> clientState, const SDL_KeyboardEvent &sdlEvent) {
     Client::KeyPress event;
 
     event.keyCode = sym2key(sdlEvent.keysym.sym);
@@ -266,10 +269,10 @@ static void clientKeyDown(Client::State &clientState, const SDL_KeyboardEvent &s
     event.altMod = sdlEvent.keysym.mod & KMOD_ALT;
     event.guiMod = sdlEvent.keysym.mod & KMOD_GUI;
 
-    clientState.keyDown(event);
+    clientState->keyDown(event);
 }
 
-static void clientKeyUp(Client::State &clientState, const SDL_KeyboardEvent &sdlEvent) {
+static void clientKeyUp(std::shared_ptr<Client::State> clientState, const SDL_KeyboardEvent &sdlEvent) {
     Client::KeyPress event;
 
     event.keyCode = sym2key(sdlEvent.keysym.sym);
@@ -278,10 +281,10 @@ static void clientKeyUp(Client::State &clientState, const SDL_KeyboardEvent &sdl
     event.altMod = sdlEvent.keysym.mod & KMOD_ALT;
     event.guiMod = sdlEvent.keysym.mod & KMOD_GUI;
 
-    clientState.keyUp(event);
+    clientState->keyUp(event);
 }
 
-static void clientMouseMove(Client::State &clientState, const SDL_MouseMotionEvent &sdlEvent) {
+static void clientMouseMove(std::shared_ptr<Client::State> clientState, const SDL_MouseMotionEvent &sdlEvent) {
     Client::MouseMove event;
 
     event.x = sdlEvent.x;
@@ -289,10 +292,10 @@ static void clientMouseMove(Client::State &clientState, const SDL_MouseMotionEve
     event.xrel = sdlEvent.xrel;
     event.yrel = sdlEvent.yrel;
 
-    clientState.mouseMove(event);
+    clientState->mouseMove(event);
 }
 
-static void clientMouseButtonPress(Client::State &clientState, const SDL_MouseButtonEvent &sdlEvent) {
+static void clientMouseButtonPress(std::shared_ptr<Client::State> clientState, const SDL_MouseButtonEvent &sdlEvent) {
     Client::MouseClick event;
 
     event.x = sdlEvent.x;
@@ -303,10 +306,10 @@ static void clientMouseButtonPress(Client::State &clientState, const SDL_MouseBu
     event.x1Pressed = sdlEvent.state & SDL_BUTTON_X1MASK;
     event.x2Pressed = sdlEvent.state & SDL_BUTTON_X2MASK;
 
-    clientState.mouseButtonPress(event);
+    clientState->mouseButtonPress(event);
 }
 
-static void clientMouseButtonRelease(Client::State &clientState, const SDL_MouseButtonEvent &sdlEvent) {
+static void clientMouseButtonRelease(std::shared_ptr<Client::State> clientState, const SDL_MouseButtonEvent &sdlEvent) {
     Client::MouseClick event;
 
     event.x = sdlEvent.x;
@@ -317,7 +320,7 @@ static void clientMouseButtonRelease(Client::State &clientState, const SDL_Mouse
     event.x1Pressed = sdlEvent.state & SDL_BUTTON_X1MASK;
     event.x2Pressed = sdlEvent.state & SDL_BUTTON_X2MASK;
 
-    clientState.mouseButtonRelease(event);
+    clientState->mouseButtonRelease(event);
 }
 
 
@@ -444,7 +447,7 @@ bool Sys::SDL2::isFullScreen() const {
     return (flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_FULLSCREEN_DESKTOP));
 }
 
-bool Sys::SDL2::handleEvents(Client::State &clientState) {
+bool Sys::SDL2::handleEvents(std::shared_ptr<Client::State> clientState) {
     SDL_Event event;
     bool run = true;
 

@@ -40,8 +40,8 @@ endif
 ifdef CONFIG_JS
     CXX = em++
     INC = -I src
-    LDFLAGS = $(shell $(EMSDK)/upstream/emscripten/system/bin/sdl2-config --libs) -lGL -lGLU -s EXIT_RUNTIME=1 -s VERBOSE=0 -s FORCE_ALIGNED_MEMORY=0 -s ALLOW_MEMORY_GROWTH=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s USE_SDL=2 -s LEGACY_GL_EMULATION=1 -s WASM=1
-    CPPFLAGS = -std=c++17 $(INC) -Wall $(shell $(EMSDK)/upstream/emscripten/system/bin/sdl2-config --cflags)
+    LDFLAGS = $(shell $(EMSDK)/upstream/emscripten/system/bin/sdl2-config --libs) -lGL -lGLU -s EXIT_RUNTIME=0 -s VERBOSE=0 -s FORCE_ALIGNED_MEMORY=0 -s ALLOW_MEMORY_GROWTH=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s USE_SDL=2 -s LEGACY_GL_EMULATION=1 -s WASM=1 -s ASYNCIFY=0 -s WARN_UNALIGNED=1 -fsanitize=address -gsource-map
+    CPPFLAGS = -g -std=c++17 $(INC) -Wall $(shell $(EMSDK)/upstream/emscripten/system/bin/sdl2-config --cflags) -fsanitize=address
 endif
 
 VERSION = $(shell cat VERSION.txt)

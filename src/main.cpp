@@ -9,7 +9,13 @@
 #include <ratio>
 #include <chrono>
 
+#if __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#endif
+
+#ifndef __EMSCRIPTEN__
 #include "ezOptionParser.hpp"
+#endif
 
 #ifdef _WIN32
 #include "mingw.thread.h"
@@ -25,9 +31,7 @@
 
 #if MINBUILD
 #else
-#ifdef __EMSCRIPTEN__
 #include "Sys/SDL2.h"
-#endif
 #endif
 
 #ifndef __EMSCRIPTEN__
@@ -97,8 +101,34 @@ std::shared_ptr<Emulator::Program> loadAssembly(const std::string &input, bool d
     return std::make_shared<Emulator::Program>(program);
 }
 
+#if __EMSCRIPTEN__
+void emscripten_loop(void *userdata) {
+#if 0
+    auto *args = static_cast<std::pair<std::shared_ptr<Sys::Base>, std::shared_ptr<Client::State>> *>(userdata);
+
+    auto sys = args->first;
+    auto clientState = args->second;
+
+    while (sys->handleEvents(clientState)) {
+        auto t1 = std::chrono::high_resolution_clock::now();
+
+        sys->clearScreen();
+        clientState->tick(0);
+        clientState->render(0);
+
+        sys->swapBuffers();
+
+        auto t4 = std::chrono::high_resolution_clock::now();
+        auto taken = std::chrono::duration_cast<std::chrono::milliseconds>(t4 - t1).count();
+
+        emscripten_sleep(std::chrono::milliseconds(16 - taken).count());
+    }
+#endif
+}
+#endif
 
 int main(int argc, char **argv) {
+#ifndef __EMSCRIPTEN__
     ez::ezOptionParser opt;
 
     opt.overview = "grape16 micro emulator";
@@ -231,9 +261,11 @@ int main(int argc, char **argv) {
         std::cout << usage << std::endl;
         exit(1);
     }
+#endif
 
     std::shared_ptr<Emulator::Program> program;
 
+#ifndef __EMSCRIPTEN__
     if (opt.lastArgs.size() == 1) {
         if (opt.isSet("-a")) {
             program = loadAssembly(*opt.lastArgs[0], opt.isSet("-d"));
@@ -261,14 +293,20 @@ int main(int argc, char **argv) {
             exit(0);
         }
     } else {
+#else
+    if (1) {
         program = std::make_shared<Emulator::Program>();
         program->add(Emulator::OpCode::NOP);
         program->add(Emulator::OpCode::HALT);
     }
+#endif
 
     std::shared_ptr<Renderer::Base> renderer;
     std::shared_ptr<Sys::Base> sys;
+
+#ifndef __EMSCRIPTEN__
     std::string sysname;
+
     opt.get("-s")->getString(sysname);
 
 #ifdef __EMSCRIPTEN__
@@ -308,35 +346,46 @@ int main(int argc, char **argv) {
         exit(0);
     }
 
+    uint32_t clockspeed = opt.isSet("-t") ? CLOCK_66MHz_at_60FPS : CLOCK_33MHz_at_60FPS;
+    bool debug = opt.isSet("-d");
+#else
+    uint32_t clockspeed = CLOCK_33MHz_at_60FPS;
+    bool debug = false;
+    sys = std::make_shared<Sys::SDL2>("Grape16");
+    renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
+#endif
+
     sys->keyRepeat(true);
 
     auto vm = std::make_shared<Emulator::VM>(0x003FFFFF);
 
-    uint32_t clockspeed = opt.isSet("-t") ? CLOCK_66MHz_at_60FPS : CLOCK_33MHz_at_60FPS;
-
     auto debugState = std::make_shared<Client::DebugState>(vm);
-    auto emulatorState = std::make_shared<Client::EmulatorState>(vm, program, clockspeed, opt.isSet("-d"));
+    auto emulatorState = std::make_shared<Client::EmulatorState>(vm, program, clockspeed, debug);
     auto displayMenuState = std::make_shared<Client::DisplayMenuState>();
 
-    Client::State clientState(
+    auto clientState = std::make_shared<Client::State>(
         std::dynamic_pointer_cast<Renderer::Base>(renderer),
         std::dynamic_pointer_cast<Sys::Base>(sys),
         std::pair<uint32_t, std::shared_ptr<Client::BaseState>>(0, std::dynamic_pointer_cast<Client::BaseState>(emulatorState))
     );
 
-    clientState.addState(1, std::dynamic_pointer_cast<Client::BaseState>(displayMenuState));
-    clientState.addState(2, std::dynamic_pointer_cast<Client::BaseState>(debugState));
+    clientState->addState(1, std::dynamic_pointer_cast<Client::BaseState>(displayMenuState));
+    clientState->addState(2, std::dynamic_pointer_cast<Client::BaseState>(debugState));
 
     static uint32_t lastRender = sys->getTicks();
     uint32_t renderTime = sys->getTicks();
 
+#if __EMSCRIPTEN__
+    auto args = std::pair<std::shared_ptr<Sys::Base>, std::shared_ptr<Client::State>>(sys, clientState);
+    emscripten_set_main_loop_arg(emscripten_loop, (void *)&args, -1, 1);
+#else
     while (sys->handleEvents(clientState)) {
         auto t1 = std::chrono::high_resolution_clock::now();
         sys->clearScreen();
-        clientState.tick(renderTime - lastRender);
-        auto t2 = std::chrono::high_resolution_clock::now();
-        clientState.render(renderTime - lastRender);
-        auto t3 = std::chrono::high_resolution_clock::now();
+        clientState->tick(renderTime - lastRender);
+        //auto t2 = std::chrono::high_resolution_clock::now();
+        clientState->render(renderTime - lastRender);
+        //auto t3 = std::chrono::high_resolution_clock::now();
 
         lastRender = renderTime;
 
@@ -344,10 +393,9 @@ int main(int argc, char **argv) {
         auto t4 = std::chrono::high_resolution_clock::now();
         auto taken = std::chrono::duration_cast<std::chrono::milliseconds>(t4 - t1).count();
 
-//        std::cerr << std::chrono::duration_cast<std::chrono::milliseconds>(t4 - t1).count() << std::endl;
-
         std::this_thread::sleep_for(std::chrono::milliseconds(16 - taken));
     }
+#endif
 
     exit(0);
 }
