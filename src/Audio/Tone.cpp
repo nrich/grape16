@@ -112,7 +112,7 @@ void Audio::Tone::generateSamples(float *stream, int length, float amplitude) {
         to.samplesLeft -= samplesToDo - i;
 
         while (i < samplesToDo) {
-            float pos = fmod(v/FREQUENCY,1.0);
+            float pos = std::fmod(v/FREQUENCY,1.0);
             v += to.freq;
 
             switch (to.waveForm) {
