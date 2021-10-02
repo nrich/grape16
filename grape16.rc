@@ -45,3 +45,4 @@ BEGIN
 END
 
 100 ICON "grape16.ico"
+GLFW_ICON ICON "grape16.ico"
