@@ -1,0 +1,47 @@
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <windows.h>
+
+#pragma code_page(65001)
+
+#ifdef _DEBUG
+#define VER_FILEFLAGS   VS_FF_DEBUG
+#else
+#define VER_FILEFLAGS   0x0L
+#endif
+
+#ifdef _WIN64
+#define VER_FILEDESCRIPTION_STR     "Grape16 (64-bit)"
+#define VER_ORIGINALFILENAME_STR    "grape16x64.exe"
+#else
+#define VER_FILEDESCRIPTION_STR     "Grape16"
+#define VER_ORIGINALFILENAME_STR    "grape16.exe"
+#endif
+
+1 VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  1,0,0,0
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "080904E4"
+    BEGIN
+      VALUE "CompanyName", "Neil Richardson"
+      VALUE "FileDescription", "Grape16"
+      VALUE "FileVersion", "0.0.1"
+      VALUE "InternalName", "grape16"
+      VALUE "LegalCopyright", "Copyright © 2021 Neil Richardson"
+      VALUE "OriginalFilename", "grape16.exe"
+      VALUE "ProductName", "Grape16"
+      VALUE "ProductVersion", "VERSION"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x809, 1252
+  END
+END
+
+100 ICON "grape16.ico"

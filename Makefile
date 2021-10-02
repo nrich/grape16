@@ -104,11 +104,11 @@ endif
 ifdef CONFIG_W32
 OBJS := \
 	$(COMMON_OBJS) \
-	#space.res
+	grape16.res
 else ifdef CONFIG_W64
 OBJS := \
 	$(COMMON_OBJS) \
-	#space.res
+	grape16.res
 else
 OBJS := \
 	$(COMMON_OBJS) \
