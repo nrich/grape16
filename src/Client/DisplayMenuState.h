@@ -1,4 +1,4 @@
-#ifndef __CLIENT_DISPLAYMENUSTATE_H___
+#ifndef __CLIENT_DISPLAYMENUSTATE_H__
 #define __CLIENT_DISPLAYMENUSTATE_H__
 
 #include "Client/BaseState.h"
@@ -18,7 +18,7 @@ namespace Client {
             void onMouseButtonRelease(State *state, const MouseClick &event);
             void onKeyDown(State *state, const KeyPress &event);
             void onKeyUp(State *state, const KeyPress &event);
-            void onEnterState(State *state, const int data);            
+            void onEnterState(State *state, std::any data);
     };
 };
 

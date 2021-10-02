@@ -9,7 +9,7 @@ using namespace Client;
 
 SystemIO::SystemIO() : cursor(0,0) {
     screenbuffer.resize(lines);
-    screenbuffer[cursor.Y()][cursor.X()] = 228;
+    screenbuffer[cursor.Y()][cursor.X()] = (char)228;
 
     screen.fill(0);
 
@@ -71,7 +71,7 @@ void SystemIO::write(uint8_t c) {
         screenbuffer[cursor.Y()][cursor.X()] = chr;
         cursor = (cursor + Point(1,0));
     } else {
-        screenbuffer[cursor.Y()][cursor.X()] = 228;
+        screenbuffer[cursor.Y()][cursor.X()] = (char)228;
     }
 
 }
@@ -141,7 +141,7 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
 
         if (c == '\n') {
             if (input == "LIST") {
-                for (auto const b : basic) {
+                for (auto const &b : basic) {
                     sysio->puts(std::to_string(b.first));
                     for (auto token : b.second) {
                         sysio->puts(std::string(" ") + token.str);

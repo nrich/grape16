@@ -29,6 +29,7 @@ namespace Sys {
             virtual bool handleEvents(Client::State &clientState) = 0;
             virtual void keyRepeat(bool enable) = 0;
             virtual void sound(uint8_t voice, float frequency, uint16_t duration, int waveForm) = 0;
+            virtual ~Base() {}
     };
 }; // Sys
 

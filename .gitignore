@@ -1,7 +1,9 @@
 grape16
 grape16.exe
 grape16x64.exe
+grape16.wasm
 .nix
 .win
 .win32
 .win64
+.emcc

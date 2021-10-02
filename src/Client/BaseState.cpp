@@ -45,3 +45,7 @@ void BaseState::changeDisplayMode(const Common::DisplayMode &displayMode) {
 
 }
 
+
+BaseState::~BaseState() {
+}
+

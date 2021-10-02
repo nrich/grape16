@@ -684,7 +684,6 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
 
     uint32_t offset = 0;
 
-    static uint32_t total_cycles = 0;
     static int16_t trace = 0;
 
     static std::shared_ptr<Debugger> tracer = std::make_shared<Debugger>();
@@ -1261,7 +1260,6 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
         }
 
         cycles += cost;
-        total_cycles += cost;
 
         if (cycles >= cycle_budget) {
             std::cerr << "Budget " << cycles << std::endl;

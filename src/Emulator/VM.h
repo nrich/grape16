@@ -242,11 +242,13 @@ namespace Emulator {
 
             virtual void sound(uint8_t voice, float frequency, uint16_t duration) = 0;
             virtual void voice(uint8_t voice, VoiceSetting setting, uint8_t value) = 0;
+            virtual ~SysIO() {}
     };
 
     class Debugger {
         public:
             virtual void debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack, value_t a, value_t b, value_t c, vmpointer_t idx, value_t memidx, uint32_t heap, std::stack<value_t> stack, std::vector<value_t> mem);
+            virtual ~Debugger() {}
     };
 
     class Program {

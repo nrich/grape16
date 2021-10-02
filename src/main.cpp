@@ -25,15 +25,21 @@
 
 #if MINBUILD
 #else
+#ifdef __EMSCRIPTEN__
 #include "Sys/SDL2.h"
 #endif
+#endif
 
+#ifndef __EMSCRIPTEN__
 #include "Sys/GLFW.h"
+#endif
 
 #ifndef _WIN32
+#ifndef __EMSCRIPTEN__
 #include "Sys/NCurses.h"
 #include "Renderer/NCurses.h"
 #include "Sys/SFML.h"
+#endif
 #endif
 
 #include "Emulator/VM.h"
@@ -261,9 +267,15 @@ int main(int argc, char **argv) {
     std::string sysname;
     opt.get("-s")->getString(sysname);
 
+#ifdef __EMSCRIPTEN__
+    if (sysname == "glfw") {
+        sys = std::make_shared<Sys::SDL2>("Grape16");
+        renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
+#else
     if (sysname == "glfw") {
         sys = std::make_shared<Sys::GLFW>("Grape16");
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
+#endif
 #if MINBUILD
 #else
     } else if (sysname == "sdl2") {
@@ -271,6 +283,7 @@ int main(int argc, char **argv) {
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
 #endif
 #ifndef _WIN32
+#ifndef __EMSCRIPTEN__
     } else if (sysname == "sfml") {
         sys = std::make_shared<Sys::SFML>("Grape16");
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
@@ -284,6 +297,7 @@ int main(int argc, char **argv) {
 
         sys = std::make_shared<Sys::NCurses>("Grape16", window);
         renderer = std::make_shared<Renderer::NCurses>(window);
+#endif
 #endif
     } else {
         std::cerr << "Unknown system" << std::endl;

@@ -27,6 +27,8 @@ namespace Client {
             virtual void onLeaveState(State *state, std::any data);
 
             virtual void changeDisplayMode(const Common::DisplayMode &displayMode);
+
+            virtual ~BaseState();
     };
 };
 

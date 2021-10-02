@@ -56,7 +56,7 @@ void DisplayMenuState::onMouseButtonRelease(State *state, const MouseClick &even
 
 }
 
-void DisplayMenuState::onEnterState(State *state, const int data) {
+void DisplayMenuState::onEnterState(State *state, std::any data) {
 }
 
 void DisplayMenuState::onKeyDown(State *state, const KeyPress &event) {
