@@ -125,9 +125,8 @@ void emscripten_loop(void *userdata) {
         auto t4 = std::chrono::high_resolution_clock::now();
         auto taken = std::chrono::duration_cast<std::chrono::milliseconds>(t4 - t1).count();
 
-        //std::cerr << "Sleep " << taken << std::endl;
-
-        //emscripten_sleep(std::chrono::milliseconds(16 - taken).count());
+        if (std::chrono::milliseconds(16 - taken).count() > 0)
+            emscripten_sleep(std::chrono::milliseconds(16 - taken).count());
     }
 }
 #endif

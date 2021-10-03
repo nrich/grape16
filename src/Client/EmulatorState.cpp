@@ -37,7 +37,7 @@ void SystemIO::setpixel(uint16_t x, uint16_t y, uint8_t pixel) {
 }
 
 uint8_t SystemIO::getpixel(uint16_t x, uint16_t y) {
-    return screen[y*320 + x];
+    return Common::Colour(screen[y*320 + x]).RGB332();
 }
 
 void SystemIO::write(uint8_t c) {
