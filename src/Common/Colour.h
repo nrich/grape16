@@ -20,6 +20,15 @@ namespace Common {
             a = rgba & 255; 
         }
 
+        static Colour Colour8(const uint8_t rgb332) {
+            uint8_t r = (rgb332 >> 5) * 255 / 7; 
+            uint8_t g = ((rgb332 >> 2) & 0x07) * 255 / 7;
+            uint8_t b = (rgb332 & 0x03) * 255 / 3;
+            uint8_t a = 255;
+
+            return Colour(r, g, b, a);
+        }
+
         //Accessors
         uint8_t R() const {
             return r;
@@ -37,6 +46,10 @@ namespace Common {
         uint32_t RGBA() const {
             uint32_t rgba = (r << 24) + (g << 16) + (b << 8) + a;
             return rgba;
+        }
+
+        uint8_t RGB332() const {
+            return (uint8_t)(((r * 7 / 255) << 5) + ((g * 7 / 255) << 2) + (b * 3 / 255));
         }
 
         //Comparison
@@ -78,7 +91,7 @@ namespace Common {
         std::string toString() const {
             std::ostringstream s;
 
-            s <<std::hex << r << "," << g << "," << b;
+            s <<std::hex << (int)r << "," << (int)g << "," << (int)b;
 
             return s.str();
         }

@@ -25,7 +25,12 @@
 
 #include "Client/State.h"
 
+#ifdef __EMSCRIPTEN__
+#include <gl4esinit.h>
 #include "Renderer/Immediate.h"
+#else
+#include "Renderer/Immediate.h"
+#endif
 
 #include "Common/DisplayMode.h"
 
@@ -103,7 +108,6 @@ std::shared_ptr<Emulator::Program> loadAssembly(const std::string &input, bool d
 
 #if __EMSCRIPTEN__
 void emscripten_loop(void *userdata) {
-#if 0
     auto *args = static_cast<std::pair<std::shared_ptr<Sys::Base>, std::shared_ptr<Client::State>> *>(userdata);
 
     auto sys = args->first;
@@ -121,9 +125,10 @@ void emscripten_loop(void *userdata) {
         auto t4 = std::chrono::high_resolution_clock::now();
         auto taken = std::chrono::duration_cast<std::chrono::milliseconds>(t4 - t1).count();
 
-        emscripten_sleep(std::chrono::milliseconds(16 - taken).count());
+        //std::cerr << "Sleep " << taken << std::endl;
+
+        //emscripten_sleep(std::chrono::milliseconds(16 - taken).count());
     }
-#endif
 }
 #endif
 
@@ -238,11 +243,7 @@ int main(int argc, char **argv) {
 #ifdef _WIN32
         "glfw", // Default.
 #else
-#ifdef __EMSCRIPTEN__
-        "sdl2", // Default.
-#else
         "ncurses", // Default.
-#endif
 #endif
         0, // Required?
         1, // Number of args expected.
@@ -281,25 +282,18 @@ int main(int argc, char **argv) {
         }
 
         if (opt.isSet("-p")) {
-/*
-            auto tokens = disassemble(*program);
-
-            for (auto token : tokens) {
-                std::cout << AsmTokenAsString(token) << std::endl; 
-            }
-*/
-
             std::cout << ProgramAsString(*program, true);
             exit(0);
         }
     } else {
 #else
+    initialize_gl4es();
     if (1) {
+#endif
         program = std::make_shared<Emulator::Program>();
         program->add(Emulator::OpCode::NOP);
         program->add(Emulator::OpCode::HALT);
     }
-#endif
 
     std::shared_ptr<Renderer::Base> renderer;
     std::shared_ptr<Sys::Base> sys;
@@ -309,15 +303,9 @@ int main(int argc, char **argv) {
 
     opt.get("-s")->getString(sysname);
 
-#ifdef __EMSCRIPTEN__
-    if (sysname == "sdl2") {
-        sys = std::make_shared<Sys::SDL2>("Grape16");
-        renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
-#else
     if (sysname == "glfw") {
         sys = std::make_shared<Sys::GLFW>("Grape16");
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
-#endif
 #if MINBUILD
 #else
     } else if (sysname == "sdl2") {
@@ -325,7 +313,6 @@ int main(int argc, char **argv) {
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
 #endif
 #ifndef _WIN32
-#ifndef __EMSCRIPTEN__
     } else if (sysname == "sfml") {
         sys = std::make_shared<Sys::SFML>("Grape16");
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
@@ -339,7 +326,6 @@ int main(int argc, char **argv) {
 
         sys = std::make_shared<Sys::NCurses>("Grape16", window);
         renderer = std::make_shared<Renderer::NCurses>(window);
-#endif
 #endif
     } else {
         std::cerr << "Unknown system" << std::endl;

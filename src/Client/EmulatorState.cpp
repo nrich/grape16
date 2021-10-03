@@ -9,9 +9,9 @@ using namespace Client;
 
 SystemIO::SystemIO() : cursor(0,0) {
     screenbuffer.resize(lines);
-    screenbuffer[cursor.Y()][cursor.X()] = (char)228;
+    screenbuffer[cursor.Y()][cursor.X()] = 'A';
 
-    screen.fill(0);
+    screen.fill(Common::Colour::Colour8(0).RGBA());
 
     for (size_t i = 0; i < voiceSettings.size(); i++) {
         voiceSettings[i] = {
@@ -26,14 +26,14 @@ SystemIO::SystemIO() : cursor(0,0) {
 }
 
 void SystemIO::cls() {
-    screen.fill(0);
+    screen.fill(Common::Colour::Black.RGBA());
     cursor = Point(0,0);
     screenbuffer.clear();
     screenbuffer.resize(lines);
 }
 
 void SystemIO::setpixel(uint16_t x, uint16_t y, uint8_t pixel) {
-    screen[y*320 + x] = pixel;
+    screen[y*320 + x] = Common::Colour::Colour8(pixel).RGBA();
 }
 
 uint8_t SystemIO::getpixel(uint16_t x, uint16_t y) {
@@ -101,7 +101,7 @@ std::string SystemIO::gets() {
 }
 
 void SystemIO::blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) {
-    uint8_t *ptr = screen.data();
+    uint32_t *ptr = screen.data();
     ptr += y*320 + x;
 
     std::memcpy(ptr, buffer.data(), buffer.size());
@@ -121,7 +121,7 @@ void EmulatorState::onRender(State *state, const uint32_t time) {
 
     uint16_t lineoffset = 0;
     for (auto line : sysio->getScreenBuffer()) {
-        state->getRenderer()->drawString(0, lineoffset*8, 8, 8, std::string(line.data()));
+        state->getRenderer()->drawString(0, lineoffset*8, 8, 8, std::string(line.data()), Common::Colour::White);
         lineoffset++;
     }
 }

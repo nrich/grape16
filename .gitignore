@@ -2,6 +2,8 @@ grape16
 grape16.exe
 grape16x64.exe
 grape16.wasm
+grape16.html
+grape16.js
 .nix
 .win
 .win32

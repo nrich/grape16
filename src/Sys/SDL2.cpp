@@ -390,6 +390,10 @@ std::vector<Common::DisplayMode> Sys::SDL2::getDisplayModes() const {
         }
     }
 
+    if (modes.size() == 0) {
+        modes.push_back(Common::DisplayMode(640, 480, 60));
+    }
+
     if (modes.front().Width() > modes.back().Width()) {
         std::reverse(modes.begin(), modes.end());
     }
@@ -556,6 +560,7 @@ Sys::SDL2::SDL2(const std::string &title) : repeatKeys(false) {
     //SDL_SetWindowFullscreen(window.get(), SDL_WINDOW_FULLSCREEN);
     SDL_GL_SetSwapInterval(0);
 
+    //glClearColor(1.0, 1.0, 1.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (int i = 0; i < VOICE_COUNT; i++)

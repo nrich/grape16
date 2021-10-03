@@ -39,9 +39,9 @@ endif
 
 ifdef CONFIG_JS
     CXX = em++
-    INC = -I src
-    LDFLAGS = $(shell $(EMSDK)/upstream/emscripten/system/bin/sdl2-config --libs) -lGL -lGLU -s EXIT_RUNTIME=0 -s VERBOSE=0 -s FORCE_ALIGNED_MEMORY=0 -s ALLOW_MEMORY_GROWTH=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s USE_SDL=2 -s LEGACY_GL_EMULATION=1 -s WASM=1 -s ASYNCIFY=0 -s WARN_UNALIGNED=1 -fsanitize=address -gsource-map
-    CPPFLAGS = -g -std=c++17 $(INC) -Wall $(shell $(EMSDK)/upstream/emscripten/system/bin/sdl2-config --cflags) -fsanitize=address
+    INC = -I /home/nrich/gl4es/include -I src
+    LDFLAGS = $(shell $(EMSDK)/upstream/emscripten/system/bin/sdl2-config --libs) -L /home/nrich/gl4es/lib -lGL -lGLU -s EXIT_RUNTIME=0 -s VERBOSE=0 -s FORCE_ALIGNED_MEMORY=0 -s ALLOW_MEMORY_GROWTH=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s USE_SDL=2 -s LEGACY_GL_EMULATION=0 -s FULL_ES2=1 -s FULL_ES3=1 -s WASM=1 -s ASYNCIFY=1 -s MIN_WEBGL_VERSION=2 -s MAX_WEBGL_VERSION=2 /home/nrich/gl4es/lib/libGL.a
+    CPPFLAGS = -std=c++17 $(INC) -Wall $(shell $(EMSDK)/upstream/emscripten/system/bin/sdl2-config --cflags)
 endif
 
 VERSION = $(shell cat VERSION.txt)
@@ -101,9 +101,19 @@ COMMON_OBJS := \
         src/Emulator/Assembler.o \
         src/Emulator/Basic.o \
 	src/Renderer/Base.o \
-	src/Renderer/Immediate.o \
-	src/Renderer/Immediate/Font.o \
 	src/main.o 
+
+ifdef CONFIG_JS
+COMMON_OBJS := \
+	$(COMMON_OBJS) \
+	src/Renderer/Immediate.o \
+	src/Renderer/Immediate/Font.o
+else
+COMMON_OBJS := \
+	$(COMMON_OBJS) \
+	src/Renderer/Immediate.o \
+	src/Renderer/Immediate/Font.o
+endif
 
 ifndef CONFIG_MIN
 COMMON_OBJS := \

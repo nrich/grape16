@@ -10,12 +10,13 @@
 
 namespace Renderer {
 
-enum class Mode {
-    Unknown,
-    Interface
-};
-
 class Immediate : public Base {
+    enum class Mode {
+        Unknown,
+        Interface
+    };
+
+
     Font font;
     Mode mode;
 

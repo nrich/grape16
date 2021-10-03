@@ -3,7 +3,6 @@
 #include <GL/glu.h>
 #include <iostream>
 
-
 #define GL_RESCALE_NORMAL                       0x803A
 #define GL_CLAMP_TO_EDGE                        0x812F
 #define GL_MAX_ELEMENTS_VERTICES                0x80E8
@@ -162,7 +161,7 @@ void Immediate::drawBuffer(const uint32_t *buffer, uint32_t width, uint32_t heig
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8, buffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, buffer);
     glEnable(GL_TEXTURE_2D);
 
     int toffset = verticalOffset;

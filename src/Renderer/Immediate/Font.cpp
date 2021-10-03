@@ -2637,7 +2637,12 @@ GLuint Font::CreateTexture(std::array<char, 64> pixels) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, 8, 8, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels.data());
     glTexImage2D(GL_TEXTURE_2D, 0, GL_INTENSITY, 8, 8, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels.data());
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA8, 8, 8, 0, GL_ALPHA, GL_UNSIGNED_BYTE, pixels.data());
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 8, 8, 0, GL_ALPHA, GL_UNSIGNED_BYTE, pixels.data());
+    //glTexImage2D(GL_TEXTURE_2D, 0,  GL_LUMINANCE_ALPHA, 8, 8, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels.data());
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 8, 8, 0, GL_RED, GL_UNSIGNED_BYTE, pixels.data());
 
     return texture;
 }
@@ -2645,7 +2650,11 @@ GLuint Font::CreateTexture(std::array<char, 64> pixels) {
 void Font::drawString(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const std::string &str) {
     glEnable (GL_BLEND);
     //glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     uint16_t offset = 0;
 

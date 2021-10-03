@@ -30,7 +30,7 @@ namespace Client {
             Point cursor;
 
             std::vector<std::array<char, chars>> screenbuffer;
-            std::array<uint8_t, 320*180> screen;
+            std::array<uint32_t, 320*180> screen;
 
             std::queue<char> inputBuffer;
             std::queue<SoundBufferObject> soundBuffer;
@@ -73,7 +73,7 @@ namespace Client {
             void sound(uint8_t voice, float frequency, uint16_t duration);
             void voice(uint8_t voice, Emulator::VoiceSetting setting, uint8_t value);
 
-            std::array<uint8_t, 320*180> getScreen() {
+            std::array<uint32_t, 320*180> getScreen() {
                 return screen;
             }
 
