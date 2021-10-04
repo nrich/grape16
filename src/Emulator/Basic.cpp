@@ -400,6 +400,12 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                 } else if (c == '\\' && line[i] == '"') {
                     c = '"';
                     i++;
+                } else if (c == '\\' && line[i] == 't') {
+                    c = '\t';
+                    i++;
+                } else if (c == '\\' && line[i] == '\\') {
+                    c = '\\';
+                    i++;
                 }
 
                 str += c;

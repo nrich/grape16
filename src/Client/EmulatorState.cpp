@@ -159,7 +159,7 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
                 for (auto const &b : basic) {
                     sysio->puts(std::to_string(b.first));
                     for (auto token : b.second) {
-                        sysio->puts(std::string(" ") + token.str);
+                        sysio->puts(std::string(" ") + token.toString());
                     }
                     sysio->write('\n');
                 }

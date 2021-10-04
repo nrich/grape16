@@ -103,6 +103,43 @@ namespace Emulator {
         int lbp;
         BasicToken(BasicTokenType type, const std::string &str, const int lbp=Precedence::NONE) : type(type), str(str), lbp(lbp) {
         }
+
+        std::string toString() const {
+            if (type == BasicTokenType::STRING) {
+                if (str.empty())
+                    return "\"\"";
+
+                std::string res = "\"";
+
+                for (const auto &c : str) {
+                    switch (c) {
+                        case '\n':
+                            res += '\\';
+                            res += 'n';
+                            break;
+                        case '\t':
+                            res += '\\';
+                            res += 't';
+                            break;
+                        case '\\':
+                            res += '\\';
+                            res += '\\';
+                            break;
+                        case '"':
+                            res += '\\';
+                            res += '"';
+                            break;
+                        default:
+                            res += c;
+                    }
+                } 
+
+                res += "\"";
+
+                return res;
+            }
+            return str;
+        }
     };
 };
 

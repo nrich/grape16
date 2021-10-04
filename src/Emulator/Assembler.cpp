@@ -124,12 +124,22 @@ static bool isWhitespace(char c) {
     return (c == ' ') || (c == '\t');
 }
 
-static void error(uint32_t linenumber, const std::string &err) {
-    std::cerr << "Error on line " << linenumber << ": " << err << std::endl;
-    exit(-1);
+static std::string str_toupper(std::string s) {
+    std::transform(
+        s.begin(), s.end(), s.begin(),
+        [](unsigned char c){ return std::toupper(c); }
+    );
+
+    return s;
 }
 
-std::pair<SysCall, RuntimeValue> getSyscall(const std::string &syscallname, const std::string &rtname) {
+static void error(uint32_t linenumber, const std::string &opcode, const std::string &err) {
+    std::ostringstream s;
+    s << "[" << linenumber << "] " << opcode << ": " << err;
+    throw std::domain_error(s.str());
+}
+
+std::pair<SysCall, RuntimeValue> getSysCall(uint32_t linenumber, const std::string &opcode, const std::string &syscallname, const std::string &rtname) {
     RuntimeValue rt;
     SysCall syscall;
 
@@ -152,8 +162,7 @@ std::pair<SysCall, RuntimeValue> getSyscall(const std::string &syscallname, cons
     } else if (syscallname == "VOICE") {
         syscall = SysCall::VOICE;
     } else {
-        std::cerr << "Unknown SysCall " << syscallname << std::endl;
-        exit(-1);
+        error(linenumber, opcode, "Unknown SysCall");
     }
 
     if (rtname == "NONE") {
@@ -167,8 +176,7 @@ std::pair<SysCall, RuntimeValue> getSyscall(const std::string &syscallname, cons
     } else if (rtname == "IDX") {
         rt = RuntimeValue::IDX;
     } else {
-        std::cerr << "Unknown RuntimeValue " << syscallname << std::endl;
-        exit(-1);
+        error(linenumber, opcode, "Unknown RuntimeValue");
     }
 
     return std::pair<SysCall, RuntimeValue>(syscall, rt);
@@ -197,8 +205,7 @@ std::pair<std::string, std::string> getSysCall(SysCall syscall, RuntimeValue rt)
     } else if (syscall == SysCall::VOICE) {
         syscallname = "VOICE";
     } else {
-        std::cerr << "Unknown SysCall " << (int)syscall << std::endl;
-        exit(-1);
+        throw std::domain_error("Unknown SysCall");
     }
 
     if (rt == RuntimeValue::NONE) {
@@ -212,8 +219,7 @@ std::pair<std::string, std::string> getSysCall(SysCall syscall, RuntimeValue rt)
     } else if (rt == RuntimeValue::IDX) {
         rtname = "IDX";
     } else {
-        std::cerr << "Unknown RuntimeValue " << syscallname << std::endl;
-        exit(-1);
+        throw std::domain_error("Unknown RuntimeValue");
     }
 
     return std::pair<std::string, std::string>(syscallname, rtname);
@@ -233,12 +239,11 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
         while (isAlpha(line[i++])) {
         }
 
-        auto opname = line.substr(start, i-start-1);
+        auto opname = str_toupper(line.substr(start, i-start-1));
 
         auto op = def.find(opname);
         if (op == def.end()) {
-            std::cerr << "Uknown opcode `" << opname << "'" << std::endl;
-            exit(-1);
+            error(linenum, opname, "Uknown opcode");
         }
 
         auto opcode = op->second.first;
@@ -254,14 +259,13 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
 
             int numstart = i;
 
-            if (!(line[i] == '-' || isDigit(line[i])))
-                std::cerr << "Expected arg: INT  for " << opname << std::endl;
+            if (!(line[i] == '-' || isDigit(line[i]))) 
+                error(linenum, opname, "INT expected");
             i++;
 
             while (i < line.size()) {
                 if (!isDigit(line[i])) {
-                    std::cerr << "Expected arg: INT  for " << opname << std::endl;
-                    exit(-1);
+                    error(linenum, opname, "INT expected");
                 }
                 i++;
             }
@@ -282,8 +286,7 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
 
                 return Emulator::AsmToken(opcode, (int32_t)(std::strtoul(line.substr(numstart).c_str(), nullptr, 16)));
             } else {
-                std::cerr << "Expected arg: POINTER for " << opname << std::endl;
-                exit(-1);
+                error(linenum, opname, "POINTER expected");
             }
         } else if (arg == ArgType::FLOAT) {
             while (isWhitespace(line[i])) {
@@ -294,7 +297,7 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
             int numstart = i;
 
             if (!(line[i] == '-' || isDigit(line[i])))
-                std::cerr << "Expected arg: FLOAT for " << opname << std::endl;
+                error(linenum, opname, "FLOAT expected");
             i++;
 
             while (isDigit(line[i]))
@@ -306,7 +309,7 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
                 while (isDigit(line[i]))
                     i++;
             } else {
-                std::cerr << "Expected arg: FLOAT  for " << opname << std::endl;
+                error(linenum, opname, "POINTER expected");
                 exit(-1);
             }
 
@@ -330,7 +333,7 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
             }
 
             if (!(line[i] == '-' || isDigit(line[i])))
-                std::cerr << "Expected arg: FLOAT for " << opname << std::endl;
+                error(linenum, opname, "FLOAT expected");
             i++;
 
             while (isDigit(line[i]))
@@ -371,7 +374,7 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
 
             auto rt  = line.substr(rtstart, i-rtstart-1);
 
-            return Emulator::AsmToken(opcode, getSyscall(syscall, rt));
+            return Emulator::AsmToken(opcode, getSysCall(linenum, opname, syscall, rt));
         } else if (arg == ArgType::STRING) {
             while (isWhitespace(line[i])) {
                 i++;
@@ -379,7 +382,7 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
             }
 
             if (line[i] != '"') {
-                std::cerr << "Expected arg: STRING  for " << opname << std::endl;
+                error(linenum, opname, "STRING expected");
                 exit(-1);
             }
 
@@ -394,6 +397,12 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
                     i++;
                 } else if (c == '\\' && line[i] == '"') {
                     c = '"';
+                    i++;
+                } else if (c == '\\' && line[i] == 't') {
+                    c = '\t';
+                    i++;
+                } else if (c == '\\' && line[i] == '\\') {
+                    c = '\\';
                     i++;
                 }
 
@@ -433,8 +442,8 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
 
             return Emulator::AsmToken(opcode, (int16_t)0);
         } else {
-            std::cerr << "TODO " << opname;
-            exit(-1);
+            error(linenum, opname, "TODO");
+            return Emulator::AsmToken(OpCode::NOP);
         }
     }
 }
@@ -593,7 +602,32 @@ std::string AsmTokenAsString(const Emulator::AsmToken &token) {
                 s << Emulator::ValueToString(value);
         } else if (std::holds_alternative<std::string>(*token.arg)) {
             auto value = std::get<std::string>(*token.arg);
-            s << "\"" << value << "\"";
+            std::string res;
+
+            for (const auto &c : value) {
+                switch (c) {
+                    case '\n':
+                        res += '\\';
+                        res += 'n';
+                        break;
+                    case '\t':
+                        res += '\\';
+                        res += 't';
+                        break;
+                    case '\\':
+                        res += '\\';
+                        res += '\\';
+                        break;
+                    case '"':
+                        res += '\\';
+                        res += '"';
+                        break;
+                    default:
+                        res += c;
+                }
+            }
+
+            s << "\"" << res << "\"";
         } else if (std::holds_alternative<std::pair<SysCall, RuntimeValue>>(*token.arg)) {
             auto value = std::get<std::pair<SysCall, RuntimeValue>>(*token.arg);
             auto syscall = getSysCall(value.first, value.second);
