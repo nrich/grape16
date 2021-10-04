@@ -375,8 +375,7 @@ std::string Program::readString(uint32_t pos) const {
 }
 
 void VM::error(const std::string &err) {
-    std::cerr << "Runtime error: "<< err << std::endl;
-    exit(-1);
+    throw std::runtime_error(err);
 }
 
 void VM::set(vmpointer_t ptr, value_t v) {

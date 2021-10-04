@@ -172,6 +172,8 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
                     sysio->puts(ia.what() + std::string("\n"));
                 } catch (const std::domain_error &de) {
                     sysio->puts(de.what() + std::string("\n"));
+                } catch (const std::runtime_error &re) {
+                    sysio->puts(std::string("Runtime Error: ") + re.what() + std::string("\n"));
                 }
                 done = false;
             } else if (cmd == "CLS") {

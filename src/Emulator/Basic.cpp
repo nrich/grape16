@@ -232,7 +232,7 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     else
-                    if (token.substr(0,2) == "FN") {
+                    if (keyword.substr(0,2) == "FN") {
                         tokenType = BasicTokenType::USRFUNCTION;
                     }
                     break;
