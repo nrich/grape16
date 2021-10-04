@@ -372,7 +372,7 @@ Sys::GLFW::GLFW(const std::string &title) {
 
     glfwMakeContextCurrent(window.get());
 
-    glfwSwapInterval(1);
+    glfwSwapInterval(0);
 
     glfwSetKeyCallback(window.get(), key_callback);
 
