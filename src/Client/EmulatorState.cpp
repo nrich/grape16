@@ -4,6 +4,7 @@
 #include "Common/WaveForm.h"
 
 #include <vector>
+#include <iostream>
 
 using namespace Client;
 
@@ -164,8 +165,14 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
                 }
             } else if (cmd == "RUN") {
                 auto run = program->add(Emulator::OpCode::NOP);
-                compile(basic, *program);
-                vm->Jump(run);
+                try {
+                    compile(basic, *program);
+                    vm->Jump(run);
+                } catch (const std::invalid_argument &ia) {
+                    sysio->puts(ia.what() + std::string("\n"));
+                } catch (const std::domain_error &de) {
+                    sysio->puts(de.what() + std::string("\n"));
+                }
                 done = false;
             } else if (cmd == "CLS") {
                 sysio->cls();
