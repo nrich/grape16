@@ -2648,12 +2648,12 @@ GLuint Font::CreateTexture(std::array<char, 64> pixels) {
 }
 
 void Font::drawString(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const std::string &str) {
-    glEnable (GL_BLEND);
+    glEnable(GL_BLEND);
     //glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     uint16_t offset = 0;

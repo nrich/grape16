@@ -169,7 +169,7 @@ void Immediate::drawBuffer(const uint32_t *buffer, uint32_t width, uint32_t heig
     int loffset = 0;
     int roffset = 0;
 
-    int VWIDTH = 640;
+    int VWIDTH = 320;
     int VHEIGHT = virtualHeight;
 
     glBegin(GL_QUADS);
@@ -194,10 +194,8 @@ void Immediate::drawBuffer(const uint8_t *buffer, uint32_t width, uint32_t heigh
 
     glEnable(GL_BLEND);
 
-
     GLuint screen;
     glGenTextures(1, &screen);
-
 
     glBindTexture(GL_TEXTURE_2D, screen);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
