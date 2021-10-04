@@ -31,7 +31,7 @@ SystemIO::SystemIO() : cursor(0,0) {
 }
 
 void SystemIO::cls() {
-    screen.fill(Common::Colour::Green.RGBA());
+    screen.fill(Common::Colour::Black.RGBA());
     cursor = Point(0,0);
     screenbuffer.clear();
     screenbuffer.resize(lines);
