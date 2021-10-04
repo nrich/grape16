@@ -106,6 +106,15 @@ static bool isWhitespace(char c) {
     return (c == ' ') || (c == '\t');
 }
 
+static std::string str_toupper(std::string s) {
+    std::transform(
+        s.begin(), s.end(), s.begin(),
+        [](unsigned char c){ return std::toupper(c); }
+    );
+
+    return s;
+}
+
 std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) {
     std::vector<BasicToken> tokens;
     size_t i = 0;
@@ -153,71 +162,72 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                 i++;
 
             auto token = line.substr(start, i-start);
+            auto keyword = str_toupper(token);
 
-            switch (token[0]) {
+            switch (keyword[0]) {
                 case 'A':
-                    if (token == "AND") {
+                    if (keyword == "AND") {
                         tokenType = BasicTokenType::AND;
                         precedence = Precedence::AND;
                     }
                     else
-                    if (token == "ABS") {
+                    if (keyword == "ABS") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     else
-                    if (line.substr(i, 3) == "TAN") {
+                    if (keyword == "TAN") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     break;
                 case 'B':
-                    if (token == "BEEP") {
+                    if (keyword == "BEEP") {
                         tokenType = BasicTokenType::BEEP;
                     }
                 case 'C':
-                    if (token == "CLS") {
+                    if (keyword == "CLS") {
                         tokenType = BasicTokenType::CLS;
                     }
                     else
-                    if (token == "CINT") {
+                    if (keyword == "CINT") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     else
-                    if (token == "COS") {
+                    if (keyword == "COS") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     else
-                    if (token == "CSNG") {
+                    if (keyword == "CSNG") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     break;
                 case 'D':
-                    if (token == "DATA") {
+                    if (keyword == "DATA") {
                         tokenType = BasicTokenType::DATA;
                     }
                     else
-                    if (token == "DEF") {
+                    if (keyword == "DEF") {
                         tokenType = BasicTokenType::DEF;
                     }
                     else
-                    if (token == "DIM") {
+                    if (keyword == "DIM") {
                         tokenType = BasicTokenType::DIM;
                     }
                     break;
                 case 'E':
-                    if (token == "ELSE") {
+                    if (keyword == "ELSE") {
                         tokenType = BasicTokenType::ELSE;
                     }
                     else
-                    if (token == "END") {
+                    if (keyword == "END") {
                         tokenType = BasicTokenType::END;
                     }
                     break;
                 case 'F':
-                    if (token == "FOR") {
+                    if (keyword == "FOR") {
                         tokenType = BasicTokenType::FOR;
                     }
                     else
-                    if (token == "FIX") {
+                    if (keyword == "FIX") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     else
@@ -226,152 +236,155 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                     }
                     break;
                 case 'G':
-                    if (token == "GOTO") {
+                    if (keyword == "GOTO") {
                         tokenType = BasicTokenType::GOTO;
                     }
                     else
-                    if (token == "GOSUB") {
+                    if (keyword == "GOSUB") {
                         tokenType = BasicTokenType::GOSUB;
                     }
                     break;
                 case 'I':
-                    if (token == "IF") {
+                    if (keyword == "IF") {
                         tokenType = BasicTokenType::IF;
                     }
                     else
-                    if (token == "INKEY") {
+                    if (keyword == "INKEY") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     else
-                    if (token == "INPUT") {
+                    if (keyword == "INPUT") {
                         tokenType = BasicTokenType::INPUT;
                     }
                     else
-                    if (token == "INT") {
+                    if (keyword == "INT") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     break;
                 case 'L':
-                    if (token == "LET") {
+                    if (keyword == "LET") {
                         tokenType = BasicTokenType::LET;
                     }
                     else
-                    if (token == "LINE") {
+                    if (keyword == "LINE") {
                         tokenType = BasicTokenType::LINE;
                     }
                     else
-                    if (token == "LOG") {
+                    if (keyword == "LOG") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     break;
                 case 'N':
-                    if (token == "NEXT") {
+                    if (keyword == "NEXT") {
                         tokenType = BasicTokenType::NEXT;
                     }
                     else
-                    if (token == "NOT") {
+                    if (keyword == "NOT") {
                         tokenType = BasicTokenType::NOT;
                     }
                     break;
                 case 'O':
-                    if (token == "OR") {
+                    if (keyword == "OR") {
                         precedence = Precedence::OR;
                         tokenType = BasicTokenType::OR;
                     }
                     break;
                 case 'P':
-                    if (token == "PEEK") {
+                    if (keyword == "PEEK") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     else
-                    if (token == "POKE") {
+                    if (keyword == "POKE") {
                         tokenType = BasicTokenType::POKE;
                     }
                     else
-                    if (token == "PRINT") {
+                    if (keyword == "PRINT") {
                         tokenType = BasicTokenType::PRINT;
                     }
                     else
-                    if (token == "PSET") {
+                    if (keyword == "PSET") {
                         tokenType = BasicTokenType::PSET;
                     }
                     else
-                    if (token == "PUT") {
+                    if (keyword == "PUT") {
                         tokenType = BasicTokenType::PUT;
                     }
                     break;
                 case 'R':
-                    if (token == "READ") {
+                    if (keyword == "READ") {
                         tokenType = BasicTokenType::READ;
                     }
                     else
-                    if (token == "REM") {
+                    if (keyword == "REM") {
                         tokenType = BasicTokenType::REM;
                     }
                     else
-                    if (token == "RETURN") {
+                    if (keyword == "RETURN") {
                         tokenType = BasicTokenType::RETURN;
                     }
                     break;
                 case 'S':
-                    if (token == "SGN") {
+                    if (keyword == "SGN") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     else
-                    if (token == "SIN") {
+                    if (keyword == "SIN") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     else
-                    if (token == "SQR") {
+                    if (keyword == "SQR") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     else
-                    if (token == "SOUND") {
+                    if (keyword == "SOUND") {
                         tokenType = BasicTokenType::SOUND;
                     }
                     else
-                    if (token == "STEP") {
+                    if (keyword == "STEP") {
                         tokenType = BasicTokenType::STEP;
                     }
                     else
-                    if (token == "SWAP") {
+                    if (keyword == "SWAP") {
                         tokenType = BasicTokenType::SWAP;
                     }
                     break;
                 case 'T':
-                    if (token == "TAN") {
+                    if (keyword == "TAN") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     else
-                    if (token == "THEN") {
+                    if (keyword == "THEN") {
                         tokenType = BasicTokenType::THEN;
                     }
                     else
-                    if (token == "TO") {
+                    if (keyword == "TO") {
                         tokenType = BasicTokenType::TO;
                     }
                     break;
                 case 'V':
-                    if (token == "VARPTR") {
+                    if (keyword == "VARPTR") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     break;
                 case 'W':
-                    if (token == "WAIT") {
+                    if (keyword == "WAIT") {
                         tokenType = BasicTokenType::WAIT;
                     }
                     else
-                    if (token == "WHILE") {
+                    if (keyword == "WHILE") {
                         tokenType = BasicTokenType::WHILE;
                     }
                     else
-                    if (token == "WEND") {
+                    if (keyword == "WEND") {
                         tokenType = BasicTokenType::WEND;
                     }
                     break;
                 default:
                     break;
             }
+
+            if (tokenType != BasicTokenType::IDENTIFIER)
+                token = keyword;
 
             tokens.push_back(BasicToken(tokenType, token, precedence));
         } else if (line[i] == '"') {
@@ -1417,7 +1430,6 @@ static void dim_declaration(Program &program, uint32_t linenumber, const std::ve
         program.add(OpCode::MOVCB);
     }
 }
-
 
 void compile(const std::map<uint32_t, std::vector<BasicToken>> &lines, Program &program) {
     uint32_t entry = program.add(OpCode::NOP);

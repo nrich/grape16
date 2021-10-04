@@ -11,8 +11,9 @@ namespace Common {
         uint8_t b;
         uint8_t a;
     public:
-        Colour(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a) : r(r), g(g), b(b), a(a) {} 
-        Colour(const uint8_t r, const uint8_t g, const uint8_t b) : r(r), g(g), b(b), a(255) {} 
+        Colour() : r(0), g(0), b(0), a(255) {}
+        Colour(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a) : r(r), g(g), b(b), a(a) {}
+        Colour(const uint8_t r, const uint8_t g, const uint8_t b) : r(r), g(g), b(b), a(255) {}
         Colour(const uint32_t rgba) {
             r = rgba >> 24 & 255; 
             g = rgba >> 16 & 255; 

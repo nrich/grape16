@@ -35,6 +35,8 @@ namespace Client {
             std::queue<char> inputBuffer;
             std::queue<SoundBufferObject> soundBuffer;
             std::array<std::map<Emulator::VoiceSetting, uint8_t>, VOICE_COUNT> voiceSettings;
+
+            std::array<Common::Colour, 256> colourLookup;
         public:
             SystemIO();
 

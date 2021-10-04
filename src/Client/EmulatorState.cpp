@@ -9,7 +9,7 @@ using namespace Client;
 
 SystemIO::SystemIO() : cursor(0,0) {
     screenbuffer.resize(lines);
-    screenbuffer[cursor.Y()][cursor.X()] = 'A';
+    screenbuffer[cursor.Y()][cursor.X()] = (char)228;
 
     screen.fill(Common::Colour::Colour8(0).RGBA());
 
@@ -23,6 +23,10 @@ SystemIO::SystemIO() : cursor(0,0) {
             {Emulator::VoiceSetting::RELEASE, 0}
         };
     }
+
+    for (size_t i = 0; i < colourLookup.size(); i++) {
+        colourLookup[i] = Common::Colour::Colour8(i);
+    }
 }
 
 void SystemIO::cls() {
@@ -33,7 +37,7 @@ void SystemIO::cls() {
 }
 
 void SystemIO::setpixel(uint16_t x, uint16_t y, uint8_t pixel) {
-    screen[y*320 + x] = Common::Colour::Colour8(pixel).RGBA();
+    screen[y*320 + x] = colourLookup[pixel].RGBA();
 }
 
 uint8_t SystemIO::getpixel(uint16_t x, uint16_t y) {
@@ -126,6 +130,15 @@ void EmulatorState::onRender(State *state, const uint32_t time) {
     }
 }
 
+static std::string str_toupper(std::string s) {
+    std::transform(
+        s.begin(), s.end(), s.begin(),
+        [](unsigned char c){ return std::toupper(c); }
+    );
+
+    return s;
+}
+
 void EmulatorState::onTick(State *state, const uint32_t time) {
     static bool done = false;
     static std::string input = "";
@@ -140,7 +153,8 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
         sysio->write(c);
 
         if (c == '\n') {
-            if (input == "LIST") {
+            auto cmd = str_toupper(input);
+            if (cmd == "LIST") {
                 for (auto const &b : basic) {
                     sysio->puts(std::to_string(b.first));
                     for (auto token : b.second) {
@@ -148,18 +162,22 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
                     }
                     sysio->write('\n');
                 }
-            } else if (input == "RUN") {
+            } else if (cmd == "RUN") {
                 auto run = program->add(Emulator::OpCode::NOP);
                 compile(basic, *program);
                 vm->Jump(run);
                 done = false;
-            } else if (input == "CLS") {
+            } else if (cmd == "CLS") {
                 sysio->cls();
-            } else if (input == "CLEAR") {
+            } else if (cmd == "CLEAR") {
                 basic.clear();
             } else {
                 auto basicline = parseLine(input);
-                basic[basicline.first] = basicline.second;
+                if (basicline.first) {
+                    basic[basicline.first] = basicline.second;
+                } else {
+                    sysio->puts("? Unknown command\n");
+                }
             }
 
             input = "";
