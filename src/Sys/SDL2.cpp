@@ -5,7 +5,8 @@
 #include <SDL_opengl.h>
 #include <SDL_audio.h>
 
-#if defined(_WIN32)
+#if defined(_WIN32) || defined(_WIN64)
+#include <winuser.h>
 #include <SDL_syswm.h>
 #endif
 
@@ -511,7 +512,7 @@ static void audio_callback(void *userData, uint8_t *_stream, int _length) {
     std::memcpy(stream, buffer.data(), sizeof(float) * length);
 }
 
-#if defined(_WIN32) && defined(GCL_HICON)
+#if defined(_WIN32)
 static void setWindowsIcon(SDL_Window *sdlWindow) {
     HINSTANCE handle = ::GetModuleHandle(nullptr);
     HICON icon = ::LoadIcon(handle, "IDI_MAIN_ICON");
@@ -520,7 +521,7 @@ static void setWindowsIcon(SDL_Window *sdlWindow) {
         SDL_VERSION(&wminfo.version);
         if(SDL_GetWindowWMInfo(sdlWindow,&wminfo) == 1){
             HWND hwnd = wminfo.info.win.window;
-            ::SetClassLong(hwnd, GCL_HICON, reinterpret_cast<LONG>(icon));
+            ::SetClassLongPtr(hwnd, GCLP_HICON, reinterpret_cast<LONG_PTR>(icon));
         }
     }
 }
@@ -600,7 +601,7 @@ Sys::SDL2::SDL2(const std::string &title) : repeatKeys(false) {
         }
     }
 
-    #if defined(_WIN32) && defined(GCL_HICON)
+    #if defined(_WIN32)
     setWindowsIcon(window.get());
     #endif
 }
