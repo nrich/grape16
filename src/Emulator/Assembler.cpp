@@ -446,6 +446,9 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
             return Emulator::AsmToken(OpCode::NOP);
         }
     }
+
+    error(linenum, opname, "This should never be reached");
+    return Emulator::AsmToken(OpCode::NOP);
 }
 
 std::vector<Emulator::AsmToken> parseAsmFile(const std::string &filename) {
