@@ -486,7 +486,7 @@ bool Sys::SDL2::handleEvents(std::shared_ptr<Client::State> clientState) {
     return run;
 }
 
-void Sys::SDL2::sound(uint8_t voice, float frequency, uint16_t duration, int waveForm) {
+void Sys::SDL2::sound(uint8_t voice, float frequency, uint16_t duration, uint8_t waveForm, uint8_t volume, uint8_t attack, uint8_t decay, uint8_t sustain, uint8_t release) {
     SDL_LockAudioDevice(dev);
     if (duration == 0) {
         SDL_PauseAudioDevice(dev, 1);

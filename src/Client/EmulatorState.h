@@ -13,15 +13,31 @@
 namespace Client {
     class State;
 
+    struct VoiceConfig {
+        uint8_t waveForm;
+        uint8_t volume;
+        uint8_t attack;
+        uint8_t decay;
+        uint8_t sustain;
+        uint8_t release;
+
+        VoiceConfig() : waveForm(0), volume(255), attack(0), decay(0), sustain(255), release(0) {
+        }
+
+        VoiceConfig(uint8_t waveForm, uint8_t volume, uint8_t attack, uint8_t decay, uint8_t sustain, uint8_t release) : waveForm(waveForm), volume(volume), attack(attack), decay(decay), sustain(sustain), release(release) {
+        }
+    };
+
     struct SoundBufferObject {
         uint8_t voice;
         float frequency;
         uint16_t duration;
-        int waveForm = 0;
+        VoiceConfig voiceConfig;
 
-        SoundBufferObject(uint8_t voice, float frequency, uint16_t duration, int waveForm = 0) : voice(voice), frequency(frequency), duration(duration), waveForm(waveForm) {
+        SoundBufferObject(uint8_t voice, float frequency, uint16_t duration, VoiceConfig voiceConfig) : voice(voice), frequency(frequency), duration(duration), voiceConfig(voiceConfig) {
         }
     };
+
 
     class SystemIO : public Emulator::SysIO {
             const static int32_t chars = 40;
@@ -34,9 +50,9 @@ namespace Client {
 
             std::queue<char> inputBuffer;
             std::queue<SoundBufferObject> soundBuffer;
-            std::array<std::map<Emulator::VoiceSetting, uint8_t>, VOICE_COUNT> voiceSettings;
 
             std::array<Common::Colour, 256> colourLookup;
+            std::array<VoiceConfig, VOICE_COUNT> voices;
         public:
             SystemIO();
 
@@ -73,7 +89,7 @@ namespace Client {
             void blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer);
 
             void sound(uint8_t voice, float frequency, uint16_t duration);
-            void voice(uint8_t voice, Emulator::VoiceSetting setting, uint8_t value);
+            void voice(uint8_t voice, uint8_t waveForm, uint8_t volume, uint8_t attack, uint8_t decay, uint8_t sustain, uint8_t release);
 
             std::array<uint32_t, 320*180> getScreen() {
                 return screen;
@@ -86,6 +102,10 @@ namespace Client {
                 auto sound = soundBuffer.front();
                 soundBuffer.pop();
                 return sound;
+            }
+
+            VoiceConfig getVoice(const uint8_t voice) {
+                return voices[voice];
             }
     };
 

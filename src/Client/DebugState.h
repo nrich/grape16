@@ -45,7 +45,7 @@ namespace Client {
             void sound(uint8_t voice, float frequency, uint16_t duration) {
             }
 
-            void voice(uint8_t voice, Emulator::VoiceSetting setting, uint8_t value) {
+            void voice(uint8_t voice, uint8_t waveForm, uint8_t volume, uint8_t attack, uint8_t decay, uint8_t sustain, uint8_t release) {
             }
     };
 

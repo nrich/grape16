@@ -241,7 +241,7 @@ namespace Emulator {
             virtual void blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) = 0;
 
             virtual void sound(uint8_t voice, float frequency, uint16_t duration) = 0;
-            virtual void voice(uint8_t voice, VoiceSetting setting, uint8_t value) = 0;
+            virtual void voice(uint8_t voice, uint8_t waveForm, uint8_t volume, uint8_t attack, uint8_t decay, uint8_t sustain, uint8_t release) = 0;
             virtual ~SysIO() {}
     };
 
@@ -350,7 +350,6 @@ namespace Emulator {
             std::map<uint32_t, std::function<void(VM*)>> interupts;
 
             std::stack<value_t> stack;
-
 
             void error(const std::string &err);
 

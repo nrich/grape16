@@ -330,7 +330,7 @@ void Sys::GLFW::keyRepeat(bool enable) {
     RepeatKeys = enable;
 }
 
-void Sys::GLFW::sound(uint8_t voice, float frequency, uint16_t duration, int waveForm) {
+void Sys::GLFW::sound(uint8_t voice, float frequency, uint16_t duration, uint8_t waveForm, uint8_t volume, uint8_t attack, uint8_t decay, uint8_t sustain, uint8_t release) {
     voices[voice].tone(frequency, duration, waveForm);
 }
 

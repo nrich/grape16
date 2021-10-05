@@ -86,7 +86,7 @@ Audio::Tone::Tone() {
     v = 0.0;
 }
 
-void Audio::Tone::tone(float freq, uint16_t duration, int waveForm) {
+void Audio::Tone::tone(float freq, uint16_t duration, uint8_t waveForm) {
     ToneObject to;
     to.freq = (double)freq;
     to.samplesLeft = duration * FREQUENCY / 1000;

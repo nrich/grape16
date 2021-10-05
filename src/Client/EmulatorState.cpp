@@ -14,17 +14,6 @@ SystemIO::SystemIO() : cursor(0,0) {
 
     screen.fill(Common::Colour::Colour8(0).RGBA());
 
-    for (size_t i = 0; i < voiceSettings.size(); i++) {
-        voiceSettings[i] = {
-            {Emulator::VoiceSetting::VOLUME, 255},
-            {Emulator::VoiceSetting::WAVEFORM, Common::WaveForm::SINE},
-            {Emulator::VoiceSetting::ATTACK, 0},
-            {Emulator::VoiceSetting::DECAY, 0},
-            {Emulator::VoiceSetting::SUSTAIN, 0},
-            {Emulator::VoiceSetting::RELEASE, 0}
-        };
-    }
-
     for (size_t i = 0; i < colourLookup.size(); i++) {
         colourLookup[i] = Common::Colour::Colour8(i);
     }
@@ -113,12 +102,13 @@ void SystemIO::blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) {
 }
 
 void SystemIO::sound(uint8_t voice, float frequency, uint16_t duration) {
-    int waveForm = (int)voiceSettings[voice][Emulator::VoiceSetting::WAVEFORM];
-    soundBuffer.push(SoundBufferObject(voice, frequency, duration, waveForm));
+    auto voiceConfig = voices[voice];
+
+    soundBuffer.push(SoundBufferObject(voice, frequency, duration, voiceConfig));
 }
 
-void SystemIO::voice(uint8_t voice, Emulator::VoiceSetting setting, uint8_t value) {
-    voiceSettings[voice][setting] = value;
+void SystemIO::voice(uint8_t voice, uint8_t waveForm, uint8_t volume, uint8_t attack, uint8_t decay, uint8_t sustain, uint8_t release) {
+    voices[voice] = VoiceConfig(waveForm, volume, attack, decay, sustain, release);
 }
 
 void EmulatorState::onRender(State *state, const uint32_t time) {
@@ -200,7 +190,8 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
     std::optional<SoundBufferObject> s = sysio->nextSound();
     while (s != std::nullopt) {
         auto sound = *s;
-        state->getSys()->sound(sound.voice, sound.frequency, sound.duration, sound.waveForm);
+        auto voice = sysio->getVoice(sound.voice);
+        state->getSys()->sound(sound.voice, sound.frequency, sound.duration, voice.waveForm, voice.volume, voice.attack, voice.decay, voice.sustain, voice.release);
         s = sysio->nextSound();
     }
 }

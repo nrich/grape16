@@ -632,11 +632,23 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
             }
             break;
         case SysCall::VOICE: {
-                uint8_t voice = ValueAsByte(a);
-                VoiceSetting setting = (VoiceSetting)ValueAsByte(b);
-                uint8_t value = ValueAsByte(c);
+                uint8_t voice;
 
-                sysIO->voice(voice, setting, value);
+                switch (rvalue) {
+                    case RuntimeValue::A:
+                        voice = ByteAsValue(a);
+                        break;
+                    case RuntimeValue::B:
+                        voice = ByteAsValue(b);
+                        break;
+                    case RuntimeValue::C:
+                        voice = ByteAsValue(c);
+                        break;
+                    default:
+                        error("Cannot read voice index");
+                }
+
+                //voices[voice] = idx;
             }
             break;
         default:
@@ -1266,7 +1278,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
         }
     }
 
-    if (done && 1) {
+    if (done) {
         idx = 0;
         pc = 0;
         sp = 0;

@@ -12,7 +12,7 @@ namespace Audio {
     struct ToneObject {
         double freq = 0.0;
         int samplesLeft = 0;
-        int waveForm;
+        uint8_t waveForm;
     };
 
     class Tone {
@@ -22,7 +22,7 @@ namespace Audio {
         public:
             Tone();
             ~Tone() {}
-            void tone(float freq, uint16_t duration, int waveForm);
+            void tone(float freq, uint16_t duration, uint8_t waveForm);
             void generateSamples(float *stream, int length, float amplitude=1.0f);
             void wait();
     };
