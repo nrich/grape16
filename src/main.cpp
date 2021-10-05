@@ -113,12 +113,17 @@ void emscripten_loop(void *userdata) {
     auto sys = args->first;
     auto clientState = args->second;
 
+    static uint32_t lastRender = sys->getTicks();
+    uint32_t renderTime = sys->getTicks();
+
     while (sys->handleEvents(clientState)) {
         auto t1 = std::chrono::high_resolution_clock::now();
 
         sys->clearScreen();
-        clientState->tick(0);
-        clientState->render(0);
+        clientState->tick(renderTime - lastRender);
+        clientState->render(renderTime - lastRender);
+
+        lastRender = renderTime;
 
         sys->swapBuffers();
 
@@ -357,13 +362,13 @@ int main(int argc, char **argv) {
     clientState->addState(1, std::dynamic_pointer_cast<Client::BaseState>(displayMenuState));
     clientState->addState(2, std::dynamic_pointer_cast<Client::BaseState>(debugState));
 
-    static uint32_t lastRender = sys->getTicks();
-    uint32_t renderTime = sys->getTicks();
-
 #if __EMSCRIPTEN__
     auto args = std::pair<std::shared_ptr<Sys::Base>, std::shared_ptr<Client::State>>(sys, clientState);
     emscripten_set_main_loop_arg(emscripten_loop, (void *)&args, -1, 1);
 #else
+    static uint32_t lastRender = sys->getTicks();
+    uint32_t renderTime = sys->getTicks();
+
     while (sys->handleEvents(clientState)) {
         auto t1 = std::chrono::high_resolution_clock::now();
         sys->clearScreen();
