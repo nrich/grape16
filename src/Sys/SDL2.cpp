@@ -600,7 +600,7 @@ Sys::SDL2::SDL2(const std::string &title) : repeatKeys(false) {
         }
     }
 
-    #if defined(_WIN32)
+    #if defined(_WIN32) && defined(GCL_HICON)
     setWindowsIcon(window.get());
     #endif
 }

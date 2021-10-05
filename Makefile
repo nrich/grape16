@@ -39,8 +39,8 @@ endif
 
 ifdef CONFIG_JS
     CXX = em++
-    INC = -I /home/nrich/gl4es/include -I src
-    LDFLAGS = $(shell $(EMSDK)/upstream/emscripten/system/bin/sdl2-config --libs) -L /home/nrich/gl4es/lib -lGL -lGLU -fexceptions -s EXIT_RUNTIME=0 -s VERBOSE=0 -s FORCE_ALIGNED_MEMORY=0 -s ALLOW_MEMORY_GROWTH=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s USE_SDL=2 -s LEGACY_GL_EMULATION=0 -s FULL_ES2=1 -s FULL_ES3=1 -s WASM=1 -s ASYNCIFY=1 -s MIN_WEBGL_VERSION=2 -s MAX_WEBGL_VERSION=2 /home/nrich/gl4es/lib/libGL.a
+    INC = -I /opt/local/gl4es-emcc/include -I src
+    LDFLAGS = $(shell $(EMSDK)/upstream/emscripten/system/bin/sdl2-config --libs) -L/opt/local/gl4es-emcc/lib -lGL -lGLU -fexceptions -s EXIT_RUNTIME=0 -s VERBOSE=0 -s FORCE_ALIGNED_MEMORY=0 -s ALLOW_MEMORY_GROWTH=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s USE_SDL=2 -s LEGACY_GL_EMULATION=0 -s FULL_ES2=1 -s FULL_ES3=1 -s WASM=1 -s ASYNCIFY=1 -s MIN_WEBGL_VERSION=2 -s MAX_WEBGL_VERSION=2 /opt/local/gl4es-emcc/lib/libGL.a
     CPPFLAGS = -O3 -std=c++17 $(INC) -Wall $(shell $(EMSDK)/upstream/emscripten/system/bin/sdl2-config --cflags) -fexceptions
 endif
 
