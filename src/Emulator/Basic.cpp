@@ -366,6 +366,10 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                     if (keyword == "VARPTR") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
+                    else
+                    if (keyword == "VOICE") {
+                        tokenType = BasicTokenType::VOICE;
+                    }
                     break;
                 case 'W':
                     if (keyword == "WAIT") {
@@ -1111,6 +1115,14 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.addValue(OpCode::SETB, IntAsValue(250));
         program.addValue(OpCode::SETC, IntAsValue(0));
         program.addSyscall(OpCode::SYSCALL, SysCall::SOUND, RuntimeValue::NONE);
+    } else if (tokens[current].type == BasicTokenType::VOICE) {
+        current += 1;
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+        auto name = identifier(linenumber, tokens[current++]);
+        program.addPointer(OpCode::SETIDX, env->get(name));
+
+        program.addSyscall(OpCode::SYSCALL, SysCall::VOICE, RuntimeValue::C);
     } else if (tokens[current].type == BasicTokenType::SOUND) {
         current += 1;
 

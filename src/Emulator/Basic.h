@@ -92,6 +92,8 @@ namespace Emulator {
 
         LINE,
 
+        VOICE,
+
         EOL,
 
         TOKEN_COUNT

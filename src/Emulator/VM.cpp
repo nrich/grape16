@@ -648,7 +648,25 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                         error("Cannot read voice index");
                 }
 
-                //voices[voice] = idx;
+                vmpointer_t ptr;
+
+                if (IS_POINTER(mem[idx])) {
+                    ptr = getPointer(idx)+1;
+                } else {
+                    ptr = idx;
+                }
+
+                uint8_t waveForm = getShort(ptr);
+                uint8_t volume = getShort(ptr+1);
+                uint8_t attack = getShort(ptr+2);
+                uint8_t decay = getShort(ptr+3);
+                uint8_t sustain = getShort(ptr+4);
+                uint8_t release = getShort(ptr+5);
+
+                std::cerr << (int)waveForm << "," << (int)volume << "," << (int)attack << std::endl;
+
+                sysIO->voice(voice, waveForm, volume, attack, decay, sustain, release);
+
             }
             break;
         default:
