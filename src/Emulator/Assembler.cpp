@@ -447,7 +447,7 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
         }
     }
 
-    error(linenum, opname, "This should never be reached");
+    throw std::domain_error("This should never be reached");
     return Emulator::AsmToken(OpCode::NOP);
 }
 
