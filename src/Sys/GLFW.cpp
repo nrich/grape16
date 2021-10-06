@@ -331,7 +331,7 @@ void Sys::GLFW::keyRepeat(bool enable) {
 }
 
 void Sys::GLFW::sound(uint8_t voice, float frequency, uint16_t duration, uint8_t waveForm, uint8_t volume, uint8_t attack, uint8_t decay, uint8_t sustain, uint8_t release) {
-    voices[voice].tone(frequency, duration, waveForm);
+    voices[voice].tone(frequency, duration, waveForm, volume, attack, decay, sustain, release);
 }
 
 static int tonecallback(const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void *userData) {

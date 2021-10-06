@@ -10,9 +10,22 @@ namespace Audio {
     const int FREQUENCY = 44100;
 
     struct ToneObject {
-        double freq = 0.0;
-        int samplesLeft = 0;
+        double freq;
+        int samplesLeft;
         uint8_t waveForm;
+        float volume;
+
+        int attackLeft;
+        float attackStep;
+
+        int decayLeft;
+        float decayStep;
+
+        int sustainLeft;
+        float sustainLevel;
+
+        int releaseLeft;
+        float releaseStep;
     };
 
     class Tone {
@@ -22,7 +35,7 @@ namespace Audio {
         public:
             Tone();
             ~Tone() {}
-            void tone(float freq, uint16_t duration, uint8_t waveForm);
+            void tone(float freq, uint16_t duration, uint8_t waveForm, uint8_t volume, uint8_t attack, uint8_t decay, uint8_t sustain, uint8_t release);
             void generateSamples(float *stream, int length, float amplitude=1.0f);
             void wait();
     };

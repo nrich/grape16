@@ -7,6 +7,7 @@
 #include <cmath>
 #include <random>
 #include <array>
+#include <iostream>
 
 #include "Audio/Tone.h"
 #include "Common/Shared.h"
@@ -86,11 +87,31 @@ Audio::Tone::Tone() {
     v = 0.0;
 }
 
-void Audio::Tone::tone(float freq, uint16_t duration, uint8_t waveForm) {
+void Audio::Tone::tone(float freq, uint16_t duration, uint8_t waveForm, uint8_t volume, uint8_t attack, uint8_t decay, uint8_t sustain, uint8_t release) {
     ToneObject to;
     to.freq = (double)freq;
     to.samplesLeft = duration * FREQUENCY / 1000;
     to.waveForm = waveForm;
+    to.volume = (float)volume/(float)UINT8_MAX;
+
+    const int Scale = 100;
+
+    to.sustainLevel = (float)sustain/(float)UINT8_MAX;
+
+    to.attackLeft = attack*Scale;
+    to.attackStep = ((float)UINT8_MAX/(float)attack)/UINT8_MAX/Scale;
+
+    if (sustain == 255) {
+        to.decayLeft = 0;
+    } else {
+        to.decayLeft = decay*Scale;
+        to.decayStep = (1.0-to.sustainLevel) * ((float)(UINT8_MAX)/(float)decay)/UINT8_MAX/Scale;
+    }
+
+    to.releaseLeft = release * Scale;
+    to.releaseStep = to.sustainLevel * ((float)(UINT8_MAX)/(float)release)/UINT8_MAX/Scale;
+
+    to.sustainLeft = to.samplesLeft - to.attackLeft - to.decayLeft - to.releaseLeft;
 
     tones.push(to);
 }
@@ -112,24 +133,43 @@ void Audio::Tone::generateSamples(float *stream, int length, float amplitude) {
         to.samplesLeft -= samplesToDo - i;
 
         while (i < samplesToDo) {
+            float attack = 1.0f;
+            float decay = 1.0f;
+            float sustain = 1.0f;
+            float release = 1.0f;
+
+            if (to.attackLeft > 0) {
+                attack -= (to.attackLeft * to.attackStep);
+                to.attackLeft--;
+            } else if (to.decayLeft > 0) {
+                decay = (to.decayLeft * to.decayStep) + to.sustainLevel;
+                to.decayLeft--;
+            } else if (to.sustainLeft > 0) {
+                sustain = to.sustainLevel;
+                to.sustainLeft--;
+            } else if (to.releaseLeft > 0) {
+                release = (to.releaseLeft * to.releaseStep);
+                to.releaseLeft--;
+            }
+
             float pos = std::fmod(v/FREQUENCY,1.0);
             v += to.freq;
 
             switch (to.waveForm) {
                 case Common::WaveForm::SAWTOOTH:
-                    stream[i] += amplitude * (pos*2 - 1);
+                    stream[i] += attack * decay * sustain * release * to.volume * amplitude * (pos*2 - 1);
                     break;
                 case Common::WaveForm::TRIANGLE:
-                    stream[i] += amplitude * (1-std::fabs(pos-0.5)*4);
+                    stream[i] += attack * decay * sustain * release * to.volume * amplitude * (1-std::fabs(pos-0.5)*4);
                     break;
                 case Common::WaveForm::SQUARE:
-                    stream[i] += amplitude * (std::sin(pos*2*M_PI) >= 0 ? 1.0 : -1.0);
+                    stream[i] += attack * decay * sustain * release * to.volume * amplitude * (std::sin(pos*2*M_PI) >= 0 ? 1.0 : -1.0);
                     break;
                 case Common::WaveForm::NOISE:
-                    stream[i] += amplitude * (pinknoise.generate());
+                    stream[i] += attack * decay * sustain * release * to.volume * amplitude * (pinknoise.generate());
                     break;
                 default: // SINE
-                    stream[i] += amplitude * (std::sin(pos*2*M_PI));
+                    stream[i] += attack * decay * sustain * release * to.volume * amplitude * (std::sin(pos*2*M_PI));
                     break;
             }
             i++;

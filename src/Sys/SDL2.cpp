@@ -491,7 +491,7 @@ void Sys::SDL2::sound(uint8_t voice, float frequency, uint16_t duration, uint8_t
     if (duration == 0) {
         SDL_PauseAudioDevice(dev, 1);
     } else {
-        voices[voice].tone(frequency, duration, waveForm);
+        voices[voice].tone(frequency, duration, waveForm, volume, attack, decay, sustain, release);
     }
     SDL_UnlockAudioDevice(dev);
 }
