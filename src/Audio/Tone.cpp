@@ -94,7 +94,7 @@ void Audio::Tone::tone(float freq, uint16_t duration, uint8_t waveForm, uint8_t 
     to.waveForm = waveForm;
     to.volume = (float)volume/(float)UINT8_MAX;
 
-    const int Scale = 100;
+    const int Scale = duration * 0.05;
 
     to.sustainLevel = (float)sustain/(float)UINT8_MAX;
 
