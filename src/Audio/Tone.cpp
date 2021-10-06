@@ -94,7 +94,10 @@ void Audio::Tone::tone(float freq, uint16_t duration, uint8_t waveForm, uint8_t 
     to.waveForm = waveForm;
     to.volume = (float)volume/(float)UINT8_MAX;
 
-    const int Scale = duration * 0.05;
+    const int Scale = to.samplesLeft / (10 * FREQUENCY / 1000);
+
+    std::cerr << to.samplesLeft << std::endl;
+    std::cerr << Scale << std::endl;
 
     to.sustainLevel = (float)sustain/(float)UINT8_MAX;
 
@@ -114,6 +117,13 @@ void Audio::Tone::tone(float freq, uint16_t duration, uint8_t waveForm, uint8_t 
     to.sustainLeft = to.samplesLeft - to.attackLeft - to.decayLeft - to.releaseLeft;
 
     tones.push(to);
+
+#if 0
+    std::cerr << (to.attackLeft * to.attackStep) << "," << (0 * to.attackStep) << std::endl;
+    std::cerr << (to.decayLeft * to.decayStep) + to.sustainLevel << "," << (0 * to.decayStep) + to.sustainLevel << std::endl;
+    std::cerr << to.sustainLevel << "," << to.sustainLeft << std::endl;
+    std::cerr << (to.releaseLeft * to.releaseStep) << "," << (0 * to.releaseStep) << std::endl;
+#endif
 }
 
 void Audio::Tone::generateSamples(float *stream, int length, float amplitude) {
@@ -138,16 +148,16 @@ void Audio::Tone::generateSamples(float *stream, int length, float amplitude) {
             float sustain = 1.0f;
             float release = 1.0f;
 
-            if (to.attackLeft > 0) {
+            if (to.attackLeft >= 0) {
                 attack -= (to.attackLeft * to.attackStep);
                 to.attackLeft--;
-            } else if (to.decayLeft > 0) {
+            } else if (to.decayLeft >= 0) {
                 decay = (to.decayLeft * to.decayStep) + to.sustainLevel;
                 to.decayLeft--;
-            } else if (to.sustainLeft > 0) {
+            } else if (to.sustainLeft >= 0) {
                 sustain = to.sustainLevel;
                 to.sustainLeft--;
-            } else if (to.releaseLeft > 0) {
+            } else if (to.releaseLeft >= 0) {
                 release = (to.releaseLeft * to.releaseStep);
                 to.releaseLeft--;
             }
