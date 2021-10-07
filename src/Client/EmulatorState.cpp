@@ -137,6 +137,15 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
 
     if (!done) {
         done = vm->run(std::dynamic_pointer_cast<Emulator::SysIO>(sysio), *program, clockspeed, debug ? debugger : NULL);
+
+        std::optional<SoundBufferObject> s = sysio->nextSound();
+        while (s != std::nullopt) {
+            auto sound = *s;
+            auto voice = sysio->getVoice(sound.voice);
+            state->getSys()->sound(sound.voice, sound.frequency, sound.duration, voice.waveForm, voice.volume, voice.attack, voice.decay, voice.sustain, voice.release);
+            s = sysio->nextSound();
+        }
+
         return;
     }
 
@@ -185,14 +194,6 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
         } else {
             input += c;
         }
-    }
-
-    std::optional<SoundBufferObject> s = sysio->nextSound();
-    while (s != std::nullopt) {
-        auto sound = *s;
-        auto voice = sysio->getVoice(sound.voice);
-        state->getSys()->sound(sound.voice, sound.frequency, sound.duration, voice.waveForm, voice.volume, voice.attack, voice.decay, voice.sustain, voice.release);
-        s = sysio->nextSound();
     }
 }
 
