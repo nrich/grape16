@@ -9,7 +9,10 @@ using namespace Emulator;
 #include <variant>
 
 #define READ_INDEX "DATA"
+#define VOICE_INDEX "VOICE"
 #define FRAME_INDEX "FRAME"
+
+#define VOICE_ARGS 6
 
 static void error(uint32_t linenumber, const std::string &err);
 
@@ -29,14 +32,11 @@ class Environment {
         std::shared_ptr<Environment> parent;
         const uint32_t offset;
     public:
-        Environment(uint32_t offset) : parent(NULL), offset(offset), Get(OpCode::LOADC), Set(OpCode::STOREC) {
+        Environment(uint32_t offset) : parent(NULL), offset(offset) {
         }
 
-        Environment(std::shared_ptr<Environment> parent) : parent(parent), offset(1), Get(OpCode::IDXC), Set(OpCode::WRITECX) {
+        Environment(std::shared_ptr<Environment> parent) : parent(parent), offset(1) {
         }
-
-        const OpCode Get;
-        const OpCode Set;
 
         const size_t Offset() const {
             return offset;
@@ -70,14 +70,16 @@ class Environment {
             return true;
         }
 
-        uint32_t create(const std::string &name) {
+        uint32_t create(const std::string &name, size_t count=1) {
             auto existing = vars.find(name);
             if (existing != vars.end()) {
                 return existing->second;
             }
 
             uint32_t next = Offset() + vars.size();
-            vars.insert(std::make_pair(name, next));
+            for (size_t i = 0; i  < count; i++) {
+                vars.insert(std::make_pair(name + std::string(i, ' '), next+i));
+            }
             return next;
         }
 
@@ -617,7 +619,7 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
         program.add(OpCode::PUSHC);
     } else if (token.str == "VARPTR") {
         auto name = identifier(linenumber, tokens[current++]);
-        check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
         program.addValue(OpCode::SETC, PointerAsValue(env->get(name)));
         program.add(OpCode::PUSHC);
     } else {
@@ -1115,8 +1117,28 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         current += 1;
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
-        auto name = identifier(linenumber, tokens[current++]);
-        program.addPointer(OpCode::SETIDX, env->get(name));
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+
+        if (tokens[current].type == BasicTokenType::COMMA) {
+            auto voiceptr = env->get(VOICE_INDEX);
+
+            program.add(OpCode::POPC);
+            program.addPointer(OpCode::STOREC, voiceptr);
+
+            for (size_t i = 1; i < VOICE_ARGS; i++) {
+                check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+                expression(program, linenumber, {tokens.begin(), tokens.end()});
+                program.add(OpCode::POPC);
+                program.addPointer(OpCode::STOREC, voiceptr+i);
+            }
+            program.addPointer(OpCode::SETIDX, voiceptr);
+            program.add(OpCode::POPC);
+        } else {
+            program.add(OpCode::POPC);
+            program.add(OpCode::PUSHC);
+            program.add(OpCode::POPIDX);
+            program.add(OpCode::POPC);
+        }
 
         program.addSyscall(OpCode::SYSCALL, SysCall::VOICE, RuntimeValue::C);
     } else if (tokens[current].type == BasicTokenType::SOUND) {
@@ -1500,6 +1522,7 @@ void compile(const std::map<uint32_t, std::vector<BasicToken>> &lines, Program &
     env = std::make_shared<Environment>(datacount);
 
     env->create(READ_INDEX);
+    env->create(VOICE_INDEX, VOICE_ARGS);
     env->create(FRAME_INDEX);
 
     auto frame = program.addValue(OpCode::SETC, PointerAsValue(0));

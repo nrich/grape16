@@ -663,7 +663,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                 uint8_t sustain = getShort(ptr+4);
                 uint8_t release = getShort(ptr+5);
 
-                std::cerr << (int)waveForm << "," << (int)volume << "," << (int)attack << std::endl;
+                //std::cerr << (int)voice << "," << (int)waveForm << "," << (int)volume << "," << (int)attack << "," << (int)decay << "," << (int)sustain << "," << (int)release << std::endl;
 
                 sysIO->voice(voice, waveForm, volume, attack, decay, sustain, release);
 

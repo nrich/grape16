@@ -136,7 +136,13 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
     static std::shared_ptr<Emulator::Debugger> debugger = std::make_shared<Emulator::Debugger>();
 
     if (!done) {
-        done = vm->run(std::dynamic_pointer_cast<Emulator::SysIO>(sysio), *program, clockspeed, debug ? debugger : NULL);
+        try {
+            done = vm->run(std::dynamic_pointer_cast<Emulator::SysIO>(sysio), *program, clockspeed, debug ? debugger : NULL);
+        } catch (const std::runtime_error &re) {
+            sysio->puts(std::string("Runtime Error: ") + re.what() + std::string("\n"));
+            done = true;
+            return;
+        }
 
         std::optional<SoundBufferObject> s = sysio->nextSound();
         while (s != std::nullopt) {
@@ -171,8 +177,6 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
                     sysio->puts(ia.what() + std::string("\n"));
                 } catch (const std::domain_error &de) {
                     sysio->puts(de.what() + std::string("\n"));
-                } catch (const std::runtime_error &re) {
-                    sysio->puts(std::string("Runtime Error: ") + re.what() + std::string("\n"));
                 }
                 done = false;
             } else if (cmd == "CLS") {
