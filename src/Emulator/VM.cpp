@@ -651,7 +651,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                 vmpointer_t ptr;
 
                 if (IS_POINTER(mem[idx])) {
-                    ptr = getPointer(idx)+1;
+                    ptr = getPointer(idx);
                 } else {
                     ptr = idx;
                 }

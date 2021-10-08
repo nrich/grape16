@@ -798,8 +798,6 @@ static void Op(Program &program, uint32_t linenumber, const std::vector<BasicTok
 
         expression(program, linenumber, {tokens.begin(), tokens.end()}, token.lbp);
 
-        program.addValue(OpCode::INCIDX, IntAsValue(1));
-
         while (tokens[current].type != BasicTokenType::RIGHT_PAREN) {
             check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
 
@@ -1012,8 +1010,6 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
             program.addPointer(OpCode::LOADIDX, env->get(name));
 
             expression(program, linenumber, {tokens.begin(), tokens.end()});
-
-            program.addValue(OpCode::INCIDX, IntAsValue(1));
 
             while (tokens[current].type != BasicTokenType::RIGHT_PAREN) {
                 check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
@@ -1253,14 +1249,11 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
 
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         program.add(OpCode::POPC);
-        //check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
 
-        //program.addShort(OpCode::TRACE, 1);
         program.add(OpCode::POPB);
         program.add(OpCode::POPA);
 
         program.addSyscall(OpCode::SYSCALL, SysCall::DRAWLINE, RuntimeValue::IDX);
-        //program.addShort(OpCode::TRACE, 0);
     } else if (tokens[current].type == BasicTokenType::IDENTIFIER && tokens[current+1].type == BasicTokenType::EQUAL) {
         auto name = identifier(linenumber, tokens[current++]);
 
@@ -1340,8 +1333,6 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.addPointer(OpCode::LOADIDX, env->get(name));
 
         expression(program, linenumber, {tokens.begin(), tokens.end()});
-
-        program.addValue(OpCode::INCIDX, IntAsValue(1));
 
         while (tokens[current].type != BasicTokenType::RIGHT_PAREN) {
             check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
@@ -1437,17 +1428,19 @@ static void dim_declaration(Program &program, uint32_t linenumber, const std::ve
     program.addValue(OpCode::INCC, IntAsValue(size));
 
     program.add(OpCode::CALLOC);
+
+    program.addValue(OpCode::INCC, IntAsValue(-size));
+    program.add(OpCode::WRITECX);
+
+    program.addValue(OpCode::INCIDX, IntAsValue(1));
     program.addPointer(OpCode::SAVEIDX, env->create(name));
 
-    program.add(OpCode::WRITECX);
-    program.addValue(OpCode::INCC, IntAsValue(-size));
-
     for (int i = 1; i < size; i++) {
-        program.addValue(OpCode::INCIDX, IntAsValue(1));
         program.add(OpCode::WRITEBX);
         program.add(OpCode::MOVCA);
         program.add(OpCode::IDIV);
         program.add(OpCode::MOVCB);
+        program.addValue(OpCode::INCIDX, IntAsValue(1));
     }
 }
 
