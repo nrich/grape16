@@ -69,9 +69,15 @@ void DebugState::onRender(State *state, const uint32_t time) {
 
     renderer->drawString(0, 72, 8, 8, std::string("HEAP: ") + std::to_string(debugger->heap));
 
+    size_t xoffset = 0;
+    size_t yoffset = 0;
+
     for (size_t i = 0; i < debugger->mem.size(); i++) {
-        renderer->drawString(0, 88+(i*8), 8, 8, std::to_string(i));
-        renderer->drawString(24, 88+(i*8), 8, 8, std::string(Emulator::ValueToString(debugger->mem[i])));
+        xoffset = i / 10;
+        yoffset = i % 10;
+
+        renderer->drawString(0 + xoffset*64, 88+(yoffset*8), 8, 8, std::to_string(i));
+        renderer->drawString(24 + xoffset*64, 88+(yoffset*8), 8, 8, std::string(Emulator::ValueToString(debugger->mem[i])));
     }
 }
 
