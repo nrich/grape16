@@ -54,16 +54,22 @@ using namespace Renderer;
 Immediate::Immediate(const Common::DisplayMode &displayMode) : mode(Mode::Unknown), displayMode(displayMode) {
     switch (displayMode.Ratio()) {
         case Common::AspectRatio::_4x3:
+            virtualWidth = 320;
+            horizontalOffset = 0;
             virtualHeight = 240;
-            verticalOffset = 30;
+            verticalOffset = 0;
             break;
         case Common::AspectRatio::_16x9:
+            virtualWidth = 320;
+            horizontalOffset = 40;
             virtualHeight = 180;
             verticalOffset = 0;
             break;
         case Common::AspectRatio::_16x10:
+            virtualWidth = 320;
+            horizontalOffset = 28;
             virtualHeight = 200;
-            verticalOffset = 10;
+            verticalOffset = 0;
             break;
         default:
             break;
@@ -85,7 +91,7 @@ void Immediate::enableInterfaceMode() {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    glOrtho(0, 320, virtualHeight, 0, -10, 10);
+    glOrtho(0, virtualWidth, virtualHeight, 0, -10, 10);
 
     //Back to the modelview so we can draw stuff
     glMatrixMode(GL_MODELVIEW);
@@ -166,10 +172,10 @@ void Immediate::drawBuffer(const uint32_t *buffer, uint32_t width, uint32_t heig
 
     int toffset = verticalOffset;
     int boffset = verticalOffset;
-    int loffset = 0;
-    int roffset = 0;
+    int loffset = horizontalOffset;
+    int roffset = horizontalOffset;
 
-    int VWIDTH = 320;
+    int VWIDTH = virtualWidth;
     int VHEIGHT = virtualHeight;
 
     glBegin(GL_QUADS);
@@ -207,10 +213,10 @@ void Immediate::drawBuffer(const uint8_t *buffer, uint32_t width, uint32_t heigh
 
     int toffset = verticalOffset;
     int boffset = verticalOffset;
-    int loffset = 0;
-    int roffset = 0;
+    int loffset = horizontalOffset;
+    int roffset = horizontalOffset;
 
-    int VWIDTH = 320;
+    int VWIDTH = virtualHeight;
     int VHEIGHT = virtualHeight;
 
     glBegin(GL_QUADS);
@@ -234,16 +240,22 @@ void Immediate::drawBuffer(const uint8_t *buffer, uint32_t width, uint32_t heigh
 void Immediate::changeDisplayMode(const Common::DisplayMode &displayMode) {
     switch (displayMode.Ratio()) {
         case Common::AspectRatio::_4x3:
+            virtualWidth = 320;
+            horizontalOffset = 0;
             virtualHeight = 240;
-            verticalOffset = 30;
+            verticalOffset = 0;
             break;
         case Common::AspectRatio::_16x9:
+            virtualWidth = 320;
+            horizontalOffset = 40;
             virtualHeight = 180;
             verticalOffset = 0;
             break;
         case Common::AspectRatio::_16x10:
-            virtualHeight = 100;
-            verticalOffset = 10;
+            virtualWidth = 320;
+            horizontalOffset = 28;
+            virtualHeight = 240;
+            verticalOffset = 0;
             break;
         default:
             break;

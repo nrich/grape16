@@ -112,7 +112,7 @@ void SystemIO::voice(uint8_t voice, uint8_t waveForm, uint8_t volume, uint8_t at
 }
 
 void EmulatorState::onRender(State *state, const uint32_t time) {
-    state->getRenderer()->drawBuffer(sysio->getScreen().data(), 320, 180);
+    state->getRenderer()->drawBuffer(sysio->getScreen().data(), 320, 240);
 
     uint16_t lineoffset = 0;
     for (auto line : sysio->getScreenBuffer()) {
