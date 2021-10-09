@@ -254,7 +254,7 @@ void Immediate::changeDisplayMode(const Common::DisplayMode &displayMode) {
         case Common::AspectRatio::_16x10:
             virtualWidth = 320;
             horizontalOffset = 28;
-            virtualHeight = 240;
+            virtualHeight = 200;
             verticalOffset = 0;
             break;
         default:

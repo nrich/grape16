@@ -16,4 +16,3 @@ Common::DisplayMode::DisplayMode(uint16_t width, uint16_t height, uint16_t refre
     }
 }
 
-
