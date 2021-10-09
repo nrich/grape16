@@ -45,7 +45,7 @@ namespace Client {
 
             Point cursor;
 
-            std::vector<std::array<char, chars>> screenbuffer;
+            std::vector<std::array<char, chars+1>> screenbuffer;
             std::array<uint32_t, 320*240> screen;
 
             std::queue<char> inputBuffer;
@@ -66,7 +66,7 @@ namespace Client {
 
             std::string gets();
 
-            std::vector<std::array<char, chars>> getScreenBuffer() {
+            std::vector<std::array<char, chars+1>> getScreenBuffer() {
                 return screenbuffer;
             }
 
@@ -132,11 +132,11 @@ namespace Client {
             void onKeyUp(State *state, const KeyPress &event);
 
             void onEnterState(State *state, std::any data) {
-                sysio->cls();
+                //sysio->cls();
             }
 
             void onLeaveState(State *state, std::any data) {
-                sysio->cls();
+                //sysio->cls();
             }
     };
 };

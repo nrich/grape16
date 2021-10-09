@@ -100,8 +100,12 @@ void Immediate::enableInterfaceMode() {
 
 void Immediate::drawString(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const std::string &str, const Common::Colour &colour) {
     enableInterfaceMode();
+
+    float w_ratio = (float)(virtualWidth-2*horizontalOffset)/(float)virtualWidth;
+    float h_ratio = (float)(virtualHeight-2*verticalOffset)/(float)240;
+
     glColor4ub(colour.R(), colour.G(), colour.B(), colour.A());
-    font.drawString(x, y, w, h, str);
+    font.drawString((x+horizontalOffset)*w_ratio, (y+verticalOffset)*h_ratio, w*w_ratio, h*h_ratio, str);
 }
 
 void Immediate::drawRect(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const Common::Colour &colour) {

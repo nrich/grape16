@@ -58,7 +58,7 @@ void SystemIO::write(uint8_t c) {
     if (cursor.Y() >= lines) {
         cursor = cursor - Point(0, 1);
         screenbuffer.erase(screenbuffer.begin());
-        screenbuffer.push_back(std::array<char, chars>());
+        screenbuffer.push_back(std::array<char, chars+1>());
     }
 
     if (chr) {
@@ -67,7 +67,6 @@ void SystemIO::write(uint8_t c) {
     } else {
         screenbuffer[cursor.Y()][cursor.X()] = (char)228;
     }
-
 }
 
 uint8_t SystemIO::read(bool noecho) {
