@@ -143,6 +143,8 @@ namespace Emulator {
         FLT,
         INT,
         PTR,
+        STR,
+        VSTR,
 
         AND,
         OR,

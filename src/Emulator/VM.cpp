@@ -53,6 +53,8 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
         case OpCode::FLT: return "FLT";
         case OpCode::INT: return "INT";
         case OpCode::PTR: return "PTR";
+        case OpCode::STR: return "STR";
+        case OpCode::VSTR: return "VSTR";
         case OpCode::AND: return "AND";
         case OpCode::OR: return "OR";
         case OpCode::NOT: return "NOT";
@@ -440,6 +442,27 @@ std::string VM::getString(vmpointer_t ptr, uint32_t len) {
     return str;
 }
 
+static value_t stringToValue(const std::string &str) {
+    value_t value = 0;
+    size_t pos;
+
+    if (str.size() > 2 && str[0] == '0' && (str[1] =='x' || str[1] =='X' )) {
+        value = PointerAsValue(std::stoul(str, &pos, 16));
+    } else if (str.find('.') != std::string::npos) {
+        value = FloatAsValue(std::stof(str, &pos));
+    } else {
+        int32_t overflow = std::stoi(str, &pos);
+
+        if (overflow > INT16_MAX || overflow < INT16_MIN) {
+            value = FloatAsValue((float)overflow);
+        } else {
+            value = IntAsValue((int16_t)overflow);
+        }
+    }
+
+    return value;
+}
+
 int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue rvalue, uint32_t cycle_budget) {
     static uint32_t offset = 0;
 
@@ -711,6 +734,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
     vmpointer_t p;
     int32_t overflow;
 
+    std::string str;
+
     uint32_t offset = 0;
 
     static int16_t trace = 0;
@@ -719,6 +744,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
 
     while (!done) {
         uint32_t cost = 1;
+        str.clear();
 
         if (debugger)
             debugger->debug(program.fetch(pc), pc, sp, callstack[sp], a, b, c, idx, mem[idx], heap, stack, {mem.begin(), mem.begin()+50});
@@ -1064,6 +1090,28 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     c = PointerAsValue(ValueAsPointer(c));
                 else
                     error("PTR argument error");
+                break;
+            case OpCode::STR:
+                if (IS_INT(c))
+                    str = std::to_string(ValueAsInt(c));
+                else if (IS_POINTER(c))
+                    str = std::to_string(ValueAsPointer(c));
+                else if (IS_FLOAT(c))
+                    str = std::to_string(ValueAsFloat(c));
+                else
+                    error("STR argument error");
+                for (size_t i = 0; i < str.size(); i++) {
+                    set(idx+i, ByteAsValue(str[i]));
+                }
+                set(idx+str.size(), ByteAsValue(0));
+                break;
+            case OpCode::VSTR:
+                offset = 0;
+                while (char chr = getByte(idx+offset)) {
+                    str += chr;
+                    offset++;
+                }
+                c = stringToValue(str);
                 break;
             case OpCode::AND:
                 if (IS_INT(a) && IS_INT(b))

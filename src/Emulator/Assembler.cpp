@@ -67,6 +67,8 @@ std::map<std::string, std::pair<OpCode, ArgType>> def = {
     {"FLT", {OpCode::FLT, ArgType::NONE}},
     {"INT", {OpCode::INT, ArgType::NONE}},
     {"PTR", {OpCode::PTR, ArgType::NONE}},
+    {"STR", {OpCode::STR, ArgType::NONE}},
+    {"VSTR", {OpCode::VSTR, ArgType::NONE}},
 
     {"AND", {OpCode::AND, ArgType::NONE}},
     {"OR", {OpCode::OR, ArgType::NONE}},

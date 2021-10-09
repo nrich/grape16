@@ -202,6 +202,14 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                     if (keyword == "CSNG") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
+                    else
+                    if (keyword == "CVI") {
+                        tokenType = BasicTokenType::FUNCTION;
+                    }
+                    else
+                    if (keyword == "CVS") {
+                        tokenType = BasicTokenType::FUNCTION;
+                    }
                     break;
                 case 'D':
                     if (keyword == "DATA") {
@@ -274,6 +282,15 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                     }
                     else
                     if (keyword == "LOG") {
+                        tokenType = BasicTokenType::FUNCTION;
+                    }
+                    break;
+                case 'M':
+                    if (keyword == "MKI") {
+                        tokenType = BasicTokenType::FUNCTION;
+                    }
+                    else
+                    if (keyword == "MKS") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     break;
@@ -575,6 +592,12 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
         program.add(OpCode::POPC);
         program.add(OpCode::FLT);
         program.add(OpCode::PUSHC);
+    } else if (token.str == "CVI" || token.str == "CVS") {
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        program.add(OpCode::POPIDX);
+        program.add(OpCode::VSTR);
+        program.add(OpCode::PUSHC);
     } else if (token.str == "INKEY") {
         check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
         program.addSyscall(OpCode::SYSCALL, SysCall::READKEY, RuntimeValue::C);
@@ -584,6 +607,12 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
         check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
         program.add(OpCode::POPC);
         program.add(OpCode::LOG);
+        program.add(OpCode::PUSHC);
+    } else if (token.str == "MKI" || token.str == "MKS") {
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        program.add(OpCode::POPIDX);
+        program.add(OpCode::VSTR);
         program.add(OpCode::PUSHC);
     } else if (token.str == "PEEK") {
         expression(program, linenumber, {tokens.begin(), tokens.end()});
