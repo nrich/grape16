@@ -55,7 +55,7 @@ static int sym2key(int sym) {
         case SDLK_PERIOD:
             return Common::Keys::Period;
         case SDLK_SLASH:
-            return Common::Keys::Divide;
+            return Common::Keys::Slash;
         case SDLK_0:
             return Common::Keys::Num0;
         case SDLK_1:
