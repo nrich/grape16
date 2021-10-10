@@ -104,7 +104,7 @@ void Immediate::drawString(const uint16_t x, const uint16_t y, const uint16_t w,
     float h_ratio = (float)(virtualHeight-2*verticalOffset)/(float)240;
 
     glColor4ub(colour.R(), colour.G(), colour.B(), colour.A());
-    font.drawString(x+horizontalOffset, y+verticalOffset, w*w_ratio, h*h_ratio, str);
+    font.drawString((w_ratio*x)+horizontalOffset, (h_ratio*y)+verticalOffset, w*w_ratio, h*h_ratio, str);
 }
 
 void Immediate::drawRect(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const Common::Colour &colour) {
