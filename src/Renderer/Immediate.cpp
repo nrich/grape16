@@ -50,7 +50,6 @@
 
 using namespace Renderer;
 
-//Immediate::Immediate(const Common::DisplayMode &displayMode, const Common::DisplayMode &screen) : mode(Mode::Unknown), displayMode(displayMode), screen(screen) {
 Immediate::Immediate(const Common::DisplayMode &displayMode) : mode(Mode::Unknown), displayMode(displayMode) {
     switch (displayMode.Ratio()) {
         case Common::AspectRatio::_4x3:

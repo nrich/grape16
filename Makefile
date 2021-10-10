@@ -25,11 +25,11 @@ endif
 ifdef CONFIG_W64
     CXX = x86_64-w64-mingw32-g++
     ifdef CONFIG_MIN
-        LDFLAGS = -static-libgcc -static-libstdc++ -L/opt/local/glfw-3.3.4.bin.WIN64/lib-mingw-w64/ -L/opt/local/portaudio-x86_64-w64/lib/ -lopengl32 -lglu32 -static-libgcc -static-libstdc++ -lwsock32 -lwinspool -lws2_32 -lglfw3 -lportaudio -lwinmm -lgdi32 -lsetupapi -lole32 -loleaut32
+        LDFLAGS = -static-libgcc -static-libstdc++ -L/opt/local/glfw-3.3.4.bin.WIN64/lib-mingw-w64/ -L/opt/local/portaudio-x86_64-w64/lib/ -lopengl32 -lglu32 -static-libgcc -static-libstdc++ -lwsock32 -lwinspool -lws2_32 -lglfw3 -lportaudio -lwinmm -lgdi32 -lsetupapi -lole32 -loleaut32 -mwindows
         INC = -I src -I /opt/local/glfw-3.3.4.bin.WIN64/include -I /opt/local/mingw-std-threads-1.0.0 -I /opt/local/portaudio-x86_64-w64/include
         CPPFLAGS = -O3 -std=c++17  $(INC) -D_WIN32 -Wall
     else
-        LDFLAGS = -static-libgcc -static-libstdc++ $(shell /opt/local/x86_64-w64-mingw32/bin/sdl2-config --libs --static-libs) -L /opt/local/glfw-3.3.4.bin.WIN64/lib-mingw-w64/ -L/opt/local/portaudio-x86_64-w64/lib/ -lopengl32 -lglu32 -static-libgcc -static-libstdc++ -lwsock32 -lwinspool -lws2_32 -lglfw3 -lgdi32 -lportaudio -lwinmm -lgdi32 -lsetupapi -lole32 -loleaut32 -mconsole
+        LDFLAGS = -static-libgcc -static-libstdc++ $(shell /opt/local/x86_64-w64-mingw32/bin/sdl2-config --libs --static-libs) -L /opt/local/glfw-3.3.4.bin.WIN64/lib-mingw-w64/ -L/opt/local/portaudio-x86_64-w64/lib/ -lopengl32 -lglu32 -static-libgcc -static-libstdc++ -lwsock32 -lwinspool -lws2_32 -lglfw3 -lgdi32 -lportaudio -lwinmm -lgdi32 -lsetupapi -lole32 -loleaut32
         INC = -I src -I /opt/local/glfw-3.3.4.bin.WIN64/include -I /opt/local/mingw-std-threads-1.0.0 -I /opt/local/portaudio-x86_64-w64/include 
         CPPFLAGS = -O3 -std=c++17  -pthread $(INC) -pthread -D_WIN64 -Wall $(shell /opt/local/x86_64-w64-mingw32/bin/sdl2-config --cflags)
     endif
