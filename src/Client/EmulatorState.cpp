@@ -12,7 +12,7 @@ SystemIO::SystemIO() : cursor(0,0) {
     screenbuffer.resize(lines);
     screenbuffer[cursor.Y()][cursor.X()] = (char)228;
 
-    screen.fill(Common::Colour::Colour8(0).RGBA());
+    screen.fill(Common::Colour::DarkSlateBlue.RGBA());
 
     for (size_t i = 0; i < colourLookup.size(); i++) {
         colourLookup[i] = Common::Colour::Colour8(i);
@@ -20,7 +20,7 @@ SystemIO::SystemIO() : cursor(0,0) {
 }
 
 void SystemIO::cls() {
-    screen.fill(Common::Colour::Black.RGBA());
+    screen.fill(Common::Colour::DarkSlateBlue.RGBA());
     cursor = Point(0,0);
     screenbuffer.clear();
     screenbuffer.resize(lines);
@@ -115,7 +115,7 @@ void EmulatorState::onRender(State *state, const uint32_t time) {
 
     uint16_t lineoffset = 0;
     for (auto line : sysio->getScreenBuffer()) {
-        state->getRenderer()->drawString(0, lineoffset*8, 8, 8, std::string(line.data()), Common::Colour::White);
+        state->getRenderer()->drawString(0, lineoffset*8, 8, 8, std::string(line.data()), Common::Colour::MediumPurple);
         lineoffset++;
     }
 }

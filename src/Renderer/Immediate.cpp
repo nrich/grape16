@@ -105,7 +105,7 @@ void Immediate::drawString(const uint16_t x, const uint16_t y, const uint16_t w,
     float h_ratio = (float)(virtualHeight-2*verticalOffset)/(float)240;
 
     glColor4ub(colour.R(), colour.G(), colour.B(), colour.A());
-    font.drawString((x+horizontalOffset)*w_ratio, (y+verticalOffset)*h_ratio, w*w_ratio, h*h_ratio, str);
+    font.drawString(x+horizontalOffset, y+verticalOffset, w*w_ratio, h*h_ratio, str);
 }
 
 void Immediate::drawRect(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const Common::Colour &colour) {
@@ -182,6 +182,9 @@ void Immediate::drawBuffer(const uint32_t *buffer, uint32_t width, uint32_t heig
     int VWIDTH = virtualWidth;
     int VHEIGHT = virtualHeight;
 
+    auto colour = Common::Colour::White;
+    glColor4ub(colour.R(), colour.G(), colour.B(), colour.A());
+
     glBegin(GL_QUADS);
         glTexCoord2i(0, 0);
         glVertex3i(loffset, toffset, 0);
@@ -195,6 +198,50 @@ void Immediate::drawBuffer(const uint32_t *buffer, uint32_t width, uint32_t heig
         glTexCoord2i(0, 1);
         glVertex3i(loffset, (VHEIGHT-boffset)*size, 0);
     glEnd();
+
+    if (horizontalOffset) {
+        glDisable(GL_BLEND);
+        auto colour = Common::Colour::DarkBlue;
+        glColor4ub(colour.R(), colour.G(), colour.B(), colour.A());
+
+        glDisable(GL_TEXTURE_2D);
+
+        glBegin(GL_QUADS);
+            glVertex3i(0, 0, 0);
+            glVertex3i(loffset, 0, 0);
+            glVertex3i(loffset, VHEIGHT, 0);
+            glVertex3i(0, VHEIGHT, 0);
+        glEnd();
+
+        glBegin(GL_QUADS);
+            glVertex3i(VWIDTH-roffset, 0, 0);
+            glVertex3i(VWIDTH, 0, 0);
+            glVertex3i(VWIDTH, VHEIGHT, 0);
+            glVertex3i(VWIDTH-roffset, VHEIGHT, 0);
+        glEnd();
+    }
+
+    if (verticalOffset) {
+        glDisable(GL_BLEND);
+        auto colour = Common::Colour::DarkBlue;
+        glColor4ub(colour.R(), colour.G(), colour.B(), colour.A());
+
+        glDisable(GL_TEXTURE_2D);
+
+        glBegin(GL_QUADS);
+            glVertex3i(0, 0, 0);
+            glVertex3i(VWIDTH, 0, 0);
+            glVertex3i(VWIDTH, toffset, 0);
+            glVertex3i(0, toffset, 0);
+        glEnd();
+
+        glBegin(GL_QUADS);
+            glVertex3i(0, VHEIGHT-boffset, 0);
+            glVertex3i(VWIDTH, VHEIGHT-boffset, 0);
+            glVertex3i(VWIDTH, VHEIGHT, 0);
+            glVertex3i(0, VHEIGHT, 0);
+        glEnd();
+    }
 
     glDeleteTextures(1, &screen);
 }
@@ -223,6 +270,9 @@ void Immediate::drawBuffer(const uint8_t *buffer, uint32_t width, uint32_t heigh
     int VWIDTH = virtualHeight;
     int VHEIGHT = virtualHeight;
 
+    auto colour = Common::Colour::White;
+    glColor4ub(colour.R(), colour.G(), colour.B(), colour.A());
+
     glBegin(GL_QUADS);
         glTexCoord2i(0, 0);
         glVertex3i(loffset, toffset, 0);
@@ -236,6 +286,50 @@ void Immediate::drawBuffer(const uint8_t *buffer, uint32_t width, uint32_t heigh
         glTexCoord2i(0, 1);
         glVertex3i(loffset, (VHEIGHT-boffset)*size, 0);
     glEnd();
+
+    if (horizontalOffset) {
+        glDisable(GL_BLEND);
+        auto colour = Common::Colour::DarkBlue;
+        glColor4ub(colour.R(), colour.G(), colour.B(), colour.A());
+
+        glDisable(GL_TEXTURE_2D);
+
+        glBegin(GL_QUADS);
+            glVertex3i(0, 0, 0);
+            glVertex3i(loffset, 0, 0);
+            glVertex3i(loffset, VHEIGHT, 0);
+            glVertex3i(0, VHEIGHT, 0);
+        glEnd();
+
+        glBegin(GL_QUADS);
+            glVertex3i(VWIDTH-roffset, 0, 0);
+            glVertex3i(VWIDTH, 0, 0);
+            glVertex3i(VWIDTH, VHEIGHT, 0);
+            glVertex3i(VWIDTH-roffset, VHEIGHT, 0);
+        glEnd();
+    }
+
+    if (verticalOffset) {
+        glDisable(GL_BLEND);
+        auto colour = Common::Colour::DarkBlue;
+        glColor4ub(colour.R(), colour.G(), colour.B(), colour.A());
+
+        glDisable(GL_TEXTURE_2D);
+
+        glBegin(GL_QUADS);
+            glVertex3i(0, 0, 0);
+            glVertex3i(VWIDTH, 0, 0);
+            glVertex3i(VWIDTH, toffset, 0);
+            glVertex3i(0, toffset, 0);
+        glEnd();
+
+        glBegin(GL_QUADS);
+            glVertex3i(0, VHEIGHT-boffset, 0);
+            glVertex3i(VWIDTH, VHEIGHT-boffset, 0);
+            glVertex3i(VWIDTH, VHEIGHT, 0);
+            glVertex3i(0, VHEIGHT, 0);
+        glEnd();
+    }
 
     glDeleteTextures(1, &screen);
 }

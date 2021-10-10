@@ -245,7 +245,11 @@ int main(int argc, char **argv) {
 
     opt.add(
 #ifdef _WIN32
+#if MINBUILD
         "glfw", // Default.
+#else
+        "sdl2", // Default.
+#endif
 #else
         "ncurses", // Default.
 #endif
