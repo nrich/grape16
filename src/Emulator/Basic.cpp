@@ -187,6 +187,10 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                         tokenType = BasicTokenType::BEEP;
                     }
                 case 'C':
+                    if (keyword == "CHR") {
+                        tokenType = BasicTokenType::FUNCTION;
+                    }
+                    else
                     if (keyword == "CLS") {
                         tokenType = BasicTokenType::CLS;
                     }
@@ -574,6 +578,13 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
         program.add(OpCode::POPC);
         program.add(OpCode::ATAN);
         program.add(OpCode::PUSHC);
+    } else if (token.str == "CHR") {
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        program.addShort(OpCode::ALLOC, 2);
+        program.add(OpCode::POPC);
+        program.add(OpCode::WRITECX);
+        program.add(OpCode::PUSHIDX);
     } else if (token.str == "CINT" || token.str == "INT") {
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
