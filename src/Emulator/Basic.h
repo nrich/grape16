@@ -73,11 +73,13 @@ namespace Emulator {
         IF,
         INPUT,
         LET,
+        LINE,
         NEXT,
         POKE,
         PRINT,
         PSET,
         PUT,
+        RANDOMIZE,
         READ,
         REM,
         RETURN,
@@ -85,12 +87,11 @@ namespace Emulator {
         STEP,
         SWAP,
         THEN,
+        TIMER,
         TO,
         WAIT,
         WHILE,
         WEND,
-
-        LINE,
 
         VOICE,
 

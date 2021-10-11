@@ -335,6 +335,10 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                     }
                     break;
                 case 'R':
+                    if (keyword == "RANDOMIZE") {
+                        tokenType = BasicTokenType::RANDOMIZE;
+                    }
+                    else
                     if (keyword == "READ") {
                         tokenType = BasicTokenType::READ;
                     }
@@ -345,6 +349,10 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                     else
                     if (keyword == "RETURN") {
                         tokenType = BasicTokenType::RETURN;
+                    }
+                    else
+                    if (keyword == "RND") {
+                        tokenType = BasicTokenType::FUNCTION;
                     }
                     break;
                 case 'S':
@@ -379,6 +387,10 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                     else
                     if (keyword == "THEN") {
                         tokenType = BasicTokenType::THEN;
+                    }
+                    else
+                    if (keyword == "TIMER") {
+                        tokenType = BasicTokenType::TIMER;
                     }
                     else
                     if (keyword == "TO") {
@@ -631,6 +643,12 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
         program.add(OpCode::POPC);
         program.add(OpCode::MOVCIDX);
         program.add(OpCode::IDXC);
+        program.add(OpCode::PUSHC);
+    } else if (token.str == "RND") {
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        program.add(OpCode::POPC);
+        program.add(OpCode::RND);
         program.add(OpCode::PUSHC);
     } else if (token.str == "SGN") {
         expression(program, linenumber, {tokens.begin(), tokens.end()});
@@ -1216,6 +1234,14 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.addPointer(OpCode::STOREC, env->get(right));
     } else if (tokens[current].type == BasicTokenType::CLS) {
         program.addSyscall(OpCode::SYSCALL, SysCall::CLS, RuntimeValue::C);
+    } else if (tokens[current].type == BasicTokenType::RANDOMIZE) {
+        current++;
+        if (tokens[current].type == BasicTokenType::TIMER) {
+            program.addValue(OpCode::SETC, IntAsValue((int16_t)time(NULL)));
+        } else {
+            expression(program, linenumber, {tokens.begin(), tokens.end()});
+        }
+        program.add(OpCode::SEED);
     } else if (tokens[current].type == BasicTokenType::END) {
         program.add(OpCode::HALT);
 

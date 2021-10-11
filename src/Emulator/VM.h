@@ -140,6 +140,9 @@ namespace Emulator {
         SQR,
         TAN,
 
+        RND,
+        SEED,
+
         FLT,
         INT,
         PTR,

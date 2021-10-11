@@ -50,6 +50,8 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
         case OpCode::SIN: return "SIN";
         case OpCode::SQR: return "SQR";
         case OpCode::TAN: return "TAN";
+        case OpCode::RND: return "RND";
+        case OpCode::SEED: return "SEED";
         case OpCode::FLT: return "FLT";
         case OpCode::INT: return "INT";
         case OpCode::PTR: return "PTR";
@@ -1053,6 +1055,22 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     c = FloatAsValue(std::tan(ValueAsFloat(c)));
                 else
                     error("TAN argument error");
+                break;
+            case OpCode::RND:
+                if (IS_INT(c))
+                    c = FloatAsValue(((float)std::rand()/(float)RAND_MAX) * (float)ValueAsInt(c));
+                else if (IS_FLOAT(c))
+                    c = FloatAsValue(((float)std::rand()/(float)RAND_MAX) * (float)ValueAsFloat(c));
+                else
+                    error("RND argument error");
+                break;
+            case OpCode::SEED:
+                if (IS_INT(c))
+                    std::srand((uint32_t)ValueAsInt(c));
+                else if (IS_FLOAT(c))
+                    std::srand((uint32_t)ValueAsFloat(c));
+                else
+                    error("RND argument error");
                 break;
             case OpCode::FLT:
                 if (IS_INT(c))
