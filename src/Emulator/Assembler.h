@@ -52,7 +52,7 @@ namespace Emulator {
         }
 
         size_t size() const {
-            if (arg == std::nullopt) {
+            if (arg != std::nullopt) {
                 if (std::holds_alternative<int16_t>(*arg)) {
                     return 1+2;
                 } else if (std::holds_alternative<float>(*arg)) {
