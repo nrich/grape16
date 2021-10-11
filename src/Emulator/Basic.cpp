@@ -9,10 +9,13 @@ using namespace Emulator;
 #include <variant>
 
 #define READ_INDEX "DATA"
-#define VOICE_INDEX "VOICE"
 #define FRAME_INDEX "FRAME"
 
+#define VOICE_INDEX "VOICE"
 #define VOICE_ARGS 6
+
+#define LINE_INDEX "LINE"
+#define LINE_ARGS 6
 
 static void error(uint32_t linenumber, const std::string &err);
 
@@ -1233,7 +1236,8 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.add(OpCode::POPC);
         program.addPointer(OpCode::STOREC, env->get(right));
     } else if (tokens[current].type == BasicTokenType::CLS) {
-        program.addSyscall(OpCode::SYSCALL, SysCall::CLS, RuntimeValue::C);
+        current++;
+        program.addSyscall(OpCode::SYSCALL, SysCall::CLS, RuntimeValue::NONE);
     } else if (tokens[current].type == BasicTokenType::RANDOMIZE) {
         current++;
         if (tokens[current].type == BasicTokenType::TIMER) {
@@ -1298,50 +1302,64 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
     } else if (tokens[current].type == BasicTokenType::LINE) {
         current++;
 
+        program.addPointer(OpCode::SETIDX, env->get(LINE_INDEX));
+
         check(linenumber, tokens[current++], BasicTokenType::LEFT_PAREN, "`(' expected");
-        expression(program, linenumber, {tokens.begin(), tokens.end()});
-        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
-        expression(program, linenumber, {tokens.begin(), tokens.end()});
-        check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
-
-        program.add(OpCode::POPA);
-        program.addValue(OpCode::SETB, IntAsValue(320));
-        program.add(OpCode::MUL);
-        program.add(OpCode::MOVCA);
-        program.add(OpCode::POPB);
-        program.add(OpCode::ADD);
-
-        program.add(OpCode::PUSHC);
-
-        check(linenumber, tokens[current++], BasicTokenType::MINUS, "`-' expected");
-        check(linenumber, tokens[current++], BasicTokenType::LEFT_PAREN, "`(' expected");
-        expression(program, linenumber, {tokens.begin(), tokens.end()});
-        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
-        expression(program, linenumber, {tokens.begin(), tokens.end()});
-        check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
-        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
-
-        program.add(OpCode::POPA);
-        program.addValue(OpCode::SETB, IntAsValue(320));
-        program.add(OpCode::MUL);
-        program.add(OpCode::MOVCA);
-        program.add(OpCode::POPB);
-        program.add(OpCode::ADD);
-
-        program.add(OpCode::MOVCA);
-        program.add(OpCode::POPB);
-
-
-        program.add(OpCode::PUSHB);
-        program.add(OpCode::PUSHA);
-
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         program.add(OpCode::POPC);
+        program.add(OpCode::WRITECX);
+        program.addValue(OpCode::INCIDX, IntAsValue(1));
 
-        program.add(OpCode::POPB);
-        program.add(OpCode::POPA);
+        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        program.add(OpCode::POPC);
+        program.add(OpCode::WRITECX);
+        program.addValue(OpCode::INCIDX, IntAsValue(1));
 
-        program.addSyscall(OpCode::SYSCALL, SysCall::DRAWLINE, RuntimeValue::IDX);
+        check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
+
+        check(linenumber, tokens[current++], BasicTokenType::MINUS, "`-' expected");
+
+        check(linenumber, tokens[current++], BasicTokenType::LEFT_PAREN, "`(' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        program.add(OpCode::POPC);
+        program.add(OpCode::WRITECX);
+        program.addValue(OpCode::INCIDX, IntAsValue(1));
+
+        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        program.add(OpCode::POPC);
+        program.add(OpCode::WRITECX);
+        program.addValue(OpCode::INCIDX, IntAsValue(1));
+
+        check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        program.add(OpCode::POPC);
+        program.add(OpCode::WRITECX);
+        program.addValue(OpCode::INCIDX, IntAsValue(1));
+
+        if (tokens[current].type == BasicTokenType::COMMA) {
+            current++;
+            auto box = identifier(linenumber, tokens[current++]);
+
+            if (box == "B") {
+                program.addValue(OpCode::SETC, IntAsValue(0));
+            } else if (box == "BF") {
+                program.addValue(OpCode::SETC, IntAsValue(1));
+            } else {
+                error(linenumber, "Expected: B or BF");
+            }
+
+            program.add(OpCode::WRITECX);
+            program.addPointer(OpCode::SETIDX, env->get(LINE_INDEX));
+            program.addSyscall(OpCode::SYSCALL, SysCall::DRAWBOX, RuntimeValue::IDX);
+        } else {
+            program.addValue(OpCode::SETC, IntAsValue(0));
+            program.add(OpCode::WRITECX);
+            program.addPointer(OpCode::SETIDX, env->get(LINE_INDEX));
+            program.addSyscall(OpCode::SYSCALL, SysCall::DRAWLINE, RuntimeValue::IDX);
+        }
     } else if (tokens[current].type == BasicTokenType::IDENTIFIER && tokens[current+1].type == BasicTokenType::EQUAL) {
         auto name = identifier(linenumber, tokens[current++]);
 
@@ -1590,6 +1608,7 @@ void compile(const std::map<uint32_t, std::vector<BasicToken>> &lines, Program &
     env->create(READ_INDEX);
     env->create(VOICE_INDEX, VOICE_ARGS);
     env->create(FRAME_INDEX);
+    env->create(LINE_INDEX, LINE_ARGS);
 
     auto frame = program.addValue(OpCode::SETC, PointerAsValue(0));
     program.addPointer(OpCode::STOREC, env->create(FRAME_INDEX));

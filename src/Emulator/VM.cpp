@@ -551,32 +551,47 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
             sysIO->setpixel(ValueAsInt(a), ValueAsInt(b), ValueAsInt(c));
             break;
         case SysCall::DRAWLINE: {
-                int fa = 0;
-                int fb = 0;
+                int x0,y0,x1,y1,colour;
 
-                int colour = ValueAsInt(c);
-
-                if (IS_FLOAT(a)) {
-//std::cerr << "FA";
-                    fa = (int)ValueAsFloat(a);
+                if (IS_FLOAT(mem[idx])) {
+                    x0 = (int)getFloat(idx);
+                } else if (IS_INT(mem[idx])) {
+                    x0 = (int)getShort(idx);
                 } else {
-//std::cerr << "IA";
-                    fa = (int)ValueAsInt(a);
+                    error("Invalid type for x0");
                 }
 
-                if (IS_FLOAT(b)) {
-//std::cerr << "FB";
-                    fb = (int)ValueAsFloat(b);
+                if (IS_FLOAT(mem[idx+1])) {
+                    y0 = (int)getFloat(idx+1);
+                } else if (IS_INT(mem[idx+1])) {
+                    y0 = (int)getShort(idx+1);
                 } else {
-//std::cerr << "IB";
-                    fb = (int)ValueAsInt(b);
+                    error("Invalid type for y0");
                 }
 
-                int x0 = fa % 320;
-                int y0 = (int)(fa / 320);
+                if (IS_FLOAT(mem[idx+2])) {
+                    x1 = (int)getFloat(idx+2);
+                } else if (IS_INT(mem[idx+2])) {
+                    x1 = (int)getShort(idx+2);
+                } else {
+                    error("Invalid type for x1");
+                }
 
-                int x1 = fb % 320;
-                int y1 = (int)(fb / 320);
+                if (IS_FLOAT(mem[idx+3])) {
+                    y1 = (int)getFloat(idx+3);
+                } else if (IS_INT(mem[idx+3])) {
+                    y1 = (int)getShort(idx+3);
+                } else {
+                    error("Invalid type for y1");
+                }
+
+                if (IS_FLOAT(mem[idx+4])) {
+                    colour = (int)getFloat(idx+4);
+                } else if (IS_INT(mem[idx+4])) {
+                    colour = (int)getShort(idx+4);
+                } else {
+                    error("Invalid type for colour");
+                }
 
                 int steep = 0;
 
@@ -620,6 +635,75 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                         } else {
                             y -= 1;
                         }
+                    }
+                }
+            }
+            break;
+        case SysCall::DRAWBOX: {
+                int x0,y0,x1,y1,colour,filled;
+
+                if (IS_FLOAT(mem[idx])) {
+                    x0 = (int)getFloat(idx);
+                } else if (IS_INT(mem[idx])) {
+                    x0 = (int)getShort(idx);
+                } else {
+                    error("Invalid type for x0");
+                }
+
+                if (IS_FLOAT(mem[idx+1])) {
+                    y0 = (int)getFloat(idx+1);
+                } else if (IS_INT(mem[idx+1])) {
+                    y0 = (int)getShort(idx+1);
+                } else {
+                    error("Invalid type for y0");
+                }
+
+                if (IS_FLOAT(mem[idx+2])) {
+                    x1 = (int)getFloat(idx+2);
+                } else if (IS_INT(mem[idx+2])) {
+                    x1 = (int)getShort(idx+2);
+                } else {
+                    error("Invalid type for x1");
+                }
+
+                if (IS_FLOAT(mem[idx+3])) {
+                    y1 = (int)getFloat(idx+3);
+                } else if (IS_INT(mem[idx+3])) {
+                    y1 = (int)getShort(idx+3);
+                } else {
+                    error("Invalid type for y1");
+                }
+
+                if (IS_FLOAT(mem[idx+4])) {
+                    colour = (int)getFloat(idx+4);
+                } else if (IS_INT(mem[idx+4])) {
+                    colour = (int)getShort(idx+4);
+                } else {
+                    error("Invalid type for colour");
+                }
+                if (IS_FLOAT(mem[idx+5])) {
+                    filled = (int)getFloat(idx+5);
+                } else if (IS_INT(mem[idx+5])) {
+                    filled = (int)getShort(idx+5);
+                } else {
+                    error("Invalid type for filled");
+                }
+
+                if (filled) {
+                    for (int y = y0; y <= y1; y++) {
+                        for (int x = x0; x <= x1; x++) {
+                            sysIO->setpixel(x, y, colour);
+                        }
+                    }
+                } else {
+                    for (int x = x0; x <= x1; x++) {
+                        sysIO->setpixel(x, y0, colour);
+                        sysIO->setpixel(x, y1, colour);
+                    }
+
+                    for (int y = y0; y <= y1; y++) {
+                        sysIO->setpixel(x0, y, colour);
+                        sysIO->setpixel(x1, y, colour);
                     }
                 }
             }

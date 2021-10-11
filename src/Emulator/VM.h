@@ -212,6 +212,7 @@ namespace Emulator {
         READKEY,
         DRAW,
         DRAWLINE,
+        DRAWBOX,
         BLIT,
         SOUND,
         VOICE,

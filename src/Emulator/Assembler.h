@@ -67,7 +67,7 @@ namespace Emulator {
                 } else if (std::holds_alternative<std::pair<SysCall, RuntimeValue>>(*arg)) {
                     return 1+2+2;
                 } else {
-                    std::cerr << "Error in size" << std::endl;
+                    std::cerr << "Error in size " << (int)opcode << std::endl;
                 }
             }
             return 1;
