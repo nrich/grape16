@@ -655,7 +655,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
             }
             break;
         case SysCall::VOICE: {
-                uint8_t voice;
+                uint8_t voice = 0;
 
                 switch (rvalue) {
                     case RuntimeValue::A:
