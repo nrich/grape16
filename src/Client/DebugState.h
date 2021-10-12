@@ -35,6 +35,9 @@ namespace Client {
             void palette(uint8_t id) {
             }
 
+            void setcolours(uint8_t foreground, uint8_t background) {
+            }
+
             void setpixel(uint16_t x, uint16_t y, uint8_t pixel) {
             }
 

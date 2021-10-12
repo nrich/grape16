@@ -156,6 +156,8 @@ std::pair<SysCall, RuntimeValue> getSysCall(uint32_t linenumber, const std::stri
         syscall = SysCall::READ;
     } else if (syscallname == "READKEY") {
         syscall = SysCall::READKEY;
+    } else if (syscallname == "COLOUR") {
+        syscall = SysCall::COLOUR;
     } else if (syscallname == "PALETTE") {
         syscall = SysCall::PALETTE;
     } else if (syscallname == "DRAW") {
@@ -204,6 +206,8 @@ std::pair<std::string, std::string> getSysCall(SysCall syscall, RuntimeValue rt)
     } else if (syscall == SysCall::READKEY) {
         syscallname = "READKEY";
     } else if (syscall == SysCall::PALETTE) {
+        syscallname = "COLOUR";
+    } else if (syscall == SysCall::COLOUR) {
         syscallname = "PALETTE";
     } else if (syscall == SysCall::DRAW) {
         syscallname = "DRAW";

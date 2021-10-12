@@ -211,6 +211,7 @@ namespace Emulator {
         READ,
         READKEY,
         PALETTE,
+        COLOUR,
         DRAW,
         DRAWLINE,
         DRAWBOX,
@@ -243,6 +244,7 @@ namespace Emulator {
             virtual std::string gets() = 0; 
 
             virtual void palette(uint8_t id) = 0;
+            virtual void setcolours(uint8_t foreground, uint8_t background) = 0;
 
             virtual void setpixel(uint16_t x, uint16_t y, uint8_t pixel) = 0;
             virtual uint8_t getpixel(uint16_t x, uint16_t y) = 0;

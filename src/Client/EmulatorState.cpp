@@ -10,11 +10,9 @@
 
 using namespace Client;
 
-SystemIO::SystemIO() : cursor(0,0),currentPalette(1) {
+SystemIO::SystemIO() : cursor(0,0),currentPalette(1), background(0), foreground(255) {
     screenbuffer.resize(lines);
     screenbuffer[cursor.Y()][cursor.X()] = (char)228;
-
-    screen.fill(Common::Colour::DarkSlateBlue.RGBA());
 
     palettes.resize(3);
 
@@ -282,10 +280,12 @@ SystemIO::SystemIO() : cursor(0,0),currentPalette(1) {
     for (size_t i = 0; i < palettes[1].size(); i++) {
         palettes[2][i] = !palettes[1][i];
     }
+
+    screen.fill(getBackground().RGBA());
 }
 
 void SystemIO::cls() {
-    screen.fill(Common::Colour::DarkSlateBlue.RGBA());
+    screen.fill(getBackground().RGBA());
     cursor = Point(0,0);
     screenbuffer.clear();
     screenbuffer.resize(lines);
@@ -380,7 +380,7 @@ void EmulatorState::onRender(State *state, const uint32_t time) {
 
     uint16_t lineoffset = 0;
     for (auto line : sysio->getScreenBuffer()) {
-        state->getRenderer()->drawString(0, lineoffset*8, 8, 8, std::string(line.data()), Common::Colour::MediumPurple);
+        state->getRenderer()->drawString(0, lineoffset*8, 8, 8, std::string(line.data()), sysio->getForeground().RGBA());
         lineoffset++;
     }
 }

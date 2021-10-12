@@ -62,6 +62,7 @@ namespace Emulator {
 
         BEEP,
         CLS,
+        COLOR,
         DATA,
         DEF,
         DIM,

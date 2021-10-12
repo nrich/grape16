@@ -203,6 +203,10 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     else
+                    if (keyword == "COLOR") {
+                        tokenType = BasicTokenType::COLOR;
+                    }
+                    else
                     if (keyword == "COS") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
@@ -1175,6 +1179,14 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         current += 1;
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         program.addSyscall(OpCode::SYSCALL, SysCall::PALETTE, RuntimeValue::C);
+    } else if (tokens[current].type == BasicTokenType::COLOR) {
+        current += 1;
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        program.add(OpCode::POPB);
+        program.add(OpCode::POPA);
+        program.addSyscall(OpCode::SYSCALL, SysCall::COLOUR, RuntimeValue::NONE);
     } else if (tokens[current].type == BasicTokenType::BEEP) {
         current += 1;
         program.addValue(OpCode::SETA, IntAsValue(800));

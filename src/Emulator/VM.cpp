@@ -547,6 +547,9 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                     error("Cannot readkey to register");
             }
             break;
+        case SysCall::COLOUR:
+            sysIO->setcolours(ValueAsByte(a), ValueAsByte(b));
+            break;
         case SysCall::PALETTE:
             switch (rvalue) {
                 case RuntimeValue::A:

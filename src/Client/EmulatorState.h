@@ -54,6 +54,9 @@ namespace Client {
             std::vector<std::array<Common::Colour, 256>> palettes;
             uint8_t currentPalette;
 
+            uint8_t background;
+            uint8_t foreground;
+
             std::array<VoiceConfig, VOICE_COUNT> voices;
         public:
             SystemIO();
@@ -91,6 +94,11 @@ namespace Client {
                 }
             }
 
+            void setcolours(uint8_t foreground, uint8_t background) {
+                this->foreground = foreground;
+                this->background = background;
+            }
+
             void setpixel(uint16_t x, uint16_t y, uint8_t pixel);
             uint8_t getpixel(uint16_t x, uint16_t y);
 
@@ -114,6 +122,14 @@ namespace Client {
 
             VoiceConfig getVoice(const uint8_t voice) {
                 return voices[voice];
+            }
+
+            Common::Colour getForeground() const {
+                return palettes[currentPalette][foreground];
+            }
+
+            Common::Colour getBackground() const {
+                return palettes[currentPalette][background];
             }
     };
 
