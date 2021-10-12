@@ -1419,7 +1419,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 idx = heap;
                 break;
             case OpCode::YIELD:
-                std::cerr << "Yield " << cycles << std::endl;
+                //std::cerr << "Yield " << cycles << std::endl;
                 return done;
                 break;
             case OpCode::TRACE:

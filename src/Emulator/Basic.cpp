@@ -4,6 +4,7 @@ using namespace Emulator;
 
 #include <fstream>
 #include <sstream>
+#include <ctime>
 
 #include <stack>
 #include <variant>
