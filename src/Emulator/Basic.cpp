@@ -182,7 +182,7 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     else
-                    if (keyword == "TAN") {
+                    if (keyword == "ATAN") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     break;
