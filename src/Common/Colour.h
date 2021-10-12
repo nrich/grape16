@@ -89,6 +89,11 @@ namespace Common {
             return Colour(r/v, g/v, b/v);
         }
 
+        Colour operator!() const {
+            uint8_t grey = 0.21*(float)r + 0.72*(float)g + 0.07*(float)b;
+            return Colour(grey,grey,grey);
+        }
+
         std::string toString() const {
             std::ostringstream s;
 

@@ -547,6 +547,30 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                     error("Cannot readkey to register");
             }
             break;
+        case SysCall::PALETTE:
+            switch (rvalue) {
+                case RuntimeValue::A:
+                    if (IS_BYTE(a))
+                        sysIO->palette(ValueAsByte(a));
+                    else
+                        error("Invalid palette");
+                    break;
+                case RuntimeValue::B:
+                    if (IS_BYTE(b))
+                        sysIO->palette(ValueAsByte(b));
+                    else
+                        error("Invalid palette");
+                    break;
+                case RuntimeValue::C:
+                    if (IS_BYTE(c))
+                        sysIO->palette(ValueAsByte(c));
+                    else
+                        error("Invalid palette");
+                    break;
+                default:
+                    error("Cannot readkey to register");
+            }
+            break;
         case SysCall::DRAW:
             sysIO->setpixel(ValueAsInt(a), ValueAsInt(b), ValueAsInt(c));
             break;

@@ -75,6 +75,7 @@ namespace Emulator {
         LET,
         LINE,
         NEXT,
+        PALETTE,
         POKE,
         PRINT,
         PSET,

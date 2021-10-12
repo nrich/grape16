@@ -318,6 +318,10 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                     }
                     break;
                 case 'P':
+                    if (keyword == "PALETTE") {
+                        tokenType = BasicTokenType::PALETTE;
+                    }
+                    else
                     if (keyword == "PEEK") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
@@ -1163,12 +1167,14 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.add(OpCode::WRITEAX);
     } else if (tokens[current].type == BasicTokenType::RETURN) {
         program.add(OpCode::RETURN);
-
         current += 1;
     } else if (tokens[current].type == BasicTokenType::WAIT) {
         program.add(OpCode::YIELD);
-
         current += 1;
+    } else if (tokens[current].type == BasicTokenType::PALETTE) {
+        current += 1;
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        program.addSyscall(OpCode::SYSCALL, SysCall::PALETTE, RuntimeValue::C);
     } else if (tokens[current].type == BasicTokenType::BEEP) {
         current += 1;
         program.addValue(OpCode::SETA, IntAsValue(800));

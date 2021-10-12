@@ -51,7 +51,9 @@ namespace Client {
             std::queue<char> inputBuffer;
             std::queue<SoundBufferObject> soundBuffer;
 
-            std::array<Common::Colour, 256> colourLookup;
+            std::vector<std::array<Common::Colour, 256>> palettes;
+            uint8_t currentPalette;
+
             std::array<VoiceConfig, VOICE_COUNT> voices;
         public:
             SystemIO();
@@ -81,6 +83,12 @@ namespace Client {
                 char c = inputBuffer.front();
                 inputBuffer.pop();
                 return c;
+            }
+
+            void palette(uint8_t id) {
+                if (id < palettes.size()) {
+                    currentPalette = id;
+                }
             }
 
             void setpixel(uint16_t x, uint16_t y, uint8_t pixel);

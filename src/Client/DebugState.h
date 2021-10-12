@@ -32,6 +32,9 @@ namespace Client {
                 return "";
             }
 
+            void palette(uint8_t id) {
+            }
+
             void setpixel(uint16_t x, uint16_t y, uint8_t pixel) {
             }
 
