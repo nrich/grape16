@@ -285,6 +285,10 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                     }
                     break;
                 case 'L':
+                    if (keyword == "LEN") {
+                        tokenType = BasicTokenType::FUNCTION;
+                    }
+                    else
                     if (keyword == "LET") {
                         tokenType = BasicTokenType::LET;
                     }
@@ -637,6 +641,26 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
         check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
         program.addSyscall(OpCode::SYSCALL, SysCall::READKEY, RuntimeValue::C);
         program.add(OpCode::PUSHC);
+    } else if (token.str == "LEN") {
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        program.add(OpCode::POPIDX);
+        program.addValue(OpCode::SETB, IntAsValue(0));
+        program.addValue(OpCode::SETC, IntAsValue(0));
+        auto loop = program.add(OpCode::NOP);
+        program.add(OpCode::PUSHC);
+        program.add(OpCode::IDXA);
+        program.add(OpCode::CMP);
+        auto cmp = program.addShort(OpCode::JMPEZ, (int16_t)0);
+        program.add(OpCode::POPC);
+        program.addValue(OpCode::INCC, IntAsValue(1));
+        program.addValue(OpCode::INCIDX, IntAsValue(1));
+        program.addShort(OpCode::JMP, (int16_t)loop);
+        program.add(OpCode::PUSHC);
+        auto end = program.add(OpCode::NOP);
+        program.add(OpCode::POPC);
+        program.add(OpCode::PUSHC);
+        program.updateShort(cmp+1, end);
     } else if (token.str == "LOG") {
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
