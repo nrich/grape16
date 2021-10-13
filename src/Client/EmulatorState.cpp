@@ -10,7 +10,7 @@
 
 using namespace Client;
 
-SystemIO::SystemIO() : cursor(0,0),currentPalette(1), background(0), foreground(255) {
+SystemIO::SystemIO() : cursor(0,0),currentPalette(1), background(0), foreground(255), fontSize(8) {
     palettes.resize(3);
 
     for (size_t i = 0; i < palettes[0].size(); i++) {
@@ -300,11 +300,11 @@ void SystemIO::cls() {
 }
 
 void SystemIO::setpixel(uint16_t x, uint16_t y, uint8_t pixel) {
-    screen[y*320 + x] = palettes[currentPalette][pixel].RGBA();
+    screen[y*width + x] = palettes[currentPalette][pixel].RGBA();
 }
 
 uint8_t SystemIO::getpixel(uint16_t x, uint16_t y) {
-    return Common::Colour(screen[y*320 + x]).RGB332();
+    return Common::Colour(screen[y*width + x]).RGB332();
 }
 
 void SystemIO::write(uint8_t c) {
@@ -368,7 +368,7 @@ std::string SystemIO::gets() {
 
 void SystemIO::blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) {
     uint32_t *ptr = screen.data();
-    ptr += y*320 + x;
+    ptr += y*width + x;
 
     std::memcpy(ptr, buffer.data(), buffer.size());
 }
@@ -384,11 +384,11 @@ void SystemIO::voice(uint8_t voice, uint8_t waveForm, uint8_t volume, uint8_t at
 }
 
 void EmulatorState::onRender(State *state, const uint32_t time) {
-    state->getRenderer()->drawBuffer(sysio->getScreen().data(), 320, 240);
+    state->getRenderer()->drawBuffer(sysio->getScreen().data(), sysio->Width(), sysio->Height());
 
     uint16_t lineoffset = 0;
     for (auto line : sysio->getScreenBuffer()) {
-        state->getRenderer()->drawString(0, lineoffset*8, 8, 8, std::string(line.data()), sysio->getForeground().RGBA());
+        state->getRenderer()->drawString(0, lineoffset*sysio->FontSize(), sysio->FontSize(), sysio->FontSize(), std::string(line.data()), sysio->getForeground().RGBA());
         lineoffset++;
     }
 }
