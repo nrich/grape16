@@ -278,14 +278,9 @@ SystemIO::SystemIO() : cursor(0,0),currentPalette(1), background(0), foreground(
         palettes[2][i] = !palettes[1][i];
     }
 
-    screenbuffer.resize(lines);
-    for (size_t i=0; i < screenbuffer.size(); i++) {
-        screenbuffer[i].fill(' ');
-        screenbuffer[i][screenbuffer.size()] = 0;
-    }
-    screenbuffer[cursor.Y()][cursor.X()] = (char)228;
+    cls();
 
-    screen.fill(background);
+    screenbuffer[cursor.Y()][cursor.X()] = (char)255;
 }
 
 void SystemIO::cls() {
@@ -338,7 +333,7 @@ void SystemIO::write(uint8_t c) {
         screenbuffer[cursor.Y()][cursor.X()] = chr;
         cursor = (cursor + Point(1,0));
     } else {
-        screenbuffer[cursor.Y()][cursor.X()] = (char)228;
+        screenbuffer[cursor.Y()][cursor.X()] = (char)255;
     }
 }
 
@@ -455,12 +450,12 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
                 try {
                     compile(basic, *program);
                     vm->Jump(run);
+                    done = false;
                 } catch (const std::invalid_argument &ia) {
                     sysio->puts(ia.what() + std::string("\n"));
                 } catch (const std::domain_error &de) {
                     sysio->puts(de.what() + std::string("\n"));
                 }
-                done = false;
             } else if (cmd == "CLS") {
                 sysio->cls();
             } else if (cmd == "CLEAR") {
@@ -470,7 +465,19 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
                 if (basicline.first) {
                     basic[basicline.first] = basicline.second;
                 } else {
-                    sysio->puts("? Unknown command\n");
+                    //sysio->puts("? Unknown command\n");
+                    auto run = program->add(Emulator::OpCode::NOP);
+                    std::map<uint32_t, std::vector<Emulator::BasicToken>> cmd = {{basicline.first, basicline.second}};
+                    try {
+                        compile(cmd, *program);
+                        vm->Jump(run);
+                        done = false;
+                    } catch (const std::invalid_argument &ia) {
+                        sysio->puts(ia.what() + std::string("\n"));
+                    } catch (const std::domain_error &de) {
+                        sysio->puts(de.what() + std::string("\n"));
+                    }
+                    sysio->puts("OK\n");
                 }
             }
 
