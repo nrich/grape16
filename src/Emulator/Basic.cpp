@@ -297,6 +297,10 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                         tokenType = BasicTokenType::LINE;
                     }
                     else
+                    if (keyword == "LOCATE") {
+                        tokenType = BasicTokenType::LOCATE;
+                    }
+                    else
                     if (keyword == "LOG") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
@@ -1211,6 +1215,14 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.add(OpCode::POPB);
         program.add(OpCode::POPA);
         program.addSyscall(OpCode::SYSCALL, SysCall::COLOUR, RuntimeValue::NONE);
+    } else if (tokens[current].type == BasicTokenType::LOCATE) {
+        current += 1;
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        program.add(OpCode::POPB);
+        program.add(OpCode::POPA);
+        program.addSyscall(OpCode::SYSCALL, SysCall::CURSOR, RuntimeValue::NONE);
     } else if (tokens[current].type == BasicTokenType::BEEP) {
         current += 1;
         program.addValue(OpCode::SETA, IntAsValue(800));

@@ -212,6 +212,7 @@ namespace Emulator {
         READKEY,
         PALETTE,
         COLOUR,
+        CURSOR,
         DRAW,
         DRAWLINE,
         DRAWBOX,
@@ -248,6 +249,8 @@ namespace Emulator {
 
             virtual void setpixel(uint16_t x, uint16_t y, uint8_t pixel) = 0;
             virtual uint8_t getpixel(uint16_t x, uint16_t y) = 0;
+
+            virtual void setcursor(uint16_t row, uint16_t column) = 0;
 
             virtual void blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) = 0;
 

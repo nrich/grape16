@@ -45,6 +45,9 @@ namespace Client {
                 return 0;
             }
 
+            void setcursor(uint16_t row, uint16_t column) {
+            }
+
             void blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) {
             }
 

@@ -75,6 +75,7 @@ namespace Emulator {
         INPUT,
         LET,
         LINE,
+        LOCATE,
         NEXT,
         PALETTE,
         POKE,

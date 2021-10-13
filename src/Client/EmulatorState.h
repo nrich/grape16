@@ -41,7 +41,7 @@ namespace Client {
 
     class SystemIO : public Emulator::SysIO {
             const static int32_t chars = 40;
-            const static int32_t lines = 22;
+            const static int32_t lines = 30;
 
             Point cursor;
 
@@ -97,6 +97,12 @@ namespace Client {
             void setcolours(uint8_t foreground, uint8_t background) {
                 this->foreground = foreground;
                 this->background = background;
+            }
+
+            void setcursor(uint16_t row, uint16_t column) {
+                if (column <= chars && row <= lines) {
+                    cursor = Point(column, row);
+                }
             }
 
             void setpixel(uint16_t x, uint16_t y, uint8_t pixel);

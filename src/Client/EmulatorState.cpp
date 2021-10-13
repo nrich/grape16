@@ -11,9 +11,6 @@
 using namespace Client;
 
 SystemIO::SystemIO() : cursor(0,0),currentPalette(1), background(0), foreground(255) {
-    screenbuffer.resize(lines);
-    screenbuffer[cursor.Y()][cursor.X()] = (char)228;
-
     palettes.resize(3);
 
     for (size_t i = 0; i < palettes[0].size(); i++) {
@@ -281,6 +278,13 @@ SystemIO::SystemIO() : cursor(0,0),currentPalette(1), background(0), foreground(
         palettes[2][i] = !palettes[1][i];
     }
 
+    screenbuffer.resize(lines);
+    for (size_t i=0; i < screenbuffer.size(); i++) {
+        screenbuffer[i].fill(' ');
+        screenbuffer[i][screenbuffer.size()] = 0;
+    }
+    screenbuffer[cursor.Y()][cursor.X()] = (char)228;
+
     screen.fill(getBackground().RGBA());
 }
 
@@ -289,6 +293,10 @@ void SystemIO::cls() {
     cursor = Point(0,0);
     screenbuffer.clear();
     screenbuffer.resize(lines);
+    for (size_t i=0; i < screenbuffer.size(); i++) {
+        screenbuffer[i].fill(' ');
+        screenbuffer[i][screenbuffer.size()] = 0;
+    }
 }
 
 void SystemIO::setpixel(uint16_t x, uint16_t y, uint8_t pixel) {
