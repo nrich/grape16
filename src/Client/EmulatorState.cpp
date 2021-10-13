@@ -285,11 +285,11 @@ SystemIO::SystemIO() : cursor(0,0),currentPalette(1), background(0), foreground(
     }
     screenbuffer[cursor.Y()][cursor.X()] = (char)228;
 
-    screen.fill(getBackground().RGBA());
+    screen.fill(background);
 }
 
 void SystemIO::cls() {
-    screen.fill(getBackground().RGBA());
+    screen.fill(background);
     cursor = Point(0,0);
     screenbuffer.clear();
     screenbuffer.resize(lines);
@@ -300,11 +300,11 @@ void SystemIO::cls() {
 }
 
 void SystemIO::setpixel(uint16_t x, uint16_t y, uint8_t pixel) {
-    screen[y*width + x] = palettes[currentPalette][pixel].RGBA();
+    screen[y*Width + x] = pixel;
 }
 
 uint8_t SystemIO::getpixel(uint16_t x, uint16_t y) {
-    return Common::Colour(screen[y*width + x]).RGB332();
+    return screen[y*Width + x];
 }
 
 void SystemIO::write(uint8_t c) {
@@ -367,8 +367,8 @@ std::string SystemIO::gets() {
 }
 
 void SystemIO::blit(uint16_t x, uint16_t y, std::vector<uint8_t> buffer) {
-    uint32_t *ptr = screen.data();
-    ptr += y*width + x;
+    uint8_t *ptr = screen.data();
+    ptr += y*Width + x;
 
     std::memcpy(ptr, buffer.data(), buffer.size());
 }
@@ -384,7 +384,17 @@ void SystemIO::voice(uint8_t voice, uint8_t waveForm, uint8_t volume, uint8_t at
 }
 
 void EmulatorState::onRender(State *state, const uint32_t time) {
-    state->getRenderer()->drawBuffer(sysio->getScreen().data(), sysio->Width(), sysio->Height());
+    static std::array<uint32_t, SystemIO::Width * SystemIO::Height> buffer;
+    auto screen = sysio->getScreen();
+    auto palette = sysio->getCurrentPalette();
+
+    std::transform(screen.begin(), screen.end(), buffer.begin(),
+        [palette](uint8_t pixel) {
+            return palette[pixel].RGBA();
+        }
+    );
+
+    state->getRenderer()->drawBuffer(buffer.data(), SystemIO::Width, SystemIO::Height);
 
     uint16_t lineoffset = 0;
     for (auto line : sysio->getScreenBuffer()) {

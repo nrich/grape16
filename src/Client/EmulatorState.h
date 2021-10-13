@@ -40,15 +40,17 @@ namespace Client {
 
 
     class SystemIO : public Emulator::SysIO {
+        public:
+            const static int32_t Width = 320;
+            const static int32_t Height = 240;
+        private:
             const static int32_t chars = 40;
             const static int32_t lines = 30;
-            const static int32_t width = 320;
-            const static int32_t height = 240;
 
             Point cursor;
 
             std::vector<std::array<char, chars+1>> screenbuffer;
-            std::array<uint32_t, width*height> screen;
+            std::array<uint8_t, Width*Height> screen;
 
             std::queue<char> inputBuffer;
             std::queue<SoundBufferObject> soundBuffer;
@@ -64,14 +66,6 @@ namespace Client {
             std::array<VoiceConfig, VOICE_COUNT> voices;
         public:
             SystemIO();
-
-            int32_t Width() const {
-                return width;
-            }
-
-            int32_t Height() const {
-                return height;
-            }
 
             int32_t FontSize() const {
                 return fontSize;
@@ -129,7 +123,19 @@ namespace Client {
             void sound(uint8_t voice, float frequency, uint16_t duration);
             void voice(uint8_t voice, uint8_t waveForm, uint8_t volume, uint8_t attack, uint8_t decay, uint8_t sustain, uint8_t release);
 
-            std::array<uint32_t, width*height> getScreen() {
+            std::array<Common::Colour, 256> getCurrentPalette() {
+                return palettes[currentPalette];
+            }
+
+            Common::Colour getForeground() const {
+                return palettes[currentPalette][foreground];
+            }
+
+            Common::Colour getBackground() const {
+                return palettes[currentPalette][background];
+            }
+
+            std::array<uint8_t, Width*Height> getScreen() {
                 return screen;
             }
 
@@ -144,14 +150,6 @@ namespace Client {
 
             VoiceConfig getVoice(const uint8_t voice) {
                 return voices[voice];
-            }
-
-            Common::Colour getForeground() const {
-                return palettes[currentPalette][foreground];
-            }
-
-            Common::Colour getBackground() const {
-                return palettes[currentPalette][background];
             }
     };
 
