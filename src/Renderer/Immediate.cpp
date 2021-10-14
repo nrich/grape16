@@ -50,31 +50,86 @@
 
 using namespace Renderer;
 
-Immediate::Immediate(const Common::DisplayMode &displayMode) : mode(Mode::Unknown), displayMode(displayMode) {
-    switch (displayMode.Ratio()) {
-        case Common::AspectRatio::_4x3:
-            virtualWidth = 320;
-            horizontalOffset = 0;
-            virtualHeight = 240;
-            verticalOffset = 0;
-            break;
-        case Common::AspectRatio::_16x9:
-            virtualWidth = 320;
-            horizontalOffset = 40;
-            virtualHeight = 180;
-            verticalOffset = 0;
-            break;
-        case Common::AspectRatio::_16x10:
-            virtualWidth = 320;
-            horizontalOffset = 28;
-            virtualHeight = 200;
-            verticalOffset = 0;
-            break;
-        default:
-            break;
+Immediate::Immediate(const Common::DisplayMode &displayMode, Common::AspectRatio ratio) : mode(Mode::Unknown), displayMode(displayMode), ratio(ratio) {
+    configureVirtualDisplay();
+    enableInterfaceMode();
+}
+
+void Immediate::configureVirtualDisplay() {
+    if (ratio == Common::AspectRatio::_4x3) {
+        switch (displayMode.Ratio()) {
+            case Common::AspectRatio::_4x3:
+                virtualWidth = 320;
+                horizontalOffset = 0;
+                virtualHeight = 240;
+                verticalOffset = 0;
+                break;
+            case Common::AspectRatio::_16x9:
+                virtualWidth = 320;
+                horizontalOffset = 40;
+                virtualHeight = 180;
+                verticalOffset = 0;
+                break;
+            case Common::AspectRatio::_16x10:
+                virtualWidth = 320;
+                horizontalOffset = 28;
+                virtualHeight = 200;
+                verticalOffset = 0;
+                break;
+            default:
+                break;
+        }
+    } else if (ratio == Common::AspectRatio::_16x9) {
+        switch (displayMode.Ratio()) {
+            case Common::AspectRatio::_4x3:
+                virtualWidth = 320;
+                horizontalOffset = 0;
+                virtualHeight = 240;
+                verticalOffset = 30;
+                break;
+            case Common::AspectRatio::_16x9:
+                virtualWidth = 320;
+                horizontalOffset = 0;
+                virtualHeight = 180;
+                verticalOffset = 0;
+                break;
+            case Common::AspectRatio::_16x10:
+                virtualWidth = 320;
+                horizontalOffset = 0;
+                virtualHeight = 200;
+                verticalOffset = 10;
+                break;
+            default:
+                break;
+        }
+    } else if (ratio == Common::AspectRatio::_16x10) {
+        switch (displayMode.Ratio()) {
+            case Common::AspectRatio::_4x3:
+                virtualWidth = 320;
+                horizontalOffset = 0;
+                virtualHeight = 240;
+                verticalOffset = 20;
+                break;
+            case Common::AspectRatio::_16x9:
+                virtualWidth = 320;
+                horizontalOffset = 16;
+                virtualHeight = 180;
+                verticalOffset = 0;
+                break;
+            case Common::AspectRatio::_16x10:
+                virtualWidth = 320;
+                horizontalOffset = 0;
+                virtualHeight = 200;
+                verticalOffset = 0;
+                break;
+            default:
+                break;
+        }
+
+    } else {
+
     }
 
-    enableInterfaceMode();
 }
 
 void Immediate::enableInterfaceMode() {
@@ -335,30 +390,9 @@ void Immediate::drawBuffer(const uint8_t *buffer, uint32_t width, uint32_t heigh
 
 
 void Immediate::changeDisplayMode(const Common::DisplayMode &displayMode) {
-    switch (displayMode.Ratio()) {
-        case Common::AspectRatio::_4x3:
-            virtualWidth = 320;
-            horizontalOffset = 0;
-            virtualHeight = 240;
-            verticalOffset = 0;
-            break;
-        case Common::AspectRatio::_16x9:
-            virtualWidth = 320;
-            horizontalOffset = 40;
-            virtualHeight = 180;
-            verticalOffset = 0;
-            break;
-        case Common::AspectRatio::_16x10:
-            virtualWidth = 320;
-            horizontalOffset = 28;
-            virtualHeight = 200;
-            verticalOffset = 0;
-            break;
-        default:
-            break;
-    }
-
     this->displayMode = displayMode;
+
+    configureVirtualDisplay();
     mode = Mode::Unknown;
     enableInterfaceMode();
 }
