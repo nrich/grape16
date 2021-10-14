@@ -77,6 +77,8 @@ void Immediate::configureVirtualDisplay() {
                 verticalOffset = 0;
                 break;
             default:
+                std::cerr << "Invalid aspect ratio" << std::endl;
+                exit(-1);
                 break;
         }
     } else if (ratio == Common::AspectRatio::_16x9) {
@@ -100,6 +102,8 @@ void Immediate::configureVirtualDisplay() {
                 verticalOffset = 10;
                 break;
             default:
+                std::cerr << "Invalid aspect ratio" << std::endl;
+                exit(-1);
                 break;
         }
     } else if (ratio == Common::AspectRatio::_16x10) {
@@ -123,11 +127,13 @@ void Immediate::configureVirtualDisplay() {
                 verticalOffset = 0;
                 break;
             default:
+                std::cerr << "Invalid aspect ratio" << std::endl;
+                exit(-1);
                 break;
         }
-
     } else {
-
+        std::cerr << "Invalid aspect ratio" << std::endl;
+        exit(-1);
     }
 
 }
