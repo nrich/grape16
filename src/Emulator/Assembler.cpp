@@ -301,7 +301,7 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
                 while (isDigit(line[i]))
                     i++;
 
-                return Emulator::AsmToken(opcode, (int32_t)(std::strtoul(line.substr(numstart).c_str(), nullptr, 16)));
+                return Emulator::AsmToken(opcode, (int32_t)(std::stoul(line.substr(numstart), nullptr, 16)));
             } else {
                 error(linenum, opname, "POINTER expected");
             }
@@ -346,7 +346,7 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
                 while (isDigit(line[i]))
                     i++;
 
-                return Emulator::AsmToken(opcode, PointerAsValue(std::strtoul(line.substr(numstart).c_str(), nullptr, 16)));
+                return Emulator::AsmToken(opcode, PointerAsValue(std::stoul(line.substr(numstart), nullptr, 16)));
             }
 
             if (!(line[i] == '-' || isDigit(line[i])))

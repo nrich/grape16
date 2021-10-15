@@ -1108,7 +1108,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     overflow = std::pow(ValueAsInt(a), ValueAsInt(b));
 
                     if (overflow > INT16_MAX || overflow < INT16_MIN) {
-                        std::cerr << "EXP overflow " << overflow << std::endl;
+                        //std::cerr << "EXP overflow " << overflow << std::endl;
                         c = FloatAsValue((float)overflow);
                     } else
                         c = IntAsValue(overflow);
@@ -1202,11 +1202,11 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     overflow = (int32_t)ValueAsFloat(c);
 
                     if (overflow > INT16_MAX) {
-                        std::cerr << (std::string("INT overflow") + std::to_string(overflow)) << std::endl;
+                        //std::cerr << (std::string("INT overflow") + std::to_string(overflow)) << std::endl;
                         c = IntAsValue(INT16_MAX);
                     } else if (overflow < INT16_MIN) {
                         //error(std::string("INT overflow (f)") + std::to_string(overflow));
-                        std::cerr << (std::string("INT underflow") + std::to_string(overflow)) << std::endl;
+                        //std::cerr << (std::string("INT underflow") + std::to_string(overflow)) << std::endl;
                         c = IntAsValue(INT16_MIN);
                     } else
                         c = IntAsValue(overflow);

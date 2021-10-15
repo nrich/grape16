@@ -1,6 +1,57 @@
 #include <Common/Colour.h>
 
+#include <cmath>
+
 using namespace Common;
+
+static double Clip(double input, double min = 0, double max = 1) {
+    return input < min ? min : input > max ? max : input;
+}
+
+Colour Colour::HSV(double h, double s, double v) {
+    h = std::fmod(h, 360.0);
+
+    auto c = v * s;
+    auto x = c * (1 - std::abs(std::fmod((h / 60),2) - 1));
+    auto m = v - c;
+
+    double r, g, b;
+
+    if (h >= 0 && h < 60) {
+        r = c;
+        g = x;
+        b = 0;
+    } else if (h >= 60 && h < 120) {
+        r = x;
+        g = c;
+        b = 0;
+    } else if (h >= 120 && h < 180) {
+        r = 0;
+        g = c;
+        b = x;
+    } else if (h >= 180 && h < 240) {
+        r = 0;
+        g = x;
+        b = c;
+    } else if (h >= 240 && h < 300) {
+        r = x;
+        g = 0;
+        b = c;
+    } else if (h >= 300 && h < 360) {
+        r = c;
+        g = 0;
+        b = x;
+    } else {
+        std::cerr << "Value not inside range 0..360";
+        exit(-1);
+    }
+
+    r = Clip(r + m);
+    g = Clip(g + m);
+    b = Clip(b + m);
+
+    return Colour((int)(r * 255), (int)(g * 255), (int)((b * 255)));
+}
 
 const Colour Colour::AliceBlue(240,248,255);
 const Colour Colour::AntiqueWhite(250,235,215);

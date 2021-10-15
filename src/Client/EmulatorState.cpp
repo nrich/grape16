@@ -11,7 +11,7 @@
 using namespace Client;
 
 SystemIO::SystemIO() : cursor(0,0),currentPalette(1), background(0), foreground(255), fontSize(8) {
-    palettes.resize(3);
+    palettes.resize(4);
 
     for (size_t i = 0; i < palettes[0].size(); i++) {
         palettes[0][i] = Common::Colour::Colour8(i);
@@ -274,8 +274,53 @@ SystemIO::SystemIO() : cursor(0,0),currentPalette(1), background(0), foreground(
     palettes[1][254] = Common::Colour(228, 228, 228); //Grey89 #e4e4e4
     palettes[1][255] = Common::Colour(238, 238, 238); //Grey93 #eeeeee
 
+    size_t index = 0;
+
+    // CGA color palette
+    palettes[2][index++] = Common::Colour(0, 0, 0);          // 0 - black
+    palettes[2][index++] = Common::Colour(0, 0, 170);        // 1 - blue
+    palettes[2][index++] = Common::Colour(0, 170, 0);        // 2 - green 
+    palettes[2][index++] = Common::Colour(0, 170, 170);      // 3 - cyan
+    palettes[2][index++] = Common::Colour(170, 0, 0);        // 4 - red 
+    palettes[2][index++] = Common::Colour(170, 0, 170);      // 5 - magenta
+    palettes[2][index++] = Common::Colour(170, 85, 170);     // 6 - brown
+    palettes[2][index++] = Common::Colour(170, 170, 170);    // 7 - gray
+    palettes[2][index++] = Common::Colour(85, 85, 85);       // 8 - lighter black
+    palettes[2][index++] = Common::Colour(85, 85, 255);      // 9 - lighter blue
+    palettes[2][index++] = Common::Colour(85, 255, 85);      // A - lighter green 
+    palettes[2][index++] = Common::Colour(85, 255, 255);     // B - lighter cyan
+    palettes[2][index++] = Common::Colour(255, 85, 85);      // C - lighter red 
+    palettes[2][index++] = Common::Colour(255, 85, 255);     // D - lighter magenta
+    palettes[2][index++] = Common::Colour(255, 255, 85);     // E - lighter brown
+    palettes[2][index++] = Common::Colour(255, 255, 255);    // F - lighter gray
+
+    // greyscale
+    {
+        uint8_t grey = 0x00;
+        for (int i = 0; i < 16; i++) {
+            palettes[2][index++] = Common::Colour(grey, grey, grey);
+            grey += 0x10;
+        }
+    }
+
+    // value array
+    std::array<double,3> satLum = {1.0, 0.5, 0.25};
+
+    // general rainbow for various luminances
+    for (double lum : satLum) {
+        for (double sat : satLum) {
+            for (int i = 240; i < 240 + 360; i += 15) {
+                palettes[2][index++] = Common::Colour::HSV(i, sat, lum);
+            }
+        }
+    }
+
+    // fill the rest of the palette with black
+    while (index < palettes[2].size())
+        palettes[2][index++] = Common::Colour(0, 0, 0);
+
     for (size_t i = 0; i < palettes[1].size(); i++) {
-        palettes[2][i] = !palettes[1][i];
+        palettes[3][i] = !palettes[1][i];
     }
 
     cls();

@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <sstream>
+#include <iostream>
 
 namespace Common {
     class Colour {
@@ -29,6 +30,8 @@ namespace Common {
 
             return Colour(r, g, b, a);
         }
+
+        static Colour HSV(double h, double s, double v);
 
         //Accessors
         uint8_t R() const {
