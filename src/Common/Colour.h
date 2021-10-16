@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <sstream>
 #include <iostream>
+#include <iomanip>
 
 namespace Common {
     class Colour {
@@ -100,7 +101,9 @@ namespace Common {
         std::string toString() const {
             std::ostringstream s;
 
-            s <<std::hex << (int)r << "," << (int)g << "," << (int)b;
+            s << "0x" << std::setfill('0') << std::setw(2) << std::uppercase << std::right << std::hex << (int)r << ","
+              << "0x" << std::setfill('0') << std::setw(2) << std::uppercase << std::right << std::hex << (int)g << ","
+              << "0x" << std::setfill('0') << std::setw(2) << std::uppercase << std::right << std::hex << (int)b;
 
             return s.str();
         }
