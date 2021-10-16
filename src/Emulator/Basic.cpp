@@ -1597,10 +1597,10 @@ static void dim_declaration(Program &program, uint32_t linenumber, const std::ve
     program.addPointer(OpCode::SAVEIDX, env->create(name));
 
     for (int i = 1; i < size; i++) {
-        program.add(OpCode::WRITEBX);
-        program.add(OpCode::MOVCA);
-        program.add(OpCode::IDIV);
+        program.add(OpCode::WRITEAX);
         program.add(OpCode::MOVCB);
+        program.add(OpCode::IDIV);
+        program.add(OpCode::MOVCA);
         program.addValue(OpCode::INCIDX, IntAsValue(1));
     }
 }
