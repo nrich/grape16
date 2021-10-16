@@ -6,8 +6,6 @@
 #include <vector>
 #include <iostream>
 
-#define USE_VGA
-
 using namespace Client;
 
 SystemIO::SystemIO() : cursor(0,0),currentPalette(1), background(0), foreground(255), fontSize(8) {
