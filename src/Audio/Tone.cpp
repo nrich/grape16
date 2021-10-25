@@ -178,9 +178,9 @@ void Audio::Tone::generateSamples(float *stream, int length, float amplitude) {
                 case Common::WaveForm::NOISE:
                     stream[i] += attack * decay * sustain * release * to.volume * amplitude * (pinknoise.generate());
                     break;
-                default: // SINE
+                case Common::WaveForm::SINE:
+                default:
                     stream[i] += attack * decay * sustain * release * to.volume * amplitude * (std::sin(pos*2*M_PI));
-                    break;
             }
             i++;
         }
