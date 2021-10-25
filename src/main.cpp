@@ -62,7 +62,7 @@
 #define CLOCK_33MHz_at_60FPS  550000
 #define CLOCK_66MHz_at_60FPS  1100000
 
-std::shared_ptr<Emulator::Program> loadAssembly(const std::string &input) {
+std::shared_ptr<Emulator::Program> loadBinary(const std::string &input) {
     std::ifstream infile(input, std::ios_base::binary);
 
     if (!infile.is_open()) {
@@ -72,7 +72,14 @@ std::shared_ptr<Emulator::Program> loadAssembly(const std::string &input) {
 
     std::vector<uint8_t> buffer((std::istreambuf_iterator<char>(infile)), (std::istreambuf_iterator<char>()));
 
-    Emulator::Program program(buffer);
+    std::string header(buffer.begin(), buffer.begin()+4);
+
+    if (header != "GR16") {
+        std::cerr << "Invalid header `" << header << "'" << std::endl;
+        exit(-1);
+    }
+
+    Emulator::Program program({buffer.begin()+4, buffer.end()});
 
     return std::make_shared<Emulator::Program>(program);
 }
@@ -211,6 +218,15 @@ int main(int argc, char **argv) {
     );
 
     opt.add(
+        "-", // Default.
+        0, // Required?
+        1, // Number of args expected.
+        0, // Delimiter if expecting multiple args.
+        "Disassemble output", // Help description.
+        "-o"     // Flag token.
+    );
+
+    opt.add(
         "", // Default.
         0, // Required?
         0, // Number of args expected.
@@ -281,7 +297,7 @@ int main(int argc, char **argv) {
         } else if (opt.isSet("-b")) {
             program = loadBasic(*opt.lastArgs[0], opt.isSet("-d"));
         } else {
-            program = loadAssembly(*opt.lastArgs[0]);
+            program = loadBinary(*opt.lastArgs[0]);
         }
 
         if (opt.isSet("-O")) {
@@ -289,8 +305,35 @@ int main(int argc, char **argv) {
             program = std::make_shared<Emulator::Program>(optimized);
         }
 
-        if (opt.isSet("-p")) {
-            std::cout << ProgramAsString(*program, true);
+        if (opt.isSet("-o")) {
+            std::string filename;
+            opt.get("-o")->getString(filename);
+
+            if (filename == "-") {
+                if (opt.isSet("-p")) {
+                    std::cout << ProgramAsString(*program, true);
+                } else {
+                    std::cerr << "Cannot write binary to stdout" << std::endl;
+                }
+            } else {
+                std::ofstream file;
+
+                if (opt.isSet("-p")) {
+                    file.open(filename);
+                } else {
+                    file.open(filename, std::ios_base::binary);
+                }
+
+                if (file.is_open()) {
+                    if (opt.isSet("-p")) {
+                        file << ProgramAsString(*program, true);
+                    } else {
+                        file.write("GR16", 4);
+                        file.write((const char*)program->Code().data(), program->Code().size());
+                    }
+                    file.close();
+                }
+            }
             exit(0);
         }
     } else {

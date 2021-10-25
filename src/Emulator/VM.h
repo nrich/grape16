@@ -282,6 +282,10 @@ namespace Emulator {
             Program(const std::vector<uint8_t> &data);
             Program(const Program &) = default;
 
+            const std::vector<uint8_t> Code() const {
+                return code;
+            }
+
             uint32_t addLabel(const std::string &label, uint32_t pos);
             uint32_t addLabel(const std::string &label) {
                 return addLabel(label, code.size());
