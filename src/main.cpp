@@ -59,8 +59,11 @@
 #include "Client/DisplayMenuState.h"
 #include "Client/EmulatorState.h"
 
+#define CLOCK_8MHz_at_60FPS  137500
+#define CLOCK_16MHz_at_60FPS  275000
 #define CLOCK_33MHz_at_60FPS  550000
 #define CLOCK_66MHz_at_60FPS  1100000
+#define CLOCK_99MHz_at_60FPS  1650000
 
 std::shared_ptr<Emulator::Program> loadBinary(const std::string &input) {
     std::ifstream infile(input, std::ios_base::binary);
@@ -238,11 +241,11 @@ int main(int argc, char **argv) {
 
 
     opt.add(
-        "", // Default.
+        "1", // Default.
         0, // Required?
-        0, // Number of args expected.
+        1, // Number of args expected.
         0, // Delimiter if expecting multiple args.
-        "Turbo mode (66MHz)", // Help description.
+        "CPU speed (0=8MHz, 1=16MHz, 2=33MHz, 3=66MHz, 4=99MHz)", // Help description.
         "-t",     // Flag token.
         "-turbo",   // Flag token.
         "--turbo"  // Flag token.
@@ -383,7 +386,28 @@ int main(int argc, char **argv) {
         exit(0);
     }
 
-    uint32_t clockspeed = opt.isSet("-t") ? CLOCK_66MHz_at_60FPS : CLOCK_33MHz_at_60FPS;
+    uint32_t clockspeed = CLOCK_33MHz_at_60FPS;
+    int turbomode;
+    opt.get("-t")->getInt(turbomode);
+
+    switch(turbomode) {
+        case 0:
+            clockspeed = CLOCK_8MHz_at_60FPS;
+            break;
+        case 1:
+            clockspeed = CLOCK_16MHz_at_60FPS;
+            break;
+        case 2:
+            clockspeed = CLOCK_33MHz_at_60FPS;
+            break;
+        case 3:
+            clockspeed = CLOCK_66MHz_at_60FPS;
+            break;
+        case 4:
+            clockspeed = CLOCK_99MHz_at_60FPS;
+            break;
+    }
+
     bool debug = opt.isSet("-d");
 #else
     uint32_t clockspeed = CLOCK_33MHz_at_60FPS;
