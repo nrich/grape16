@@ -1371,17 +1371,17 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 stack.pop();
                 break;
             case OpCode::JMP:
-                pc = program.readShort(pc);
+                pc = (uint16_t)program.readShort(pc);
                 break;
             case OpCode::JMPEZ:
                 if (c == IntAsValue(0)) 
-                    pc = program.readShort(pc);
+                    pc = (uint16_t)program.readShort(pc);
                 else
                     pc += 2;
                 break;
             case OpCode::JMPNZ:
                 if (c != IntAsValue(0)) 
-                    pc = program.readShort(pc);
+                    pc = (uint16_t)program.readShort(pc);
                 else
                     pc += 2;
                 break;
@@ -1415,7 +1415,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 break;
             case OpCode::CALL:
                 callstack[++sp] = pc + 2; 
-                pc = program.readShort(pc);
+                pc = (uint16_t)program.readShort(pc);
                 break;
             case OpCode::RETURN:
                 if (sp == 0)
