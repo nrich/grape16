@@ -306,6 +306,14 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                     }
                     break;
                 case 'M':
+                    if (keyword == "MAX") {
+                        tokenType = BasicTokenType::FUNCTION;
+                    }
+                    else
+                    if (keyword == "MIN") {
+                        tokenType = BasicTokenType::FUNCTION;
+                    }
+                    else
                     if (keyword == "MKI") {
                         tokenType = BasicTokenType::FUNCTION;
                     }
@@ -671,6 +679,33 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
         program.add(OpCode::POPC);
         program.add(OpCode::LOG);
         program.add(OpCode::PUSHC);
+    } else if (token.str == "MAX") {
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        program.add(OpCode::POPB);
+        program.add(OpCode::POPA);
+        program.add(OpCode::GT);
+        auto cmp = program.addShort(OpCode::JMPNZ, (int16_t)0);
+        program.add(OpCode::PUSHB);
+        program.add(OpCode::POPA);
+        auto end = program.add(OpCode::PUSHA);
+        program.updateShort(cmp+1, end);
+    } else if (token.str == "MIN") {
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        program.add(OpCode::POPB);
+        program.add(OpCode::POPA);
+        program.add(OpCode::LT);
+        auto cmp = program.addShort(OpCode::JMPNZ, (int16_t)0);
+        program.add(OpCode::PUSHB);
+        program.add(OpCode::POPA);
+        auto end = program.add(OpCode::PUSHA);
+        program.updateShort(cmp+1, end);
+
     } else if (token.str == "MKI" || token.str == "MKS") {
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
@@ -896,7 +931,7 @@ static void Op(Program &program, uint32_t linenumber, const std::vector<BasicTok
     } else if (token.type == BasicTokenType::LEFT_PAREN) {
         program.add(OpCode::POPIDX);
 
-        expression(program, linenumber, {tokens.begin(), tokens.end()}, token.lbp);
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
 
         while (tokens[current].type != BasicTokenType::RIGHT_PAREN) {
             check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
