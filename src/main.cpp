@@ -59,7 +59,7 @@
 #include "Client/DisplayMenuState.h"
 #include "Client/EmulatorState.h"
 
-#define CLOCK_8MHz_at_60FPS  137500
+#define CLOCK_8MHz_at_60FPS   137500
 #define CLOCK_16MHz_at_60FPS  275000
 #define CLOCK_33MHz_at_60FPS  550000
 #define CLOCK_66MHz_at_60FPS  1100000
