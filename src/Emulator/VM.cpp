@@ -547,6 +547,21 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                     error("Cannot readkey to register");
             }
             break;
+        case SysCall::KEYSET:
+            switch (rvalue) {
+                case RuntimeValue::A:
+                    c = IntAsValue(sysIO->keyset(ValueAsByte(a)) ? 1 : 0);
+                    break;
+                case RuntimeValue::B:
+                    c = IntAsValue(sysIO->keyset(ValueAsByte(b)) ? 1 : 0);
+                    break;
+                case RuntimeValue::C:
+                    c = IntAsValue(sysIO->keyset(ValueAsByte(c)) ? 1 : 0);
+                    break;
+                default:
+                    error("Cannot readkey to register");
+            }
+            break;
         case SysCall::CURSOR:
             sysIO->setcursor(ValueAsByte(a), ValueAsByte(b));
             break;

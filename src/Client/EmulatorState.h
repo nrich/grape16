@@ -1,6 +1,7 @@
 #ifndef __CLIENT_EMULATORSTATE_H__
 #define __CLIENT_EMULATORSTATE_H__
 
+#include <map>
 #include <queue>
 #include <optional>
 
@@ -64,6 +65,9 @@ namespace Client {
             int32_t fontSize;
 
             std::array<VoiceConfig, VOICE_COUNT> voices;
+
+            uint64_t nextKeyId;
+            std::array<uint64_t, 256> keysPressed; 
         public:
             SystemIO();
 
@@ -76,6 +80,8 @@ namespace Client {
             void write(uint8_t c);
 
             uint8_t read(bool noecho);
+
+            bool keyset(const uint8_t c);
 
             void puts(const std::string &str);
 
@@ -97,6 +103,9 @@ namespace Client {
                 inputBuffer.pop();
                 return c;
             }
+
+            void keydown(char key);
+            void keyup(char key);
 
             void palette(uint8_t id) {
                 if (id < palettes.size()) {

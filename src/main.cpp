@@ -241,7 +241,7 @@ int main(int argc, char **argv) {
 
 
     opt.add(
-        "1", // Default.
+        "2", // Default.
         0, // Required?
         1, // Number of args expected.
         0, // Delimiter if expecting multiple args.

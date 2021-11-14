@@ -92,6 +92,8 @@ class Environment {
         }
 };
 
+std::vector<std::tuple<uint32_t, EventType, uint32_t>> events; 
+
 static std::map<std::string, UserFunction> userfunctions;
 
 static int current = 0;
@@ -284,6 +286,11 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                         tokenType = BasicTokenType::FUNCTION;
                     }
                     break;
+                case 'K':
+                    if (keyword == "KEY") {
+                        tokenType = BasicTokenType::KEY;
+                    }
+                    break;
                 case 'L':
                     if (keyword == "LEN") {
                         tokenType = BasicTokenType::FUNCTION;
@@ -332,6 +339,10 @@ std::pair<uint32_t, std::vector<BasicToken>> parseLine(const std::string &line) 
                     }
                     break;
                 case 'O':
+                    if (keyword == "ON") {
+                        tokenType = BasicTokenType::ON;
+                    }
+                    else
                     if (keyword == "OR") {
                         precedence = Precedence::OR;
                         tokenType = BasicTokenType::OR;
@@ -650,8 +661,14 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
         program.add(OpCode::VSTR);
         program.add(OpCode::PUSHC);
     } else if (token.str == "INKEY") {
-        check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
-        program.addSyscall(OpCode::SYSCALL, SysCall::READKEY, RuntimeValue::C);
+        if (tokens[current].type == BasicTokenType::RIGHT_PAREN) {
+            program.addSyscall(OpCode::SYSCALL, SysCall::READKEY, RuntimeValue::C);
+        } else {
+            expression(program, linenumber, {tokens.begin(), tokens.end()});
+            check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
+            program.addSyscall(OpCode::SYSCALL, SysCall::KEYSET, RuntimeValue::C);
+        }
+
         program.add(OpCode::PUSHC);
     } else if (token.str == "LEN") {
         expression(program, linenumber, {tokens.begin(), tokens.end()});
@@ -1389,6 +1406,23 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.add(OpCode::POPB);
         program.add(OpCode::POPA);
         program.addSyscall(OpCode::SYSCALL, SysCall::BLIT, RuntimeValue::IDX);
+    } else if (tokens[current].type == BasicTokenType::ON) {
+        current++;
+
+        check(linenumber, tokens[current++], BasicTokenType::KEY, "`KEY' expected");
+
+        check(linenumber, tokens[current++], BasicTokenType::LEFT_PAREN, "`(' expected");
+        expression(program, linenumber, {tokens.begin(), tokens.end()});
+        check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
+        check(linenumber, tokens[current++], BasicTokenType::GOSUB, "`GOSUB' expected");
+
+        if (tokens[current+1].type != BasicTokenType::INT)
+            error(linenumber, "Line number expected");
+
+        uint32_t jmp = program.addShort(OpCode::CALL, 0)+1;
+        jumps[jmp] = tokens[current+1].str;
+
+        current += 2;
     } else if (tokens[current].type == BasicTokenType::LINE) {
         current++;
 
@@ -1719,6 +1753,7 @@ void compile(const std::map<uint32_t, std::vector<BasicToken>> &lines, Program &
             current++;
             dim_declaration(program, linenumber, tokens);
         } else {
+            // emit event handler jump
             statement(program, linenumber, tokens);
         }
     }

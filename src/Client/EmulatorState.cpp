@@ -324,6 +324,8 @@ SystemIO::SystemIO() : cursor(0,0),currentPalette(1), background(0), foreground(
     cls();
 
     screenbuffer[cursor.Y()][cursor.X()] = (char)255;
+
+    nextKeyId = 1;
 }
 
 void SystemIO::cls() {
@@ -394,6 +396,10 @@ uint8_t SystemIO::read(bool noecho) {
     return c;
 }
 
+bool SystemIO::keyset(const uint8_t c) {
+    return keysPressed[c] != 0;
+}
+
 void SystemIO::puts(const std::string &str) {
     for (auto c : str) {
         write(c);
@@ -419,6 +425,49 @@ void SystemIO::sound(uint8_t voice, float frequency, uint16_t duration) {
 
 void SystemIO::voice(uint8_t voice, uint8_t waveForm, uint8_t volume, uint8_t attack, uint8_t decay, uint8_t sustain, uint8_t release) {
     voices[voice] = VoiceConfig(waveForm, volume, attack, decay, sustain, release);
+}
+
+/*
+std::queue<char> SystemIO::buffer() const {
+    std::vector<char> keys;
+
+    for (size_t i = 0; i < keysPressed.size(); i++) {
+        uint64_t keyId = keysPressed[i];
+
+        if (keyId == 0)
+            continue;
+
+        if (keys.size() == 0) {
+            keys.push_back((char)i);
+        } else if (keyId >= keysPressed[keys[keys.size()-1]]) {
+            keys.push_back((char)i);
+        } else {
+            for (size_t k = 0; k < keys.size(); k++) {
+                uint64_t existingId = keysPressed[keys[k]];
+                if (keyId < existingId) {
+                    keys.insert(keys.begin() + k, (char)i);
+                    break;
+                } 
+            }
+        }
+    }
+
+    if (keys.size())
+        std::cerr << std::string(keys.data()) << std::endl;
+
+    std::queue<char, std::deque<char>> buffer(std::deque<char>(keys.begin(), keys.end()));
+
+    return buffer;
+}
+*/
+
+void SystemIO::keydown(char key) {
+    inputBuffer.push(key);
+    keysPressed[key] = nextKeyId++;
+}
+
+void SystemIO::keyup(char key) {
+    keysPressed[key] = 0;
 }
 
 void EmulatorState::onRender(State *state, const uint32_t time) {
@@ -544,107 +593,107 @@ void EmulatorState::onMouseButtonRelease(State *state, const MouseClick &event) 
 
 void EmulatorState::onKeyDown(State *state, const KeyPress &event) {
     if (event.keyCode == Common::Keys::A) {
-        sysio->buffer(event.shiftMod ? 'A' : 'a');
+        sysio->keydown(event.shiftMod ? 'A' : 'a');
     } else if (event.keyCode == Common::Keys::B) {
-        sysio->buffer(event.shiftMod ? 'B' : 'b');
+        sysio->keydown(event.shiftMod ? 'B' : 'b');
     } else if (event.keyCode == Common::Keys::C) {
-        sysio->buffer(event.shiftMod ? 'C' : 'c');
+        sysio->keydown(event.shiftMod ? 'C' : 'c');
     } else if (event.keyCode == Common::Keys::D) {
-        sysio->buffer(event.shiftMod ? 'D' : 'd');
+        sysio->keydown(event.shiftMod ? 'D' : 'd');
     } else if (event.keyCode == Common::Keys::E) {
-        sysio->buffer(event.shiftMod ? 'E' : 'e');
+        sysio->keydown(event.shiftMod ? 'E' : 'e');
     } else if (event.keyCode == Common::Keys::F) {
-        sysio->buffer(event.shiftMod ? 'F' : 'f');
+        sysio->keydown(event.shiftMod ? 'F' : 'f');
     } else if (event.keyCode == Common::Keys::G) {
-        sysio->buffer(event.shiftMod ? 'G' : 'g');
+        sysio->keydown(event.shiftMod ? 'G' : 'g');
     } else if (event.keyCode == Common::Keys::H) {
-        sysio->buffer(event.shiftMod ? 'H' : 'h');
+        sysio->keydown(event.shiftMod ? 'H' : 'h');
     } else if (event.keyCode == Common::Keys::I) {
-        sysio->buffer(event.shiftMod ? 'I' : 'i');
+        sysio->keydown(event.shiftMod ? 'I' : 'i');
     } else if (event.keyCode == Common::Keys::J) {
-        sysio->buffer(event.shiftMod ? 'J' : 'j');
+        sysio->keydown(event.shiftMod ? 'J' : 'j');
     } else if (event.keyCode == Common::Keys::K) {
-        sysio->buffer(event.shiftMod ? 'K' : 'k');
+        sysio->keydown(event.shiftMod ? 'K' : 'k');
     } else if (event.keyCode == Common::Keys::L) {
-        sysio->buffer(event.shiftMod ? 'L' : 'l');
+        sysio->keydown(event.shiftMod ? 'L' : 'l');
     } else if (event.keyCode == Common::Keys::M) {
-        sysio->buffer(event.shiftMod ? 'M' : 'm');
+        sysio->keydown(event.shiftMod ? 'M' : 'm');
     } else if (event.keyCode == Common::Keys::N) {
-        sysio->buffer(event.shiftMod ? 'N' : 'n');
+        sysio->keydown(event.shiftMod ? 'N' : 'n');
     } else if (event.keyCode == Common::Keys::O) {
-        sysio->buffer(event.shiftMod ? 'O' : 'o');
+        sysio->keydown(event.shiftMod ? 'O' : 'o');
     } else if (event.keyCode == Common::Keys::P) {
-        sysio->buffer(event.shiftMod ? 'P' : 'p');
+        sysio->keydown(event.shiftMod ? 'P' : 'p');
     } else if (event.keyCode == Common::Keys::Q) {
-        sysio->buffer(event.shiftMod ? 'Q' : 'q');
+        sysio->keydown(event.shiftMod ? 'Q' : 'q');
     } else if (event.keyCode == Common::Keys::R) {
-        sysio->buffer(event.shiftMod ? 'R' : 'r');
+        sysio->keydown(event.shiftMod ? 'R' : 'r');
     } else if (event.keyCode == Common::Keys::S) {
-        sysio->buffer(event.shiftMod ? 'S' : 's');
+        sysio->keydown(event.shiftMod ? 'S' : 's');
     } else if (event.keyCode == Common::Keys::T) {
-        sysio->buffer(event.shiftMod ? 'T' : 't');
+        sysio->keydown(event.shiftMod ? 'T' : 't');
     } else if (event.keyCode == Common::Keys::U) {
-        sysio->buffer(event.shiftMod ? 'U' : 'u');
+        sysio->keydown(event.shiftMod ? 'U' : 'u');
     } else if (event.keyCode == Common::Keys::V) {
-        sysio->buffer(event.shiftMod ? 'V' : 'v');
+        sysio->keydown(event.shiftMod ? 'V' : 'v');
     } else if (event.keyCode == Common::Keys::W) {
-        sysio->buffer(event.shiftMod ? 'W' : 'w');
+        sysio->keydown(event.shiftMod ? 'W' : 'w');
     } else if (event.keyCode == Common::Keys::X) {
-        sysio->buffer(event.shiftMod ? 'X' : 'x');
+        sysio->keydown(event.shiftMod ? 'X' : 'x');
     } else if (event.keyCode == Common::Keys::Y) {
-        sysio->buffer(event.shiftMod ? 'Y' : 'y');
+        sysio->keydown(event.shiftMod ? 'Y' : 'y');
     } else if (event.keyCode == Common::Keys::Z) {
-        sysio->buffer(event.shiftMod ? 'Z' : 'z');
+        sysio->keydown(event.shiftMod ? 'Z' : 'z');
     } else if (event.keyCode == Common::Keys::Num1) {
-        sysio->buffer(event.shiftMod ? '!' : '1');
+        sysio->keydown(event.shiftMod ? '!' : '1');
     } else if (event.keyCode == Common::Keys::Num2) {
-        sysio->buffer(event.shiftMod ? '@' : '2');
+        sysio->keydown(event.shiftMod ? '@' : '2');
     } else if (event.keyCode == Common::Keys::Num3) {
-        sysio->buffer(event.shiftMod ? '#' : '3');
+        sysio->keydown(event.shiftMod ? '#' : '3');
     } else if (event.keyCode == Common::Keys::Num4) {
-        sysio->buffer(event.shiftMod ? '$' : '4');
+        sysio->keydown(event.shiftMod ? '$' : '4');
     } else if (event.keyCode == Common::Keys::Num5) {
-        sysio->buffer(event.shiftMod ? '%' : '5');
+        sysio->keydown(event.shiftMod ? '%' : '5');
     } else if (event.keyCode == Common::Keys::Num6) {
-        sysio->buffer(event.shiftMod ? '^' : '6');
+        sysio->keydown(event.shiftMod ? '^' : '6');
     } else if (event.keyCode == Common::Keys::Num7) {
-        sysio->buffer(event.shiftMod ? '&' : '7');
+        sysio->keydown(event.shiftMod ? '&' : '7');
     } else if (event.keyCode == Common::Keys::Num8) {
-        sysio->buffer(event.shiftMod ? '*' : '8');
+        sysio->keydown(event.shiftMod ? '*' : '8');
     } else if (event.keyCode == Common::Keys::Num9) {
-        sysio->buffer(event.shiftMod ? '(' : '9');
+        sysio->keydown(event.shiftMod ? '(' : '9');
     } else if (event.keyCode == Common::Keys::Num0) {
-        sysio->buffer(event.shiftMod ? ')' : '0');
+        sysio->keydown(event.shiftMod ? ')' : '0');
     } else if (event.keyCode == Common::Keys::Backquote) {
-        sysio->buffer(event.shiftMod ? '~' : '`');
+        sysio->keydown(event.shiftMod ? '~' : '`');
     } else if (event.keyCode == Common::Keys::LBracket) {
-        sysio->buffer(event.shiftMod ? '{' : '[');
+        sysio->keydown(event.shiftMod ? '{' : '[');
     } else if (event.keyCode == Common::Keys::RBracket) {
-        sysio->buffer(event.shiftMod ? '}' : ']');
+        sysio->keydown(event.shiftMod ? '}' : ']');
     } else if (event.keyCode == Common::Keys::Semicolon) {
-        sysio->buffer(event.shiftMod ? ':' : ';');
+        sysio->keydown(event.shiftMod ? ':' : ';');
     } else if (event.keyCode == Common::Keys::Comma) {
-        sysio->buffer(event.shiftMod ? '<' : ',');
+        sysio->keydown(event.shiftMod ? '<' : ',');
     } else if (event.keyCode == Common::Keys::Period) {
-        sysio->buffer(event.shiftMod ? '>' : '.');
+        sysio->keydown(event.shiftMod ? '>' : '.');
     } else if (event.keyCode == Common::Keys::Quote) {
-        sysio->buffer(event.shiftMod ? '"' : '\'');
+        sysio->keydown(event.shiftMod ? '"' : '\'');
     } else if (event.keyCode == Common::Keys::Slash) {
-        sysio->buffer(event.shiftMod ? '?' : '/');
+        sysio->keydown(event.shiftMod ? '?' : '/');
     } else if (event.keyCode == Common::Keys::Backslash) {
-        sysio->buffer(event.shiftMod ? '|' : '\\');
+        sysio->keydown(event.shiftMod ? '|' : '\\');
     } else if (event.keyCode == Common::Keys::Equal) {
-        sysio->buffer(event.shiftMod ? '+' : '=');
+        sysio->keydown(event.shiftMod ? '+' : '=');
     } else if (event.keyCode == Common::Keys::Hyphen) {
-        sysio->buffer(event.shiftMod ? '_' : '-');
+        sysio->keydown(event.shiftMod ? '_' : '-');
     } else if (event.keyCode == Common::Keys::Enter) {
-        sysio->buffer('\n');
+        sysio->keydown('\n');
     } else if (event.keyCode == Common::Keys::Tab) {
-        sysio->buffer('\t');
+        sysio->keydown('\t');
     } else if (event.keyCode == Common::Keys::Space) {
-        sysio->buffer(' ');
+        sysio->keydown(' ');
     } else if (event.keyCode == Common::Keys::Backspace) {
-        sysio->buffer(8);
+        sysio->keydown(8);
     } else if (event.keyCode == Common::Keys::F1) {
         state->changeState(1);
     } else if (event.keyCode == Common::Keys::F2) {
@@ -653,4 +702,107 @@ void EmulatorState::onKeyDown(State *state, const KeyPress &event) {
 }
 
 void EmulatorState::onKeyUp(State *state, const KeyPress &event) {
+    if (event.keyCode == Common::Keys::A) {
+        sysio->keyup(event.shiftMod ? 'A' : 'a');
+    } else if (event.keyCode == Common::Keys::B) {
+        sysio->keyup(event.shiftMod ? 'B' : 'b');
+    } else if (event.keyCode == Common::Keys::C) {
+        sysio->keyup(event.shiftMod ? 'C' : 'c');
+    } else if (event.keyCode == Common::Keys::D) {
+        sysio->keyup(event.shiftMod ? 'D' : 'd');
+    } else if (event.keyCode == Common::Keys::E) {
+        sysio->keyup(event.shiftMod ? 'E' : 'e');
+    } else if (event.keyCode == Common::Keys::F) {
+        sysio->keyup(event.shiftMod ? 'F' : 'f');
+    } else if (event.keyCode == Common::Keys::G) {
+        sysio->keyup(event.shiftMod ? 'G' : 'g');
+    } else if (event.keyCode == Common::Keys::H) {
+        sysio->keyup(event.shiftMod ? 'H' : 'h');
+    } else if (event.keyCode == Common::Keys::I) {
+        sysio->keyup(event.shiftMod ? 'I' : 'i');
+    } else if (event.keyCode == Common::Keys::J) {
+        sysio->keyup(event.shiftMod ? 'J' : 'j');
+    } else if (event.keyCode == Common::Keys::K) {
+        sysio->keyup(event.shiftMod ? 'K' : 'k');
+    } else if (event.keyCode == Common::Keys::L) {
+        sysio->keyup(event.shiftMod ? 'L' : 'l');
+    } else if (event.keyCode == Common::Keys::M) {
+        sysio->keyup(event.shiftMod ? 'M' : 'm');
+    } else if (event.keyCode == Common::Keys::N) {
+        sysio->keyup(event.shiftMod ? 'N' : 'n');
+    } else if (event.keyCode == Common::Keys::O) {
+        sysio->keyup(event.shiftMod ? 'O' : 'o');
+    } else if (event.keyCode == Common::Keys::P) {
+        sysio->keyup(event.shiftMod ? 'P' : 'p');
+    } else if (event.keyCode == Common::Keys::Q) {
+        sysio->keyup(event.shiftMod ? 'Q' : 'q');
+    } else if (event.keyCode == Common::Keys::R) {
+        sysio->keyup(event.shiftMod ? 'R' : 'r');
+    } else if (event.keyCode == Common::Keys::S) {
+        sysio->keyup(event.shiftMod ? 'S' : 's');
+    } else if (event.keyCode == Common::Keys::T) {
+        sysio->keyup(event.shiftMod ? 'T' : 't');
+    } else if (event.keyCode == Common::Keys::U) {
+        sysio->keyup(event.shiftMod ? 'U' : 'u');
+    } else if (event.keyCode == Common::Keys::V) {
+        sysio->keyup(event.shiftMod ? 'V' : 'v');
+    } else if (event.keyCode == Common::Keys::W) {
+        sysio->keyup(event.shiftMod ? 'W' : 'w');
+    } else if (event.keyCode == Common::Keys::X) {
+        sysio->keyup(event.shiftMod ? 'X' : 'x');
+    } else if (event.keyCode == Common::Keys::Y) {
+        sysio->keyup(event.shiftMod ? 'Y' : 'y');
+    } else if (event.keyCode == Common::Keys::Z) {
+        sysio->keyup(event.shiftMod ? 'Z' : 'z');
+    } else if (event.keyCode == Common::Keys::Num1) {
+        sysio->keyup(event.shiftMod ? '!' : '1');
+    } else if (event.keyCode == Common::Keys::Num2) {
+        sysio->keyup(event.shiftMod ? '@' : '2');
+    } else if (event.keyCode == Common::Keys::Num3) {
+        sysio->keyup(event.shiftMod ? '#' : '3');
+    } else if (event.keyCode == Common::Keys::Num4) {
+        sysio->keyup(event.shiftMod ? '$' : '4');
+    } else if (event.keyCode == Common::Keys::Num5) {
+        sysio->keyup(event.shiftMod ? '%' : '5');
+    } else if (event.keyCode == Common::Keys::Num6) {
+        sysio->keyup(event.shiftMod ? '^' : '6');
+    } else if (event.keyCode == Common::Keys::Num7) {
+        sysio->keyup(event.shiftMod ? '&' : '7');
+    } else if (event.keyCode == Common::Keys::Num8) {
+        sysio->keyup(event.shiftMod ? '*' : '8');
+    } else if (event.keyCode == Common::Keys::Num9) {
+        sysio->keyup(event.shiftMod ? '(' : '9');
+    } else if (event.keyCode == Common::Keys::Num0) {
+        sysio->keyup(event.shiftMod ? ')' : '0');
+    } else if (event.keyCode == Common::Keys::Backquote) {
+        sysio->keyup(event.shiftMod ? '~' : '`');
+    } else if (event.keyCode == Common::Keys::LBracket) {
+        sysio->keyup(event.shiftMod ? '{' : '[');
+    } else if (event.keyCode == Common::Keys::RBracket) {
+        sysio->keyup(event.shiftMod ? '}' : ']');
+    } else if (event.keyCode == Common::Keys::Semicolon) {
+        sysio->keyup(event.shiftMod ? ':' : ';');
+    } else if (event.keyCode == Common::Keys::Comma) {
+        sysio->keyup(event.shiftMod ? '<' : ',');
+    } else if (event.keyCode == Common::Keys::Period) {
+        sysio->keyup(event.shiftMod ? '>' : '.');
+    } else if (event.keyCode == Common::Keys::Quote) {
+        sysio->keyup(event.shiftMod ? '"' : '\'');
+    } else if (event.keyCode == Common::Keys::Slash) {
+        sysio->keyup(event.shiftMod ? '?' : '/');
+    } else if (event.keyCode == Common::Keys::Backslash) {
+        sysio->keyup(event.shiftMod ? '|' : '\\');
+    } else if (event.keyCode == Common::Keys::Equal) {
+        sysio->keyup(event.shiftMod ? '+' : '=');
+    } else if (event.keyCode == Common::Keys::Hyphen) {
+        sysio->keyup(event.shiftMod ? '_' : '-');
+    } else if (event.keyCode == Common::Keys::Enter) {
+        sysio->keyup('\n');
+    } else if (event.keyCode == Common::Keys::Tab) {
+        sysio->keyup('\t');
+    } else if (event.keyCode == Common::Keys::Space) {
+        sysio->keyup(' ');
+    } else if (event.keyCode == Common::Keys::Backspace) {
+        sysio->keyup(8);
+   }
 }

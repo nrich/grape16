@@ -24,6 +24,10 @@ namespace Client {
                 return 0;
             }
 
+            bool keyset(const uint8_t c) {
+                return false;
+            }
+
             void puts(const std::string &str) {
 
             }

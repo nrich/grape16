@@ -84,6 +84,12 @@ namespace Emulator {
         return "";
     }
 
+    enum class EventType {
+        KeyPress,
+        Timer,
+        Count
+    };
+
     enum class OpCode {
         NOP = 0,
 
@@ -210,6 +216,7 @@ namespace Emulator {
         WRITE,
         READ,
         READKEY,
+        KEYSET,
         PALETTE,
         COLOUR,
         CURSOR,
@@ -240,6 +247,8 @@ namespace Emulator {
 
             virtual void write(const uint8_t c) = 0;
             virtual uint8_t read(bool noecho) = 0;
+
+            virtual bool keyset(const uint8_t c) = 0;
 
             virtual void puts(const std::string &str) = 0;
             virtual std::string gets() = 0; 
