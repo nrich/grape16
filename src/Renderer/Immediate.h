@@ -32,8 +32,10 @@ class Immediate : public Base {
 
     int virtualWidth;
     int horizontalOffset;
+
+    int resolutionScale;
 public:
-    Immediate(const Common::DisplayMode &displayMode, Common::AspectRatio ratio=Common::AspectRatio::_4x3);
+    Immediate(const Common::DisplayMode &displayMode, Common::AspectRatio ratio=Common::AspectRatio::_4x3, int resolutionScale=1);
     void drawString(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const std::string &str, const Common::Colour &colour = Common::Colour::White);
     void drawRect(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const Common::Colour &colour);
     void drawQuad(const Vec2d &a, const Vec2d &b, const Vec2d &c, const Vec2d &d, const Common::Colour &colour);

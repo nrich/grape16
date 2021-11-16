@@ -50,7 +50,17 @@
 
 using namespace Renderer;
 
-Immediate::Immediate(const Common::DisplayMode &displayMode, Common::AspectRatio ratio) : mode(Mode::Unknown), displayMode(displayMode), ratio(ratio) {
+
+static bool isPowerOfTwo(int x) {
+    return (x != 0) && ((x & (x - 1)) == 0);
+}
+
+Immediate::Immediate(const Common::DisplayMode &displayMode, Common::AspectRatio ratio, int resolutionScale) : mode(Mode::Unknown), displayMode(displayMode), ratio(ratio), resolutionScale(resolutionScale) {
+    if (!isPowerOfTwo(resolutionScale)) {
+        std::cerr << "Invalid resolution scale" << std::endl;
+        exit(-1);
+    }
+
     configureVirtualDisplay();
     enableInterfaceMode();
 }
@@ -133,6 +143,10 @@ void Immediate::configureVirtualDisplay() {
         exit(-1);
     }
 
+    virtualWidth *= resolutionScale;
+    horizontalOffset *= resolutionScale;
+    virtualHeight *= resolutionScale;
+    verticalOffset *= resolutionScale;
 }
 
 void Immediate::enableInterfaceMode() {

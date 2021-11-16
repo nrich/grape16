@@ -67,7 +67,7 @@ namespace Client {
             std::array<VoiceConfig, VOICE_COUNT> voices;
 
             uint64_t nextKeyId;
-            std::array<uint64_t, 256> keysPressed; 
+            std::array<uint64_t, 256> keysPressed;
         public:
             SystemIO();
 

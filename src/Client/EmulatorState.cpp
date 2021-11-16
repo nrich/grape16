@@ -397,6 +397,11 @@ uint8_t SystemIO::read(bool noecho) {
 }
 
 bool SystemIO::keyset(const uint8_t c) {
+    if (inputBuffer.size() && (uint8_t)inputBuffer.front() == c) {
+        inputBuffer.pop();
+        return true;
+    }
+
     return keysPressed[c] != 0;
 }
 
