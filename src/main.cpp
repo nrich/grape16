@@ -59,11 +59,15 @@
 #include "Client/DisplayMenuState.h"
 #include "Client/EmulatorState.h"
 
-#define CLOCK_8MHz_at_60FPS   137500
-#define CLOCK_16MHz_at_60FPS  275000
+#define CLOCK_8MHz_at_60FPS   133333
+#define CLOCK_16MHz_at_60FPS  266667
 #define CLOCK_33MHz_at_60FPS  550000
 #define CLOCK_66MHz_at_60FPS  1100000
-#define CLOCK_99MHz_at_60FPS  1650000
+#define CLOCK_100MHz_at_60FPS  1666667
+#define CLOCK_133MHz_at_60FPS  2216667
+#define CLOCK_166MHz_at_60FPS  2766667
+#define CLOCK_200MHz_at_60FPS  3333333
+
 
 std::shared_ptr<Emulator::Program> loadBinary(const std::string &input) {
     std::ifstream infile(input, std::ios_base::binary);
@@ -404,7 +408,19 @@ int main(int argc, char **argv) {
             clockspeed = CLOCK_66MHz_at_60FPS;
             break;
         case 4:
-            clockspeed = CLOCK_99MHz_at_60FPS;
+            clockspeed = CLOCK_100MHz_at_60FPS;
+            break;
+        case 5:
+            clockspeed = CLOCK_133MHz_at_60FPS;
+            break;
+        case 6:
+            clockspeed = CLOCK_166MHz_at_60FPS;
+            break;
+        case 7:
+            clockspeed = CLOCK_200MHz_at_60FPS;
+            break;
+        default:
+            clockspeed = UINT32_MAX;
             break;
     }
 
