@@ -20,8 +20,8 @@
 #define QNAN        ((uint32_t)0x7F800000)
 #define BYTEVAL     ((uint32_t)0xFFFF00FF)
 
-#define IS_INT(value)               (((value & SIGN_BIT) != SIGN_BIT) && ((value & QNAN) == QNAN))
-#define IS_BYTE(value)              (IS_INT(value) && ((value & BYTEVAL) == value))
+#define IS_SHORT(value)             (((value & SIGN_BIT) != SIGN_BIT) && ((value & QNAN) == QNAN))
+#define IS_BYTE(value)              ((((value & SIGN_BIT) != SIGN_BIT) && ((value & QNAN) == QNAN)) && ((value & BYTEVAL) == value))
 #define IS_FLOAT(value)             (((value) & QNAN) != QNAN)
 #define IS_POINTER(value)           (((value) & (QNAN | SIGN_BIT)) == (QNAN | SIGN_BIT))
 
@@ -34,7 +34,7 @@ namespace Emulator {
     }
 
     inline int16_t ValueAsShort(value_t value) {
-        if (!IS_INT(value)) {
+        if (!IS_SHORT(value)) {
             std::cerr << "Value is not an int!" << std::endl;
             exit(-1);
         }
@@ -74,7 +74,7 @@ namespace Emulator {
     }
 
     inline std::string ValueToString(value_t value) {
-        if (IS_INT(value))
+        if (IS_SHORT(value))
             return std::to_string(ValueAsShort(value));
         if (IS_FLOAT(value))
             return std::to_string(ValueAsFloat(value));
