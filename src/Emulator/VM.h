@@ -229,16 +229,6 @@ namespace Emulator {
         COUNT
     };
 
-    enum class VoiceSetting {
-        VOLUME,
-        WAVEFORM,
-        ATTACK,
-        DECAY,
-        SUSTAIN,
-        RELEASE,
-        COUNT
-    };
-
     std::string OpCodeAsString(OpCode opcode);
 
     class SysIO {

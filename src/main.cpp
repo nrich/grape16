@@ -256,6 +256,17 @@ int main(int argc, char **argv) {
     );
 
     opt.add(
+        "2", // Default.
+        0, // Required?
+        1, // Number of args expected.
+        0, // Delimiter if expecting multiple args.
+        "Memory size (0=1MB, 1=2MB, 2=4MB, 3=8MB)", // Help description.
+        "-m",     // Flag token.
+        "-mem",   // Flag token.
+        "--mem"  // Flag token.
+    );
+
+    opt.add(
         "", // Default.
         0, // Required?
         0, // Number of args expected.
@@ -424,9 +435,30 @@ int main(int argc, char **argv) {
             break;
     }
 
+    uint32_t memsize = 0x003FFFFF;
+    int mem;
+    opt.get("-m")->getInt(mem);
+
+    switch(mem) {
+        case 0:
+            memsize = 0x000FFFFF;
+            break;
+        case 1:
+            memsize = 0x001FFFFF;
+            break;
+        case 2:
+            memsize = 0x003FFFFF;
+            break;
+        case 3:
+            memsize = 0x007FFFFF;
+            break;
+    }
+
+
     bool debug = opt.isSet("-d");
 #else
     uint32_t clockspeed = CLOCK_33MHz_at_60FPS;
+    uint32_t memsize = 0x003FFFFF;
     bool debug = false;
     sys = std::make_shared<Sys::SDL2>("Grape16");
     renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
@@ -434,7 +466,7 @@ int main(int argc, char **argv) {
 
     sys->keyRepeat(true);
 
-    auto vm = std::make_shared<Emulator::VM>(0x003FFFFF);
+    auto vm = std::make_shared<Emulator::VM>(memsize);
 
     auto debugState = std::make_shared<Client::DebugState>(vm);
     auto emulatorState = std::make_shared<Client::EmulatorState>(vm, program, clockspeed, debug);
