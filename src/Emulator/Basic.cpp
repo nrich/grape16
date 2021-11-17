@@ -618,7 +618,7 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
         program.add(OpCode::POPA);
-        program.addValue(OpCode::SETB, IntAsValue(0));
+        program.addValue(OpCode::SETB, ShortAsValue(0));
         program.add(OpCode::CMP);
         program.add(OpCode::MOVCB);
         program.add(OpCode::MUL);
@@ -674,16 +674,16 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
         program.add(OpCode::POPIDX);
-        program.addValue(OpCode::SETB, IntAsValue(0));
-        program.addValue(OpCode::SETC, IntAsValue(0));
+        program.addValue(OpCode::SETB, ShortAsValue(0));
+        program.addValue(OpCode::SETC, ShortAsValue(0));
         auto loop = program.add(OpCode::NOP);
         program.add(OpCode::PUSHC);
         program.add(OpCode::IDXA);
         program.add(OpCode::CMP);
         auto cmp = program.addShort(OpCode::JMPEZ, (int16_t)0);
         program.add(OpCode::POPC);
-        program.addValue(OpCode::INCC, IntAsValue(1));
-        program.addValue(OpCode::INCIDX, IntAsValue(1));
+        program.addValue(OpCode::INCC, ShortAsValue(1));
+        program.addValue(OpCode::INCIDX, ShortAsValue(1));
         program.addShort(OpCode::JMP, (int16_t)loop);
         program.add(OpCode::PUSHC);
         auto end = program.add(OpCode::NOP);
@@ -746,7 +746,7 @@ static void function(Program &program, uint32_t linenumber, const std::vector<Ba
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         check(linenumber, tokens[current], BasicTokenType::RIGHT_PAREN, "`)' expected");
         program.add(OpCode::POPA);
-        program.addValue(OpCode::SETB, IntAsValue(0));
+        program.addValue(OpCode::SETB, ShortAsValue(0));
         program.add(OpCode::CMP);
         program.add(OpCode::PUSHC);
     } else if (token.str == "SIN") {
@@ -823,7 +823,7 @@ static void TokenAsValue(Program &program, uint32_t linenumber, const std::vecto
         program.add(OpCode::POPC);
         program.add(OpCode::PUSHC);
     } else if (token.type == BasicTokenType::INT) {
-        program.addValue(OpCode::SETC, IntAsValue((int16_t)std::stoi(token.str)));
+        program.addValue(OpCode::SETC, ShortAsValue((int16_t)std::stoi(token.str)));
         program.add(OpCode::PUSHC);
     } else if (token.type == BasicTokenType::FLOAT) {
         program.addValue(OpCode::SETC, FloatAsValue(std::stof(token.str)));
@@ -838,7 +838,7 @@ static void TokenAsValue(Program &program, uint32_t linenumber, const std::vecto
             program.add(OpCode::IDXB);
             program.add(OpCode::PUSHB);
             program.add(OpCode::POPIDX);
-            program.addValue(OpCode::INCIDX, IntAsValue(env->get(token.str)));
+            program.addValue(OpCode::INCIDX, ShortAsValue(env->get(token.str)));
             program.add(OpCode::IDXC);
             program.add(OpCode::POPIDX);
             program.add(OpCode::PUSHC);
@@ -959,7 +959,7 @@ static void Op(Program &program, uint32_t linenumber, const std::vector<BasicTok
             program.add(OpCode::POPB);
             program.add(OpCode::MUL);
 
-            program.addValue(OpCode::INCIDX, IntAsValue(1));
+            program.addValue(OpCode::INCIDX, ShortAsValue(1));
 
             program.add(OpCode::MOVCA);
             program.add(OpCode::POPB);
@@ -1005,7 +1005,7 @@ static void prefix(Program &program, uint32_t linenumber, const std::vector<Basi
         current++;
         prefix(program, linenumber, tokens, rbp);
         program.add(OpCode::POPB);
-        program.addValue(OpCode::SETA, IntAsValue(0));
+        program.addValue(OpCode::SETA, ShortAsValue(0));
         program.add(OpCode::SUB);
         program.add(OpCode::PUSHC);
     } else {
@@ -1088,7 +1088,7 @@ static void for_statement(Program &program, uint32_t linenumber, const std::vect
         current++;
         expression(program, linenumber, tokens);
     } else {
-        program.addValue(OpCode::SETC, IntAsValue(step));
+        program.addValue(OpCode::SETC, ShortAsValue(step));
         program.add(OpCode::PUSHC);
     }
 
@@ -1172,7 +1172,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
                 program.add(OpCode::POPB);
                 program.add(OpCode::MUL);
 
-                program.addValue(OpCode::INCIDX, IntAsValue(1));
+                program.addValue(OpCode::INCIDX, ShortAsValue(1));
 
                 program.add(OpCode::MOVCA);
                 program.add(OpCode::POPB);
@@ -1198,7 +1198,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
             program.addPointer(OpCode::LOADB, env->get(READ_INDEX));
             program.add(OpCode::ADD);
 
-            program.addValue(OpCode::INCB, IntAsValue(1));
+            program.addValue(OpCode::INCB, ShortAsValue(1));
             program.addPointer(OpCode::STOREB, env->get(READ_INDEX));
 
             program.add(OpCode::PUSHC);
@@ -1214,7 +1214,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
             program.addPointer(OpCode::LOADB, env->get(READ_INDEX));
             program.add(OpCode::ADD);
 
-            program.addValue(OpCode::INCB, IntAsValue(1));
+            program.addValue(OpCode::INCB, ShortAsValue(1));
             program.addPointer(OpCode::STOREB, env->get(READ_INDEX));
 
             program.add(OpCode::PUSHC);
@@ -1277,9 +1277,9 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.addSyscall(OpCode::SYSCALL, SysCall::CURSOR, RuntimeValue::NONE);
     } else if (tokens[current].type == BasicTokenType::BEEP) {
         current += 1;
-        program.addValue(OpCode::SETA, IntAsValue(800));
-        program.addValue(OpCode::SETB, IntAsValue(250));
-        program.addValue(OpCode::SETC, IntAsValue(0));
+        program.addValue(OpCode::SETA, ShortAsValue(800));
+        program.addValue(OpCode::SETB, ShortAsValue(250));
+        program.addValue(OpCode::SETC, ShortAsValue(0));
         program.addSyscall(OpCode::SYSCALL, SysCall::SOUND, RuntimeValue::NONE);
     } else if (tokens[current].type == BasicTokenType::VOICE) {
         current += 1;
@@ -1321,7 +1321,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
             expression(program, linenumber, {tokens.begin(), tokens.end()});
             program.add(OpCode::POPC);
         } else {
-            program.addValue(OpCode::SETC, IntAsValue(0));
+            program.addValue(OpCode::SETC, ShortAsValue(0));
         }
 
         program.add(OpCode::POPB);
@@ -1348,7 +1348,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
     } else if (tokens[current].type == BasicTokenType::RANDOMIZE) {
         current++;
         if (tokens[current].type == BasicTokenType::TIMER) {
-            program.addValue(OpCode::SETC, IntAsValue((int16_t)time(NULL)));
+            program.addValue(OpCode::SETC, ShortAsValue((int16_t)time(NULL)));
         } else {
             expression(program, linenumber, {tokens.begin(), tokens.end()});
         }
@@ -1401,7 +1401,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         program.addPointer(OpCode::LOADIDX, env->get(dst));
 
         program.add(OpCode::IDXC);
-        program.addValue(OpCode::INCIDX, IntAsValue(1));
+        program.addValue(OpCode::INCIDX, ShortAsValue(1));
 
         program.add(OpCode::POPB);
         program.add(OpCode::POPA);
@@ -1432,13 +1432,13 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         program.add(OpCode::POPC);
         program.add(OpCode::WRITECX);
-        program.addValue(OpCode::INCIDX, IntAsValue(1));
+        program.addValue(OpCode::INCIDX, ShortAsValue(1));
 
         check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         program.add(OpCode::POPC);
         program.add(OpCode::WRITECX);
-        program.addValue(OpCode::INCIDX, IntAsValue(1));
+        program.addValue(OpCode::INCIDX, ShortAsValue(1));
 
         check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
 
@@ -1448,29 +1448,29 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         program.add(OpCode::POPC);
         program.add(OpCode::WRITECX);
-        program.addValue(OpCode::INCIDX, IntAsValue(1));
+        program.addValue(OpCode::INCIDX, ShortAsValue(1));
 
         check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         program.add(OpCode::POPC);
         program.add(OpCode::WRITECX);
-        program.addValue(OpCode::INCIDX, IntAsValue(1));
+        program.addValue(OpCode::INCIDX, ShortAsValue(1));
 
         check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
         check(linenumber, tokens[current++], BasicTokenType::COMMA, "`,' expected");
         expression(program, linenumber, {tokens.begin(), tokens.end()});
         program.add(OpCode::POPC);
         program.add(OpCode::WRITECX);
-        program.addValue(OpCode::INCIDX, IntAsValue(1));
+        program.addValue(OpCode::INCIDX, ShortAsValue(1));
 
         if (tokens[current].type == BasicTokenType::COMMA) {
             current++;
             auto box = identifier(linenumber, tokens[current++]);
 
             if (box == "B") {
-                program.addValue(OpCode::SETC, IntAsValue(0));
+                program.addValue(OpCode::SETC, ShortAsValue(0));
             } else if (box == "BF") {
-                program.addValue(OpCode::SETC, IntAsValue(1));
+                program.addValue(OpCode::SETC, ShortAsValue(1));
             } else {
                 error(linenumber, "Expected: B or BF");
             }
@@ -1479,7 +1479,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
             program.addPointer(OpCode::SETIDX, env->get(LINE_INDEX));
             program.addSyscall(OpCode::SYSCALL, SysCall::DRAWBOX, RuntimeValue::IDX);
         } else {
-            program.addValue(OpCode::SETC, IntAsValue(0));
+            program.addValue(OpCode::SETC, ShortAsValue(0));
             program.add(OpCode::WRITECX);
             program.addPointer(OpCode::SETIDX, env->get(LINE_INDEX));
             program.addSyscall(OpCode::SYSCALL, SysCall::DRAWLINE, RuntimeValue::IDX);
@@ -1518,7 +1518,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         auto call = program.add(OpCode::NOP);
 
         program.addPointer(OpCode::LOADIDX, env->get(FRAME_INDEX));
-        program.addValue(OpCode::INCIDX, IntAsValue(1));
+        program.addValue(OpCode::INCIDX, ShortAsValue(1));
 
         env = std::make_shared<Environment>(env);
 
@@ -1528,7 +1528,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
         for (size_t i = 0; i< rargs.size(); i++) {
             program.add(OpCode::POPC);
             program.add(OpCode::WRITECX);
-            program.addValue(OpCode::INCIDX, IntAsValue(1));
+            program.addValue(OpCode::INCIDX, ShortAsValue(1));
             env->create(rargs[i]);
         }
 
@@ -1573,7 +1573,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
             program.add(OpCode::POPB);
             program.add(OpCode::MUL);
 
-            program.addValue(OpCode::INCIDX, IntAsValue(1));
+            program.addValue(OpCode::INCIDX, ShortAsValue(1));
 
             program.add(OpCode::MOVCA);
             program.add(OpCode::POPB);
@@ -1639,14 +1639,14 @@ static void dim_declaration(Program &program, uint32_t linenumber, const std::ve
     }
     check(linenumber, tokens[current++], BasicTokenType::RIGHT_PAREN, "`)' expected");
 
-    program.addValue(OpCode::SETC, IntAsValue(1));
+    program.addValue(OpCode::SETC, ShortAsValue(1));
     program.add(OpCode::PUSHC);
 
     for (int i = 0; i < size; i++) {
         program.add(OpCode::POPB);
 
         program.add(OpCode::POPA);
-        program.addValue(OpCode::INCA, IntAsValue(1));
+        program.addValue(OpCode::INCA, ShortAsValue(1));
 
         program.add(OpCode::MUL);
 
@@ -1655,14 +1655,14 @@ static void dim_declaration(Program &program, uint32_t linenumber, const std::ve
 
     program.add(OpCode::POPC);
 
-    program.addValue(OpCode::INCC, IntAsValue(size));
+    program.addValue(OpCode::INCC, ShortAsValue(size));
 
     program.add(OpCode::CALLOC);
 
-    program.addValue(OpCode::INCC, IntAsValue(-size));
+    program.addValue(OpCode::INCC, ShortAsValue(-size));
     program.add(OpCode::WRITECX);
 
-    program.addValue(OpCode::INCIDX, IntAsValue(1));
+    program.addValue(OpCode::INCIDX, ShortAsValue(1));
     program.addPointer(OpCode::SAVEIDX, env->create(name));
 
     for (int i = 1; i < size; i++) {
@@ -1670,7 +1670,7 @@ static void dim_declaration(Program &program, uint32_t linenumber, const std::ve
         program.add(OpCode::MOVCB);
         program.add(OpCode::IDIV);
         program.add(OpCode::MOVCA);
-        program.addValue(OpCode::INCIDX, IntAsValue(1));
+        program.addValue(OpCode::INCIDX, ShortAsValue(1));
     }
 }
 

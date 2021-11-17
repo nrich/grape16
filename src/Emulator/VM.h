@@ -29,11 +29,11 @@ namespace Emulator {
     typedef uint32_t vmpointer_t;
     typedef uint32_t value_t;
 
-    inline value_t IntAsValue(int16_t s) {
+    inline value_t ShortAsValue(int16_t s) {
         return (QNAN | (uint16_t)s);
     }
 
-    inline int16_t ValueAsInt(value_t value) {
+    inline int16_t ValueAsShort(value_t value) {
         if (!IS_INT(value)) {
             std::cerr << "Value is not an int!" << std::endl;
             exit(-1);
@@ -75,7 +75,7 @@ namespace Emulator {
 
     inline std::string ValueToString(value_t value) {
         if (IS_INT(value))
-            return std::to_string(ValueAsInt(value));
+            return std::to_string(ValueAsShort(value));
         if (IS_FLOAT(value))
             return std::to_string(ValueAsFloat(value));
         if (IS_POINTER(value))
@@ -395,7 +395,7 @@ namespace Emulator {
                     case RuntimeValue::IDX:
                         return PointerAsValue(idx);
                     default:
-                        return IntAsValue(0);
+                        return ShortAsValue(0);
                 }
             }
 
