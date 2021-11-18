@@ -97,7 +97,7 @@ std::map<std::string, std::pair<OpCode, ArgType>> def = {
     {"JMPEZ", {OpCode::JMPEZ, ArgType::LABEL}},
     {"JMPNZ", {OpCode::JMPNZ, ArgType::LABEL}},
 
-    {"IDATA", {OpCode::IDATA, ArgType::SHORT}},
+    {"IDATA", {OpCode::IDATA, ArgType::INT}},
     {"FDATA", {OpCode::FDATA, ArgType::FLOAT}},
     {"PDATA", {OpCode::PDATA, ArgType::POINTER}},
     {"SDATA", {OpCode::SDATA, ArgType::STRING}},
@@ -107,14 +107,14 @@ std::map<std::string, std::pair<OpCode, ArgType>> def = {
     {"CALL", {OpCode::CALL, ArgType::LABEL}},
     {"RETURN", {OpCode::RETURN, ArgType::NONE}},
 
-    {"IRQ", {OpCode::IRQ, ArgType::SHORT}},
+    {"IRQ", {OpCode::IRQ, ArgType::INT}},
 
-    {"ALLOC", {OpCode::ALLOC, ArgType::SHORT}},
+    {"ALLOC", {OpCode::ALLOC, ArgType::INT}},
     {"CALLOC", {OpCode::CALLOC, ArgType::NONE}},
 
     {"YIELD", {OpCode::YIELD, ArgType::NONE}},
 
-    {"TRACE", {OpCode::TRACE, ArgType::SHORT}}
+    {"TRACE", {OpCode::TRACE, ArgType::INT}}
 };
 
 static bool isDigit(char c) {
@@ -272,7 +272,7 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
 
         if (arg == ArgType::NONE) {
             return Emulator::AsmToken(opcode);
-        } else if (arg == ArgType::SHORT) {
+        } else if (arg == ArgType::INT) {
             while (isWhitespace(line[i])) {
                 i++;
                 continue;
@@ -566,7 +566,7 @@ std::vector<Emulator::AsmToken> disassemble(const Emulator::Program &program) {
 
         if (arg == ArgType::NONE) {
             tokens.push_back(Emulator::AsmToken(opcode));
-        } else if (arg == ArgType::SHORT) {
+        } else if (arg == ArgType::INT) {
             tokens.push_back(Emulator::AsmToken(opcode, program.readShort(pc)));
             pc += 2;
         } else if (arg == ArgType::FLOAT) {
@@ -577,7 +577,7 @@ std::vector<Emulator::AsmToken> disassemble(const Emulator::Program &program) {
             pc += 3;
         } else if (arg == ArgType::VALUE) {
             tokens.push_back(Emulator::AsmToken(opcode, program.readValue(pc)));
-            pc += 4;
+            pc += ValueTypeSize;
         } else if (arg == ArgType::SYSCALL) {
             tokens.push_back(Emulator::AsmToken(opcode, std::pair<SysCall, RuntimeValue>((SysCall)program.readShort(pc), (RuntimeValue)program.readShort(pc+2))));
             pc += 2+2;
@@ -688,7 +688,7 @@ Emulator::Program optimize(const Emulator::Program &code) {
                 program.update(pc-1, OpCode::MOVCIDX);
                 program.update(pc, OpCode::NOP);
             }
-        } else if (arg == ArgType::SHORT) {
+        } else if (arg == ArgType::INT) {
             OpCode next = program.fetch(pc+2);
 
             if (current == OpCode::SETC && next == OpCode::POPC) {
@@ -710,7 +710,7 @@ Emulator::Program optimize(const Emulator::Program &code) {
         } else if (arg == ArgType::POINTER) {
             pc += 3;
         } else if (arg == ArgType::VALUE) {
-            pc += 4;
+            pc += ValueTypeSize;
         } else if (arg == ArgType::SYSCALL) {
             pc += 2+2;
         } else if (arg == ArgType::STRING) {
@@ -742,14 +742,14 @@ std::string ProgramAsString(const Emulator::Program &code, bool resolve_jumps) {
             auto arg = op.second;
 
             if (arg == ArgType::NONE) {
-            } else if (arg == ArgType::SHORT) {
+            } else if (arg == ArgType::INT) {
                 pc += 2;
             } else if (arg == ArgType::FLOAT) {
                 pc += 4;
             } else if (arg == ArgType::POINTER) {
                 pc += 3;
             } else if (arg == ArgType::VALUE) {
-                pc += 4;
+                pc += ValueTypeSize;
             } else if (arg == ArgType::SYSCALL) {
                 pc += 2+2;
             } else if (arg == ArgType::STRING) {
@@ -784,7 +784,7 @@ std::string ProgramAsString(const Emulator::Program &code, bool resolve_jumps) {
 
         if (arg == ArgType::NONE) {
             s << AsmTokenAsString(Emulator::AsmToken(opcode)) << std::endl;
-        } else if (arg == ArgType::SHORT) {
+        } else if (arg == ArgType::INT) {
             s << AsmTokenAsString(Emulator::AsmToken(opcode, program.readShort(pc))) << std::endl;
             pc += 2;
         } else if (arg == ArgType::FLOAT) {
@@ -795,7 +795,7 @@ std::string ProgramAsString(const Emulator::Program &code, bool resolve_jumps) {
             pc += 3;
         } else if (arg == ArgType::VALUE) {
             s << AsmTokenAsString(Emulator::AsmToken(opcode, program.readValue(pc))) << std::endl;
-            pc += 4;
+            pc += ValueTypeSize;
         } else if (arg == ArgType::SYSCALL) {
             s << AsmTokenAsString(Emulator::AsmToken(opcode, std::pair<SysCall, RuntimeValue>((SysCall)program.readShort(pc), (RuntimeValue)program.readShort(pc+2)))) << std::endl;
             pc += 2+2;

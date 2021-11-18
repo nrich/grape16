@@ -15,7 +15,7 @@
 namespace Emulator {
     enum class ArgType {
         NONE,
-        SHORT,
+        INT,
         FLOAT,
         POINTER,
         STRING,
@@ -60,7 +60,7 @@ namespace Emulator {
                 } else if (std::holds_alternative<int32_t>(*arg)) {
                     return 1+3;
                 } else if (std::holds_alternative<value_t>(*arg)) {
-                    return 1+4;
+                    return 1+ValueTypeSize;
                 } else if (std::holds_alternative<std::string>(*arg)) {
                     auto value = std::get<std::string>(*arg);
                     return 1 + value.size();

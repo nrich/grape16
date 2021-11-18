@@ -6,6 +6,15 @@
 
 using namespace Emulator;
 
+#ifdef SYS32
+    #define _INT_MAX INT32_MAX
+    #define _INT_MIN INT32_MIN
+#else
+    #define _INT_MAX INT16_MAX
+    #define _INT_MIN INT16_MIN
+#endif
+
+
 std::string Emulator::OpCodeAsString(OpCode opcode) {
     switch(opcode) {
         case OpCode::NOP: return "NOP";
@@ -98,8 +107,8 @@ void Debugger::debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack,
 
     if (IS_BYTE(a) && 0)
         std::cerr << (uint32_t)ValueAsByte(a) << "b";
-    else if (IS_SHORT(a))
-        std::cerr << ValueAsShort(a) << "s";
+    else if (IS_INT(a))
+        std::cerr << ValueAsInt(a) << "s";
     else if (IS_POINTER(a))
         std::cerr << "&" << ValueAsPointer(a);
     else
@@ -109,8 +118,8 @@ void Debugger::debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack,
 
     if (IS_BYTE(b) && 0)
         std::cerr << (uint32_t)ValueAsByte(b) << "b";
-    else if (IS_SHORT(b))
-        std::cerr << ValueAsShort(b) << "s";
+    else if (IS_INT(b))
+        std::cerr << ValueAsInt(b) << "s";
     else if (IS_POINTER(b))
         std::cerr << "&" << ValueAsPointer(b);
     else
@@ -120,8 +129,8 @@ void Debugger::debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack,
 
     if (IS_BYTE(c) && 0)
         std::cerr << (uint32_t)ValueAsByte(c) << "b";
-    else if (IS_SHORT(c))
-        std::cerr << ValueAsShort(c) << "s";
+    else if (IS_INT(c))
+        std::cerr << ValueAsInt(c) << "s";
     else if (IS_POINTER(c))
         std::cerr << "&" << ValueAsPointer(c);
     else
@@ -133,8 +142,8 @@ void Debugger::debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack,
 
     if (IS_BYTE(memidx) && 0)
         std::cerr << (uint32_t)ValueAsByte(memidx) << "b";
-    else if (IS_SHORT(memidx))
-        std::cerr << ValueAsShort(memidx) << "s";
+    else if (IS_INT(memidx))
+        std::cerr << ValueAsInt(memidx) << "s";
     else if (IS_POINTER(memidx))
         std::cerr << "&" << ValueAsPointer(memidx);
     else
@@ -192,6 +201,13 @@ void Program::addValue(value_t v) {
     addByte(bytes[1]);
     addByte(bytes[2]);
     addByte(bytes[3]);
+
+#ifdef SYS32
+    addByte(bytes[4]);
+    addByte(bytes[5]);
+    addByte(bytes[6]);
+    addByte(bytes[7]);
+#endif
 }
 
 void Program::addSyscall(SysCall syscall) {
@@ -320,6 +336,13 @@ void Program::updateValue(uint32_t pos, value_t v) {
     code[pos+1] = bytes[1];
     code[pos+2] = bytes[2];
     code[pos+3] = bytes[3];
+
+#ifdef SYS32
+    code[pos+4] = bytes[4];
+    code[pos+5] = bytes[5];
+    code[pos+6] = bytes[6];
+    code[pos+7] = bytes[7];
+#endif
 }
 
 OpCode Program::fetch(uint32_t pos) const {
@@ -395,16 +418,17 @@ uint8_t VM::getByte(vmpointer_t ptr) {
     return ValueAsByte(value);
 }
 
+// TODO
 int16_t VM::getShort(vmpointer_t ptr) {
     value_t value = mem[ptr];
 
-    if (!(IS_SHORT(value)))
+    if (!(IS_INT(value)))
         error("Value is not an int");
 
-    return ValueAsShort(value);
+    return ValueAsInt(value);
 }
 
-float VM::getFloat(vmpointer_t ptr) {
+_float_t VM::getFloat(vmpointer_t ptr) {
     value_t value = mem[ptr];
 
     if (!(IS_FLOAT(value)))
@@ -453,12 +477,12 @@ static value_t stringToValue(const std::string &str) {
     } else if (str.find('.') != std::string::npos) {
         value = FloatAsValue(std::stof(str, &pos));
     } else {
-        int32_t overflow = std::stoi(str, &pos);
+        overflow_t overflow = std::stoi(str, &pos);
 
-        if (overflow > INT16_MAX || overflow < INT16_MIN) {
-            value = FloatAsValue((float)overflow);
+        if (overflow > _INT_MAX || overflow < _INT_MIN) {
+            value = FloatAsValue((_float_t)overflow);
         } else {
-            value = ShortAsValue((int16_t)overflow);
+            value = IntAsValue((integer_t)overflow);
         }
     }
 
@@ -497,8 +521,8 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                         } else {
                             sysIO->puts(std::to_string(ValueAsByte(arg)));
                         }
-                    } else if (IS_SHORT(arg)) {
-                        sysIO->puts(std::to_string(ValueAsShort(arg)));
+                    } else if (IS_INT(arg)) {
+                        sysIO->puts(std::to_string(ValueAsInt(arg)));
                     } else if (IS_FLOAT(arg)) {
                         sysIO->puts(std::to_string(ValueAsFloat(arg)));
                     }
@@ -535,13 +559,13 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
         case SysCall::READKEY:
             switch (rvalue) {
                 case RuntimeValue::A:
-                    a = ShortAsValue(sysIO->read(true));
+                    a = IntAsValue(sysIO->read(true));
                     break;
                 case RuntimeValue::B:
-                    b = ShortAsValue(sysIO->read(true));
+                    b = IntAsValue(sysIO->read(true));
                     break;
                 case RuntimeValue::C:
-                    c = ShortAsValue(sysIO->read(true));
+                    c = IntAsValue(sysIO->read(true));
                     break;
                 default:
                     error("Cannot readkey to register");
@@ -550,13 +574,13 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
         case SysCall::KEYSET:
             switch (rvalue) {
                 case RuntimeValue::A:
-                    c = ShortAsValue(sysIO->keyset(ValueAsByte(a)) ? 1 : 0);
+                    c = IntAsValue(sysIO->keyset(ValueAsByte(a)) ? 1 : 0);
                     break;
                 case RuntimeValue::B:
-                    c = ShortAsValue(sysIO->keyset(ValueAsByte(b)) ? 1 : 0);
+                    c = IntAsValue(sysIO->keyset(ValueAsByte(b)) ? 1 : 0);
                     break;
                 case RuntimeValue::C:
-                    c = ShortAsValue(sysIO->keyset(ValueAsByte(c)) ? 1 : 0);
+                    c = IntAsValue(sysIO->keyset(ValueAsByte(c)) ? 1 : 0);
                     break;
                 default:
                     error("Cannot readkey to register");
@@ -593,14 +617,14 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
             }
             break;
         case SysCall::DRAW:
-            sysIO->setpixel(ValueAsShort(a), ValueAsShort(b), ValueAsShort(c));
+            sysIO->setpixel(ValueAsInt(a), ValueAsInt(b), ValueAsInt(c));
             break;
         case SysCall::DRAWLINE: {
                 int x0,y0,x1,y1,colour;
 
                 if (IS_FLOAT(mem[idx])) {
                     x0 = (int)getFloat(idx);
-                } else if (IS_SHORT(mem[idx])) {
+                } else if (IS_INT(mem[idx])) {
                     x0 = (int)getShort(idx);
                 } else {
                     error("Invalid type for x0");
@@ -608,7 +632,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
 
                 if (IS_FLOAT(mem[idx+1])) {
                     y0 = (int)getFloat(idx+1);
-                } else if (IS_SHORT(mem[idx+1])) {
+                } else if (IS_INT(mem[idx+1])) {
                     y0 = (int)getShort(idx+1);
                 } else {
                     error("Invalid type for y0");
@@ -616,7 +640,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
 
                 if (IS_FLOAT(mem[idx+2])) {
                     x1 = (int)getFloat(idx+2);
-                } else if (IS_SHORT(mem[idx+2])) {
+                } else if (IS_INT(mem[idx+2])) {
                     x1 = (int)getShort(idx+2);
                 } else {
                     error("Invalid type for x1");
@@ -624,7 +648,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
 
                 if (IS_FLOAT(mem[idx+3])) {
                     y1 = (int)getFloat(idx+3);
-                } else if (IS_SHORT(mem[idx+3])) {
+                } else if (IS_INT(mem[idx+3])) {
                     y1 = (int)getShort(idx+3);
                 } else {
                     error("Invalid type for y1");
@@ -632,7 +656,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
 
                 if (IS_FLOAT(mem[idx+4])) {
                     colour = (int)getFloat(idx+4);
-                } else if (IS_SHORT(mem[idx+4])) {
+                } else if (IS_INT(mem[idx+4])) {
                     colour = (int)getShort(idx+4);
                 } else {
                     error("Invalid type for colour");
@@ -689,7 +713,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
 
                 if (IS_FLOAT(mem[idx])) {
                     x0 = (int)getFloat(idx);
-                } else if (IS_SHORT(mem[idx])) {
+                } else if (IS_INT(mem[idx])) {
                     x0 = (int)getShort(idx);
                 } else {
                     error("Invalid type for x0");
@@ -697,7 +721,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
 
                 if (IS_FLOAT(mem[idx+1])) {
                     y0 = (int)getFloat(idx+1);
-                } else if (IS_SHORT(mem[idx+1])) {
+                } else if (IS_INT(mem[idx+1])) {
                     y0 = (int)getShort(idx+1);
                 } else {
                     error("Invalid type for y0");
@@ -705,7 +729,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
 
                 if (IS_FLOAT(mem[idx+2])) {
                     x1 = (int)getFloat(idx+2);
-                } else if (IS_SHORT(mem[idx+2])) {
+                } else if (IS_INT(mem[idx+2])) {
                     x1 = (int)getShort(idx+2);
                 } else {
                     error("Invalid type for x1");
@@ -713,7 +737,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
 
                 if (IS_FLOAT(mem[idx+3])) {
                     y1 = (int)getFloat(idx+3);
-                } else if (IS_SHORT(mem[idx+3])) {
+                } else if (IS_INT(mem[idx+3])) {
                     y1 = (int)getShort(idx+3);
                 } else {
                     error("Invalid type for y1");
@@ -721,14 +745,14 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
 
                 if (IS_FLOAT(mem[idx+4])) {
                     colour = (int)getFloat(idx+4);
-                } else if (IS_SHORT(mem[idx+4])) {
+                } else if (IS_INT(mem[idx+4])) {
                     colour = (int)getShort(idx+4);
                 } else {
                     error("Invalid type for colour");
                 }
                 if (IS_FLOAT(mem[idx+5])) {
                     filled = (int)getFloat(idx+5);
-                } else if (IS_SHORT(mem[idx+5])) {
+                } else if (IS_INT(mem[idx+5])) {
                     filled = (int)getShort(idx+5);
                 } else {
                     error("Invalid type for filled");
@@ -754,9 +778,9 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
             }
             break;
         case SysCall::BLIT: {
-                auto x = ValueAsShort(a);
-                auto y = ValueAsShort(b);
-                auto count = (uint16_t)ValueAsShort(c);
+                auto x = ValueAsInt(a);
+                auto y = ValueAsInt(b);
+                auto count = (uint16_t)ValueAsInt(c);
                 std::vector<uint8_t> buffer;
 
                 buffer.resize(count);
@@ -775,14 +799,14 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
         case SysCall::SOUND: {
                 float frequency;
 
-                if (IS_SHORT(a)) {
-                     frequency = (float)ValueAsShort(a);
+                if (IS_INT(a)) {
+                     frequency = (float)ValueAsInt(a);
                 } else {
-                    frequency = ValueAsFloat(a);
+                    frequency = (float)ValueAsFloat(a);
                 }
-                uint16_t duration = (uint16_t)ValueAsShort(b);
+                uint16_t duration = (uint16_t)ValueAsInt(b);
 
-                sysIO->sound(ValueAsShort(c), frequency, duration);
+                sysIO->sound(ValueAsInt(c), frequency, duration);
             }
             break;
         case SysCall::VOICE: {
@@ -832,9 +856,9 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
 }
 
 VM::VM(uint32_t _ptrspace) : idx(0),  pc(0), sp(0), ptrspace(_ptrspace) {
-    a = ShortAsValue(0);
-    b = ShortAsValue(0);
-    c = ShortAsValue(0);
+    a = IntAsValue(0);
+    b = IntAsValue(0);
+    c = IntAsValue(0);
 
     callstack.fill(0);
 
@@ -847,7 +871,7 @@ int VM::compare(vmpointer_t a, vmpointer_t b) {
     if (a == b)
         return 0;
 
-    while (ValueAsShort(mem[a])) {
+    while (ValueAsInt(mem[a])) {
         if (mem[a] != mem[b])
             break;
 
@@ -855,7 +879,7 @@ int VM::compare(vmpointer_t a, vmpointer_t b) {
         b++;
     }
 
-    return ValueAsShort(mem[a]) - ValueAsShort(mem[b]);
+    return ValueAsInt(mem[a]) - ValueAsInt(mem[b]);
 }
 
 bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycle_budget, std::shared_ptr<Debugger> debugger) {
@@ -863,7 +887,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
     uint32_t cycles = 0;
 
     vmpointer_t p;
-    int32_t overflow;
+    overflow_t overflow;
 
     std::string str;
 
@@ -890,15 +914,15 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 break;
             case OpCode::SETA:
                 a = program.readValue(pc);
-                pc += 4;
+                pc += ValueTypeSize;
                 break;
             case OpCode::SETB:
                 b = program.readValue(pc);
-                pc += 4;
+                pc += ValueTypeSize;
                 break;
             case OpCode::SETC:
                 c = program.readValue(pc);
-                pc += 4;
+                pc += ValueTypeSize;
                 break;
             case OpCode::LOADA:
                 p = program.readPointer(pc);
@@ -960,43 +984,43 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
             case OpCode::MOVCIDX:
                 if (IS_POINTER(c))
                     idx = ValueAsPointer(c);
-                else if (IS_SHORT(c))
-                    idx = (vmpointer_t)ValueAsShort(c);
+                else if (IS_INT(c))
+                    idx = (vmpointer_t)ValueAsInt(c);
                 else
                     error("MOVCIDX is not a pointer");
                 break;
             case OpCode::INCA:
-                if (IS_SHORT(a) && IS_SHORT(program.readValue(pc)))
-                    a = ShortAsValue(ValueAsShort(a) + ValueAsShort(program.readValue(pc)));
+                if (IS_INT(a) && IS_INT(program.readValue(pc)))
+                    a = IntAsValue(ValueAsInt(a) + ValueAsInt(program.readValue(pc)));
                 else if (IS_FLOAT(a) && IS_FLOAT(program.readValue(pc)))
                     a = FloatAsValue(ValueAsFloat(a) + ValueAsFloat(program.readValue(pc)));
-                else if (IS_POINTER(a) && IS_SHORT(program.readValue(pc)))
-                    a = PointerAsValue(ValueAsPointer(a) + ValueAsShort(program.readValue(pc)));
+                else if (IS_POINTER(a) && IS_INT(program.readValue(pc)))
+                    a = PointerAsValue(ValueAsPointer(a) + ValueAsInt(program.readValue(pc)));
                 else
                     error("INCA mismatch");
-                pc += 4;
+                pc += ValueTypeSize;
                 break;
             case OpCode::INCB:
-                if (IS_SHORT(b) && IS_SHORT(program.readValue(pc)))
-                    b = ShortAsValue(ValueAsShort(b) + ValueAsShort(program.readValue(pc)));
+                if (IS_INT(b) && IS_INT(program.readValue(pc)))
+                    b = IntAsValue(ValueAsInt(b) + ValueAsInt(program.readValue(pc)));
                 else if (IS_FLOAT(b) && IS_FLOAT(program.readValue(pc)))
                     b = FloatAsValue(ValueAsFloat(b) + ValueAsFloat(program.readValue(pc)));
-                else if (IS_POINTER(b) && IS_SHORT(program.readValue(pc)))
-                    b = PointerAsValue(ValueAsPointer(b) + ValueAsShort(program.readValue(pc)));
+                else if (IS_POINTER(b) && IS_INT(program.readValue(pc)))
+                    b = PointerAsValue(ValueAsPointer(b) + ValueAsInt(program.readValue(pc)));
                 else
                     error("INCB mismatch");
-                pc += 4;
+                pc += ValueTypeSize;
                 break;
             case OpCode::INCC:
-                if (IS_SHORT(c) && IS_SHORT(program.readValue(pc)))
-                    c = ShortAsValue(ValueAsShort(c) + ValueAsShort(program.readValue(pc)));
+                if (IS_INT(c) && IS_INT(program.readValue(pc)))
+                    c = IntAsValue(ValueAsInt(c) + ValueAsInt(program.readValue(pc)));
                 else if (IS_FLOAT(c) && IS_FLOAT(program.readValue(pc)))
                     c = FloatAsValue(ValueAsFloat(c) + ValueAsFloat(program.readValue(pc)));
-                else if (IS_POINTER(c) && IS_SHORT(program.readValue(pc)))
-                    c = PointerAsValue(ValueAsPointer(c) + ValueAsShort(program.readValue(pc)));
+                else if (IS_POINTER(c) && IS_INT(program.readValue(pc)))
+                    c = PointerAsValue(ValueAsPointer(c) + ValueAsInt(program.readValue(pc)));
                 else
                     error("INCC mismatch");
-                pc += 4;
+                pc += ValueTypeSize;
                 break;
             case OpCode::IDXA:
                 a = getValue(idx);
@@ -1017,25 +1041,25 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 set(idx, c);
                 break;
             case OpCode::ADD:
-                if (IS_SHORT(a) && IS_SHORT(b)) {
-                    overflow = (int32_t)ValueAsShort(a) + (int32_t)ValueAsShort(b);
-                    if (overflow > INT16_MAX || overflow < INT16_MIN) {
+                if (IS_INT(a) && IS_INT(b)) {
+                    overflow = (overflow_t)ValueAsInt(a) + (overflow_t)ValueAsInt(b);
+                    if (overflow > _INT_MAX || overflow < _INT_MIN) {
                         //error(std::string("ADD overflow: ") + std::to_string(overflow));
-                        //std::cerr << std::string("ADD overflow: ") << std::to_string(overflow) << "=" << ValueAsShort(a) << "+" << ValueAsShort(b) << std::endl;
-                        c = FloatAsValue((float)overflow);
+                        //std::cerr << std::string("ADD overflow: ") << std::to_string(overflow) << "=" << ValueAsInt(a) << "+" << ValueAsInt(b) << std::endl;
+                        c = FloatAsValue((_float_t)overflow);
                     } else 
-                        c = ShortAsValue(overflow);
+                        c = IntAsValue(overflow);
                 }
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
                     c = FloatAsValue(ValueAsFloat(a) + ValueAsFloat(b));
-                else if (IS_FLOAT(a) && IS_SHORT(b))
-                    c = FloatAsValue(ValueAsFloat(a) + (float)ValueAsShort(b));
-                else if (IS_SHORT(a) && IS_FLOAT(b))
-                    c = FloatAsValue((float)ValueAsShort(a) + ValueAsFloat(b));
-                else if (IS_POINTER(a) && IS_SHORT(b))
-                    c = PointerAsValue(ValueAsPointer(a) + ValueAsShort(b));
-                else if (IS_SHORT(a) && IS_POINTER(b))
-                    c = PointerAsValue(ValueAsPointer(b) + ValueAsShort(a));
+                else if (IS_FLOAT(a) && IS_INT(b))
+                    c = FloatAsValue(ValueAsFloat(a) + (_float_t)ValueAsInt(b));
+                else if (IS_INT(a) && IS_FLOAT(b))
+                    c = FloatAsValue((_float_t)ValueAsInt(a) + ValueAsFloat(b));
+                else if (IS_POINTER(a) && IS_INT(b))
+                    c = PointerAsValue(ValueAsPointer(a) + ValueAsInt(b));
+                else if (IS_INT(a) && IS_POINTER(b))
+                    c = PointerAsValue(ValueAsPointer(b) + ValueAsInt(a));
                 else if (IS_POINTER(a) && IS_FLOAT(b))
                     c = PointerAsValue(ValueAsPointer(a) + (uint16_t)ValueAsFloat(b));
                 else if (IS_FLOAT(a) && IS_POINTER(b))
@@ -1044,24 +1068,24 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     error("ADD mismatch");
                 break;
             case OpCode::SUB:
-                if (IS_SHORT(a) && IS_SHORT(b)) {
-                    overflow = ValueAsShort(a) - ValueAsShort(b);
-                    if (overflow > INT16_MAX || overflow < INT16_MIN) {
-                        //std::cerr << std::string("SUB overflow: ") << std::to_string(overflow) << "=" << ValueAsShort(a) << "-" << ValueAsShort(b) << std::endl;
-                        c = FloatAsValue((float)overflow);
+                if (IS_INT(a) && IS_INT(b)) {
+                    overflow = ValueAsInt(a) - ValueAsInt(b);
+                    if (overflow > _INT_MAX || overflow < _INT_MIN) {
+                        //std::cerr << std::string("SUB overflow: ") << std::to_string(overflow) << "=" << ValueAsInt(a) << "-" << ValueAsInt(b) << std::endl;
+                        c = FloatAsValue((_float_t)overflow);
                     } else 
-                        c = ShortAsValue(overflow);
+                        c = IntAsValue(overflow);
                 }
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
                     c = FloatAsValue(ValueAsFloat(a) - ValueAsFloat(b));
-                else if (IS_FLOAT(a) && IS_SHORT(b))
-                    c = FloatAsValue(ValueAsFloat(a) - (float)ValueAsShort(b));
-                else if (IS_SHORT(a) && IS_FLOAT(b))
-                    c = FloatAsValue((float)ValueAsShort(a) - ValueAsFloat(b));
-                else if (IS_POINTER(a) && IS_SHORT(b))
-                    c = PointerAsValue(ValueAsPointer(a) - ValueAsShort(b));
-                else if (IS_SHORT(a) && IS_POINTER(b))
-                    c = PointerAsValue(ValueAsPointer(b) - ValueAsShort(a));
+                else if (IS_FLOAT(a) && IS_INT(b))
+                    c = FloatAsValue(ValueAsFloat(a) - (_float_t)ValueAsInt(b));
+                else if (IS_INT(a) && IS_FLOAT(b))
+                    c = FloatAsValue((_float_t)ValueAsInt(a) - ValueAsFloat(b));
+                else if (IS_POINTER(a) && IS_INT(b))
+                    c = PointerAsValue(ValueAsPointer(a) - ValueAsInt(b));
+                else if (IS_INT(a) && IS_POINTER(b))
+                    c = PointerAsValue(ValueAsPointer(b) - ValueAsInt(a));
                 else if (IS_POINTER(a) && IS_FLOAT(b))
                     c = PointerAsValue(ValueAsPointer(a) - (uint16_t)ValueAsFloat(b));
                 else if (IS_FLOAT(a) && IS_POINTER(b))
@@ -1070,177 +1094,177 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     error("SUB mismatch");
                 break;
             case OpCode::MUL:
-                if (IS_SHORT(a) && IS_SHORT(b)) {
-                    overflow = (int32_t)ValueAsShort(a) * (int32_t)ValueAsShort(b);
+                if (IS_INT(a) && IS_INT(b)) {
+                    overflow = (overflow_t)ValueAsInt(a) * (overflow_t)ValueAsInt(b);
 
-                    if (overflow > INT16_MAX || overflow < INT16_MIN) {
+                    if (overflow > _INT_MAX || overflow < _INT_MIN) {
                         //error(std::string("MUL overflow: ") + std::to_string(overflow));
-                        //std::cerr << std::string("MUL overflow: ") << std::to_string(overflow) << "=" << ValueAsShort(a) << "x" << ValueAsShort(b) << std::endl;
-                        c = FloatAsValue((float)overflow);
+                        //std::cerr << std::string("MUL overflow: ") << std::to_string(overflow) << "=" << ValueAsInt(a) << "x" << ValueAsInt(b) << std::endl;
+                        c = FloatAsValue((_float_t)overflow);
                     } else
-                        c = ShortAsValue(overflow);
+                        c = IntAsValue(overflow);
                 }
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
                     c = FloatAsValue(ValueAsFloat(a) * ValueAsFloat(b));
-                else if (IS_FLOAT(a) && IS_SHORT(b))
-                    c = FloatAsValue(ValueAsFloat(a) * (float)ValueAsShort(b));
-                else if (IS_SHORT(a) && IS_FLOAT(b))
-                    c = FloatAsValue((float)ValueAsShort(a) * ValueAsFloat(b));
+                else if (IS_FLOAT(a) && IS_INT(b))
+                    c = FloatAsValue(ValueAsFloat(a) * (_float_t)ValueAsInt(b));
+                else if (IS_INT(a) && IS_FLOAT(b))
+                    c = FloatAsValue((_float_t)ValueAsInt(a) * ValueAsFloat(b));
                 else
                     error("MUL mismatch");
                 break;
             case OpCode::DIV:
-                if (IS_SHORT(a) && IS_SHORT(b))
-                    c = FloatAsValue((float)ValueAsShort(a) / (float)ValueAsShort(b));
+                if (IS_INT(a) && IS_INT(b))
+                    c = FloatAsValue((_float_t)ValueAsInt(a) / (_float_t)ValueAsInt(b));
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
                     c = FloatAsValue(ValueAsFloat(a) / ValueAsFloat(b));
-                else if (IS_FLOAT(a) && IS_SHORT(b))
-                    c = FloatAsValue(ValueAsFloat(a) / (float)ValueAsShort(b));
-                else if (IS_SHORT(a) && IS_FLOAT(b))
-                    c = FloatAsValue((float)ValueAsShort(a) / ValueAsFloat(b));
+                else if (IS_FLOAT(a) && IS_INT(b))
+                    c = FloatAsValue(ValueAsFloat(a) / (_float_t)ValueAsInt(b));
+                else if (IS_INT(a) && IS_FLOAT(b))
+                    c = FloatAsValue((_float_t)ValueAsInt(a) / ValueAsFloat(b));
                 else
                     error("DIV mismatch");
                 break;
             case OpCode::IDIV:
-                if (IS_SHORT(a) && IS_SHORT(b)) {
-                    overflow = ValueAsShort(a) / ValueAsShort(b);
-                    if (overflow > INT16_MAX || overflow < INT16_MIN)
+                if (IS_INT(a) && IS_INT(b)) {
+                    overflow = ValueAsInt(a) / ValueAsInt(b);
+                    if (overflow > _INT_MAX || overflow < _INT_MIN)
                         error("IDIV overflow");
                     else
-                        c = ShortAsValue(overflow);
+                        c = IntAsValue(overflow);
                 }
                 else
                     error("IDIV mismatch");
                 break;
             case OpCode::MOD:
-                if (IS_SHORT(a) && IS_SHORT(b))
-                    c = ShortAsValue(ValueAsShort(a) % ValueAsShort(b));
+                if (IS_INT(a) && IS_INT(b))
+                    c = IntAsValue(ValueAsInt(a) % ValueAsInt(b));
                 else
                     error("MOD mismatch");
                 break;
             case OpCode::EXP:
-                if (IS_SHORT(a) && IS_SHORT(b)) {
-                    overflow = std::pow(ValueAsShort(a), ValueAsShort(b));
+                if (IS_INT(a) && IS_INT(b)) {
+                    overflow = std::pow(ValueAsInt(a), ValueAsInt(b));
 
-                    if (overflow > INT16_MAX || overflow < INT16_MIN) {
+                    if (overflow > _INT_MAX || overflow < _INT_MIN) {
                         //std::cerr << "EXP overflow " << overflow << std::endl;
-                        c = FloatAsValue((float)overflow);
+                        c = FloatAsValue((_float_t)overflow);
                     } else
-                        c = ShortAsValue(overflow);
+                        c = IntAsValue(overflow);
                 }
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
                     c = FloatAsValue(std::pow(ValueAsFloat(a), ValueAsFloat(b)));
-                else if (IS_FLOAT(a) && IS_SHORT(b))
-                    c = FloatAsValue(std::pow(ValueAsFloat(a), ValueAsShort(b)));
-                else if (IS_SHORT(a) && IS_FLOAT(b))
-                    c = FloatAsValue(std::pow(ValueAsShort(a), ValueAsFloat(b)));
+                else if (IS_FLOAT(a) && IS_INT(b))
+                    c = FloatAsValue(std::pow(ValueAsFloat(a), ValueAsInt(b)));
+                else if (IS_INT(a) && IS_FLOAT(b))
+                    c = FloatAsValue(std::pow(ValueAsInt(a), ValueAsFloat(b)));
                 else
                     error("EXP mismatch");
                 break;
             case OpCode::ATAN:
-                if (IS_SHORT(c))
-                    c = FloatAsValue(std::atan((float)ValueAsShort(c)));
+                if (IS_INT(c))
+                    c = FloatAsValue(std::atan((_float_t)ValueAsInt(c)));
                 else if (IS_FLOAT(c))
                     c = FloatAsValue(std::atan(ValueAsFloat(c)));
                 else
                     error("ATAN argument error");
                 break;
             case OpCode::COS:
-                if (IS_SHORT(c))
-                    c = FloatAsValue(std::cos((float)ValueAsShort(c)));
+                if (IS_INT(c))
+                    c = FloatAsValue(std::cos((_float_t)ValueAsInt(c)));
                 else if (IS_FLOAT(c))
                     c = FloatAsValue(std::cos(ValueAsFloat(c)));
                 else
                     error("COS argument error");
                 break;
             case OpCode::LOG:
-                if (IS_SHORT(c))
-                    c = FloatAsValue(std::log((float)ValueAsShort(c)));
+                if (IS_INT(c))
+                    c = FloatAsValue(std::log((_float_t)ValueAsInt(c)));
                 else if (IS_FLOAT(c))
                     c = FloatAsValue(std::log(ValueAsFloat(c)));
                 else
                     error("LOG argument error");
                 break;
             case OpCode::SIN:
-                if (IS_SHORT(c))
-                    c = FloatAsValue(std::sin((float)ValueAsShort(c)));
+                if (IS_INT(c))
+                    c = FloatAsValue(std::sin((_float_t)ValueAsInt(c)));
                 else if (IS_FLOAT(c))
                     c = FloatAsValue(std::sin(ValueAsFloat(c)));
                 else
                     error("SIN argument error");
                 break;
             case OpCode::SQR:
-                if (IS_SHORT(c))
-                    c = FloatAsValue(std::sqrt((float)ValueAsShort(c)));
+                if (IS_INT(c))
+                    c = FloatAsValue(std::sqrt((_float_t)ValueAsInt(c)));
                 else if (IS_FLOAT(c))
                     c = FloatAsValue(std::sqrt(ValueAsFloat(c)));
                 else
                     error("SQR argument error");
                 break;
             case OpCode::TAN:
-                if (IS_SHORT(c))
-                    c = FloatAsValue(std::tan((float)ValueAsShort(c)));
+                if (IS_INT(c))
+                    c = FloatAsValue(std::tan((_float_t)ValueAsInt(c)));
                 else if (IS_FLOAT(c))
                     c = FloatAsValue(std::tan(ValueAsFloat(c)));
                 else
                     error("TAN argument error");
                 break;
             case OpCode::RND:
-                if (IS_SHORT(c))
-                    c = FloatAsValue(((float)std::rand()/(float)RAND_MAX) * (float)ValueAsShort(c));
+                if (IS_INT(c))
+                    c = FloatAsValue(((_float_t)std::rand()/(_float_t)RAND_MAX) * (_float_t)ValueAsInt(c));
                 else if (IS_FLOAT(c))
-                    c = FloatAsValue(((float)std::rand()/(float)RAND_MAX) * (float)ValueAsFloat(c));
+                    c = FloatAsValue(((_float_t)std::rand()/(_float_t)RAND_MAX) * (_float_t)ValueAsFloat(c));
                 else
                     error("RND argument error");
                 break;
             case OpCode::SEED:
-                if (IS_SHORT(c))
-                    std::srand((uint32_t)ValueAsShort(c));
+                if (IS_INT(c))
+                    std::srand((uint32_t)ValueAsInt(c));
                 else if (IS_FLOAT(c))
                     std::srand((uint32_t)ValueAsFloat(c));
                 else
                     error("RND argument error");
                 break;
             case OpCode::FLT:
-                if (IS_SHORT(c))
-                    c = FloatAsValue((float)ValueAsShort(c));
+                if (IS_INT(c))
+                    c = FloatAsValue((_float_t)ValueAsInt(c));
                 else if (IS_FLOAT(c))
                     c = FloatAsValue(ValueAsFloat(c));
                 else
                     error("FLT argument error");
                 break;
             case OpCode::INT:
-                if (IS_SHORT(c)) {
-                    c = ShortAsValue(c);
+                if (IS_INT(c)) {
+                    c = IntAsValue(c);
                 }
                 else if (IS_FLOAT(c)) {
-                    overflow = (int32_t)ValueAsFloat(c);
+                    overflow = (overflow_t)ValueAsFloat(c);
 
-                    if (overflow > INT16_MAX) {
+                    if (overflow > _INT_MAX) {
                         //std::cerr << (std::string("INT overflow") + std::to_string(overflow)) << std::endl;
-                        c = ShortAsValue(INT16_MAX);
-                    } else if (overflow < INT16_MIN) {
+                        c = IntAsValue(_INT_MAX);
+                    } else if (overflow < _INT_MIN) {
                         //error(std::string("INT overflow (f)") + std::to_string(overflow));
                         //std::cerr << (std::string("INT underflow") + std::to_string(overflow)) << std::endl;
-                        c = ShortAsValue(INT16_MIN);
+                        c = IntAsValue(_INT_MIN);
                     } else
-                        c = ShortAsValue(overflow);
+                        c = IntAsValue(overflow);
                 } else if (IS_POINTER(c))
-                    c = ShortAsValue((int16_t)ValueAsPointer(c));
+                    c = IntAsValue((integer_t)ValueAsPointer(c));
                 else
                     error("INT argument error");
                 break;
             case OpCode::PTR:
-                if (IS_SHORT(c))
-                    c = PointerAsValue((vmpointer_t)ValueAsShort(c));
+                if (IS_INT(c))
+                    c = PointerAsValue((vmpointer_t)ValueAsInt(c));
                 else if (IS_POINTER(c))
                     c = PointerAsValue(ValueAsPointer(c));
                 else
                     error("PTR argument error");
                 break;
             case OpCode::STR:
-                if (IS_SHORT(c))
-                    str = std::to_string(ValueAsShort(c));
+                if (IS_INT(c))
+                    str = std::to_string(ValueAsInt(c));
                 else if (IS_POINTER(c))
                     str = std::to_string(ValueAsPointer(c));
                 else if (IS_FLOAT(c))
@@ -1261,98 +1285,98 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 c = stringToValue(str);
                 break;
             case OpCode::AND:
-                if (IS_SHORT(a) && IS_SHORT(b))
-                    c = ValueAsShort(a) && ValueAsShort(b) ? ShortAsValue(1) : ShortAsValue(0);
+                if (IS_INT(a) && IS_INT(b))
+                    c = ValueAsInt(a) && ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = ValueAsFloat(a) && ValueAsFloat(b) ? ShortAsValue(1) : ShortAsValue(0);
+                    c = ValueAsFloat(a) && ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
                 else
                     error("AND mismatch");
                 break;
             case OpCode::OR:
-                if (IS_SHORT(a) && IS_SHORT(b))
-                    c = ValueAsShort(a) || ValueAsShort(b) ? ShortAsValue(1) : ShortAsValue(0);
+                if (IS_INT(a) && IS_INT(b))
+                    c = ValueAsInt(a) || ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = ValueAsFloat(a) || ValueAsFloat(b) ? ShortAsValue(1) : ShortAsValue(0);
+                    c = ValueAsFloat(a) || ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
                 else
                     error("OR mismatch");
                 break;
             case OpCode::NOT:
-                if (IS_SHORT(c))
-                    c = ShortAsValue(!ValueAsShort(c));
+                if (IS_INT(c))
+                    c = IntAsValue(!ValueAsInt(c));
                 else if (IS_FLOAT(c))
                     c = FloatAsValue(!ValueAsFloat(c));
                 else
                     error("NOT mismatch");
                 break;
             case OpCode::EQ:
-                if (IS_SHORT(a) && IS_SHORT(b))
-                    c = ValueAsShort(a) == ValueAsShort(b) ? ShortAsValue(1) : ShortAsValue(0);
+                if (IS_INT(a) && IS_INT(b))
+                    c = ValueAsInt(a) == ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = ValueAsFloat(a) == ValueAsFloat(b) ? ShortAsValue(1) : ShortAsValue(0);
+                    c = ValueAsFloat(a) == ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_POINTER(a) && IS_POINTER(b))
-                    c = compare(ValueAsPointer(a), ValueAsPointer(b)) == 0 ? ShortAsValue(1) : ShortAsValue(0);
+                    c = compare(ValueAsPointer(a), ValueAsPointer(b)) == 0 ? IntAsValue(1) : IntAsValue(0);
                 else
                     error("EQ mismatch");
                 break;
             case OpCode::NE:
-                if (IS_SHORT(a) && IS_SHORT(b))
-                    c = ValueAsShort(a) != ValueAsShort(b) ? ShortAsValue(1) : ShortAsValue(0);
+                if (IS_INT(a) && IS_INT(b))
+                    c = ValueAsInt(a) != ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = ValueAsFloat(a) != ValueAsFloat(b) ? ShortAsValue(1) : ShortAsValue(0);
+                    c = ValueAsFloat(a) != ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_POINTER(a) && IS_POINTER(b))
-                    c = compare(ValueAsPointer(a), ValueAsPointer(b)) != 0 ? ShortAsValue(1) : ShortAsValue(0);
+                    c = compare(ValueAsPointer(a), ValueAsPointer(b)) != 0 ? IntAsValue(1) : IntAsValue(0);
                 else
                     error("NE mismatch");
                 break;
             case OpCode::GT:
-                if (IS_SHORT(a) && IS_SHORT(b))
-                    c = ValueAsShort(a) > ValueAsShort(b) ? ShortAsValue(1) : ShortAsValue(0);
+                if (IS_INT(a) && IS_INT(b))
+                    c = ValueAsInt(a) > ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = ValueAsFloat(a) > ValueAsFloat(b) ? ShortAsValue(1) : ShortAsValue(0);
+                    c = ValueAsFloat(a) > ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_POINTER(a) && IS_POINTER(b))
-                    c = compare(ValueAsPointer(a), ValueAsPointer(b)) > 0 ? ShortAsValue(1) : ShortAsValue(0);
+                    c = compare(ValueAsPointer(a), ValueAsPointer(b)) > 0 ? IntAsValue(1) : IntAsValue(0);
                 else
                     error("GT mismatch");
                 break;
             case OpCode::GE:
-                if (IS_SHORT(a) && IS_SHORT(b))
-                    c = ValueAsShort(a) >= ValueAsShort(b) ? ShortAsValue(1) : ShortAsValue(0);
+                if (IS_INT(a) && IS_INT(b))
+                    c = ValueAsInt(a) >= ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = ValueAsFloat(a) >= ValueAsFloat(b) ? ShortAsValue(1) : ShortAsValue(0);
+                    c = ValueAsFloat(a) >= ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_POINTER(a) && IS_POINTER(b))
-                    c = compare(ValueAsPointer(a), ValueAsPointer(b)) >= 0 ? ShortAsValue(1) : ShortAsValue(0);
+                    c = compare(ValueAsPointer(a), ValueAsPointer(b)) >= 0 ? IntAsValue(1) : IntAsValue(0);
                 else
                     error("GE mismatch");
                 break;
             case OpCode::LT:
-                if (IS_SHORT(a) && IS_SHORT(b))
-                    c = ValueAsShort(a) < ValueAsShort(b) ? ShortAsValue(1) : ShortAsValue(0);
+                if (IS_INT(a) && IS_INT(b))
+                    c = ValueAsInt(a) < ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = ValueAsFloat(a) < ValueAsFloat(b) ? ShortAsValue(1) : ShortAsValue(0);
+                    c = ValueAsFloat(a) < ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_POINTER(a) && IS_POINTER(b))
-                    c = compare(ValueAsPointer(a), ValueAsPointer(b)) < 0 ? ShortAsValue(1) : ShortAsValue(0);
+                    c = compare(ValueAsPointer(a), ValueAsPointer(b)) < 0 ? IntAsValue(1) : IntAsValue(0);
                 else
                     error("LT mismatch");
                 break;
             case OpCode::LE:
-                if (IS_SHORT(a) && IS_SHORT(b))
-                    c = ValueAsShort(a) <= ValueAsShort(b) ? ShortAsValue(1) : ShortAsValue(0);
+                if (IS_INT(a) && IS_INT(b))
+                    c = ValueAsInt(a) <= ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = ValueAsFloat(a) <= ValueAsFloat(b) ? ShortAsValue(1) : ShortAsValue(0);
+                    c = ValueAsFloat(a) <= ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_POINTER(a) && IS_POINTER(b))
-                    c = compare(ValueAsPointer(a), ValueAsPointer(b)) <= 0 ? ShortAsValue(1) : ShortAsValue(0);
+                    c = compare(ValueAsPointer(a), ValueAsPointer(b)) <= 0 ? IntAsValue(1) : IntAsValue(0);
                 else
                     error("LE mismatch");
                 break;
             case OpCode::CMP:
-                if (IS_SHORT(a) && IS_SHORT(b))
-                    c = ValueAsShort(a) > ValueAsShort(b) ? ShortAsValue(1) : ValueAsShort(a) < ValueAsShort(b) ? ShortAsValue(-1) : ShortAsValue(0);
+                if (IS_INT(a) && IS_INT(b))
+                    c = ValueAsInt(a) > ValueAsInt(b) ? IntAsValue(1) : ValueAsInt(a) < ValueAsInt(b) ? IntAsValue(-1) : IntAsValue(0);
                 else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = ValueAsFloat(a) > ValueAsFloat(b) ? ShortAsValue(1) : ValueAsFloat(a) < ValueAsFloat(b) ? ShortAsValue(-1) : ShortAsValue(0);
-                else if (IS_FLOAT(a) && IS_SHORT(b))
-                    c = ValueAsFloat(a) > ValueAsShort(b) ? ShortAsValue(1) : ValueAsFloat(a) < ValueAsShort(b) ? ShortAsValue(-1) : ShortAsValue(0);
-                else if (IS_SHORT(a) && IS_FLOAT(b))
-                    c = ValueAsShort(a) > ValueAsFloat(b) ? ShortAsValue(1) : ValueAsShort(a) < ValueAsFloat(b) ? ShortAsValue(-1) : ShortAsValue(0);
+                    c = ValueAsFloat(a) > ValueAsFloat(b) ? IntAsValue(1) : ValueAsFloat(a) < ValueAsFloat(b) ? IntAsValue(-1) : IntAsValue(0);
+                else if (IS_FLOAT(a) && IS_INT(b))
+                    c = ValueAsFloat(a) > ValueAsInt(b) ? IntAsValue(1) : ValueAsFloat(a) < ValueAsInt(b) ? IntAsValue(-1) : IntAsValue(0);
+                else if (IS_INT(a) && IS_FLOAT(b))
+                    c = ValueAsInt(a) > ValueAsFloat(b) ? IntAsValue(1) : ValueAsInt(a) < ValueAsFloat(b) ? IntAsValue(-1) : IntAsValue(0);
                 else
                     error("CMP mismatch");
                 break;
@@ -1366,11 +1390,11 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 break;
             case OpCode::STOREIDX:
                 set(idx, program.readValue(pc));
-                pc += 4;
+                pc += ValueTypeSize;
                 break;
             case OpCode::INCIDX:
-                idx += ValueAsShort(program.readValue(pc));
-                pc += 4;
+                idx += ValueAsInt(program.readValue(pc));
+                pc += ValueTypeSize;
                 break;
             case OpCode::SAVEIDX:
                 set(program.readPointer(pc), PointerAsValue(idx));
@@ -1389,24 +1413,24 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 pc = (uint16_t)program.readShort(pc);
                 break;
             case OpCode::JMPEZ:
-                if (c == ShortAsValue(0)) 
+                if (c == IntAsValue(0)) 
                     pc = (uint16_t)program.readShort(pc);
                 else
                     pc += 2;
                 break;
             case OpCode::JMPNZ:
-                if (c != ShortAsValue(0)) 
+                if (c != IntAsValue(0)) 
                     pc = (uint16_t)program.readShort(pc);
                 else
                     pc += 2;
                 break;
             case OpCode::IDATA:
-                set(idx, ShortAsValue(program.readShort(pc)));
+                set(idx, IntAsValue(program.readShort(pc)));
                 pc += 2;
                 break;
             case OpCode::FDATA:
                 set(idx, FloatAsValue(program.readFloat(pc)));
-                pc += 4;
+                pc += ValueTypeSize;
                 break;
             case OpCode::PDATA:
                 set(idx, PointerAsValue(program.readPointer(pc)));
@@ -1415,11 +1439,11 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
             case OpCode::SDATA:
                 offset = 0;
                 while (uint8_t b = program.readByte(pc)) {
-                    set(idx+offset, ShortAsValue(b));
+                    set(idx+offset, IntAsValue(b));
                     pc += 1;
                     offset += 1;
                 }
-                set(idx+offset, ShortAsValue(0));
+                set(idx+offset, IntAsValue(0));
                 pc += 1;
                 break;
             case OpCode::SYSCALL:
@@ -1455,8 +1479,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 pc += 2;
                 break;
             case OpCode::CALLOC:
-                if (IS_SHORT(c))
-                    heap -= (uint16_t)ValueAsShort(c);
+                if (IS_INT(c))
+                    heap -= (uint16_t)ValueAsInt(c);
                 else if (IS_FLOAT(c))
                     heap -= (uint16_t)ValueAsFloat(c);
                 else
@@ -1480,7 +1504,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
 
                 break;
             default:
-                std::cout << "Unknown opcode " << (int)program.fetch(pc-1) << std::endl;
+                std::cout << "Unknown opcode " << (int)program.fetch(pc-1)  << " " << (int)(pc-1) << " " << (int)program.fetch(pc-2) << " " << (int)program.fetch(pc-3) << " " << (int)program.fetch(pc-4) << " " << (int)program.fetch(pc-5) << " " << (int)program.fetch(pc-6) << " " << (int)program.fetch(pc-7) << " " << (int)program.fetch(pc-8) << " " << (int)program.fetch(pc-9) << " " << (int)program.fetch(pc-10) << std::endl;
         }
 
         cycles += cost;
@@ -1495,9 +1519,9 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
         idx = 0;
         pc = 0;
         sp = 0;
-        a = ShortAsValue(0);
-        b = ShortAsValue(0);
-        c = ShortAsValue(0);
+        a = IntAsValue(0);
+        b = IntAsValue(0);
+        c = IntAsValue(0);
 
         callstack.fill(0);
 

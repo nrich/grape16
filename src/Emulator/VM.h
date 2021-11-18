@@ -16,9 +16,21 @@
 #include <memory>
 #include <functional>
 
-#define SIGN_BIT    ((uint32_t)0x80000000)
-#define QNAN        ((uint32_t)0x7F800000)
-#define BYTEVAL     ((uint32_t)0xFFFF00FF)
+//#define SYS32
+
+#ifdef SYS32
+    #define SIGN_BIT    ((uint64_t)0x8000000000000000)
+    #define QNAN        ((uint64_t)0X7FFC000000000000)
+    #define BYTEVAL     ((uint64_t)0xFFFFFFFFFFFF00FF)
+    #define INTEGER_MASK 0xFFFFFFFF
+    #define IS_INT(value)             (((value & SIGN_BIT) != SIGN_BIT) && ((value & QNAN) == QNAN))
+#else
+    #define SIGN_BIT    ((uint32_t)0x80000000)
+    #define QNAN        ((uint32_t)0x7F800000)
+    #define BYTEVAL     ((uint32_t)0xFFFF00FF)
+    #define INTEGER_MASK 0xFFFF
+    #define IS_INT(value)             (((value & SIGN_BIT) != SIGN_BIT) && ((value & QNAN) == QNAN))
+#endif
 
 #define IS_SHORT(value)             (((value & SIGN_BIT) != SIGN_BIT) && ((value & QNAN) == QNAN))
 #define IS_BYTE(value)              ((((value & SIGN_BIT) != SIGN_BIT) && ((value & QNAN) == QNAN)) && ((value & BYTEVAL) == value))
@@ -26,8 +38,23 @@
 #define IS_POINTER(value)           (((value) & (QNAN | SIGN_BIT)) == (QNAN | SIGN_BIT))
 
 namespace Emulator {
+#ifdef SYS32
+    typedef uint64_t vmpointer_t;
+    typedef uint64_t value_t;
+    typedef double _float_t;
+    typedef int32_t integer_t;
+    typedef uint32_t uinteger_t;
+    typedef int64_t overflow_t;
+#else
     typedef uint32_t vmpointer_t;
     typedef uint32_t value_t;
+    typedef float _float_t;
+    typedef int16_t integer_t;
+    typedef uint16_t uinteger_t;
+    typedef int32_t overflow_t;
+#endif
+
+    const size_t ValueTypeSize = sizeof(value_t);
 
     inline value_t ShortAsValue(int16_t s) {
         return (QNAN | (uint16_t)s);
@@ -35,10 +62,22 @@ namespace Emulator {
 
     inline int16_t ValueAsShort(value_t value) {
         if (!IS_SHORT(value)) {
+            std::cerr << "Value is not a short!" << std::endl;
+            exit(-1);
+        }
+        return (int16_t)(0xFFFF & value);
+    }
+
+    inline value_t IntAsValue(integer_t i) {
+        return (QNAN | (uinteger_t)i);
+    }
+
+    inline integer_t ValueAsInt(value_t value) {
+        if (!IS_INT(value)) {
             std::cerr << "Value is not an int!" << std::endl;
             exit(-1);
         }
-        return (int16_t)(0x0000FFFF & value);
+        return (integer_t)(INTEGER_MASK & value);
     }
 
     inline value_t ByteAsValue(uint8_t b) {
@@ -46,7 +85,7 @@ namespace Emulator {
     }
 
     inline uint8_t ValueAsByte(value_t value) {
-        return (uint8_t)(0x000000FF & value);
+        return (uint8_t)(0xFF & value);
     }
 
     inline value_t PointerAsValue(vmpointer_t p) {
@@ -57,18 +96,18 @@ namespace Emulator {
         return (vmpointer_t)((~(QNAN | SIGN_BIT)) & value);
     }
 
-    inline value_t FloatAsValue(float f) {
+    inline value_t FloatAsValue(_float_t f) {
         value_t value;
 
-        memcpy(&value, &f, sizeof(float));
+        memcpy(&value, &f, sizeof(_float_t));
 
         return value;
     }
 
-    inline float ValueAsFloat(value_t value) {
-        float f;
+    inline _float_t ValueAsFloat(value_t value) {
+        _float_t f;
 
-        memcpy(&f, &value, sizeof(float));
+        memcpy(&f, &value, sizeof(_float_t));
 
         return f;
     }
@@ -376,7 +415,7 @@ namespace Emulator {
 
             uint8_t getByte(vmpointer_t ptr);
             int16_t getShort(vmpointer_t ptr);
-            float getFloat(vmpointer_t prt);
+            _float_t getFloat(vmpointer_t prt);
             vmpointer_t getPointer(vmpointer_t ptr);
             std::string getString(vmpointer_t ptr, uint32_t len);
 

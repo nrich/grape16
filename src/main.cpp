@@ -68,6 +68,11 @@
 #define CLOCK_166MHz_at_60FPS  2766667
 #define CLOCK_200MHz_at_60FPS  3333333
 
+#ifdef SYS32
+    #define EXEHEADER "GR32"
+#else
+    #define EXEHEADER "GR16"
+#endif
 
 std::shared_ptr<Emulator::Program> loadBinary(const std::string &input) {
     std::ifstream infile(input, std::ios_base::binary);
@@ -81,7 +86,7 @@ std::shared_ptr<Emulator::Program> loadBinary(const std::string &input) {
 
     std::string header(buffer.begin(), buffer.begin()+4);
 
-    if (header != "GR16") {
+    if (header != EXEHEADER) {
         std::cerr << "Invalid header `" << header << "'" << std::endl;
         exit(-1);
     }
@@ -346,7 +351,7 @@ int main(int argc, char **argv) {
                     if (opt.isSet("-p")) {
                         file << ProgramAsString(*program, true);
                     } else {
-                        file.write("GR16", 4);
+                        file.write(EXEHEADER, 4);
                         file.write((const char*)program->Code().data(), program->Code().size());
                     }
                     file.close();
