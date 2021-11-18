@@ -191,7 +191,15 @@ void Program::addPointer(vmpointer_t p) {
 
     addByte(bytes[0]);
     addByte(bytes[1]);
+
+#ifdef SYS32
+    addByte(bytes[2]);
+    addByte((uint8_t)(bytes[3] & 0x0F));
+#else
     addByte((uint8_t)(bytes[2] & 0x7F));
+    addByte(0);
+#endif
+
 }
 
 void Program::addValue(value_t v) {
@@ -326,7 +334,14 @@ void Program::updatePointer(uint32_t pos, vmpointer_t p) {
 
     code[pos+0] = bytes[0];
     code[pos+1] = bytes[1];
+
+#ifdef SYS32
+    code[pos+2] = bytes[2];
+    code[pos+3] = (bytes[3] & 0x0F);
+#else
     code[pos+2] = (bytes[2] & 0x7F);
+    code[pos+3] = 0;
+#endif
 }
 
 void Program::updateValue(uint32_t pos, value_t v) {
@@ -860,6 +875,11 @@ VM::VM(uint32_t _ptrspace) : idx(0),  pc(0), sp(0), ptrspace(_ptrspace) {
     b = IntAsValue(0);
     c = IntAsValue(0);
 
+    if (ptrspace > PTR_MASK) {
+        std::cerr << "Error: memory size is greater than " << PTR_MASK << std::endl;
+        exit(-1);
+    }
+
     callstack.fill(0);
 
     mem.resize(ptrspace+1, QNAN);
@@ -914,45 +934,45 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 break;
             case OpCode::SETA:
                 a = program.readValue(pc);
-                pc += ValueTypeSize;
+                pc += sizeof(value_t);
                 break;
             case OpCode::SETB:
                 b = program.readValue(pc);
-                pc += ValueTypeSize;
+                pc += sizeof(value_t);
                 break;
             case OpCode::SETC:
                 c = program.readValue(pc);
-                pc += ValueTypeSize;
+                pc += sizeof(value_t);
                 break;
             case OpCode::LOADA:
                 p = program.readPointer(pc);
                 a = getValue(p);
-                pc += 3;
+                pc += sizeof(vmpointer_t);
                 break;
             case OpCode::LOADB:
                 p = program.readPointer(pc);
                 b = getValue(p);
-                pc += 3;
+                pc += sizeof(vmpointer_t);
                 break;
             case OpCode::LOADC:
                 p = program.readPointer(pc);
                 c = getValue(p);
-                pc += 3;
+                pc += sizeof(vmpointer_t);
                 break;
             case OpCode::STOREA:
                 p = program.readPointer(pc);
                 set(p, a);
-                pc += 3;
+                pc += sizeof(vmpointer_t);
                 break;
             case OpCode::STOREB:
                 p = program.readPointer(pc);
                 set(p, b);
-                pc += 3;
+                pc += sizeof(vmpointer_t);
                 break;
             case OpCode::STOREC:
                 p = program.readPointer(pc);
                 set(p, c);
-                pc += 3;
+                pc += sizeof(vmpointer_t);
                 break;
             case OpCode::PUSHA:
                 stack.push(a);
@@ -998,7 +1018,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     a = PointerAsValue(ValueAsPointer(a) + ValueAsInt(program.readValue(pc)));
                 else
                     error("INCA mismatch");
-                pc += ValueTypeSize;
+                pc += sizeof(value_t);
                 break;
             case OpCode::INCB:
                 if (IS_INT(b) && IS_INT(program.readValue(pc)))
@@ -1009,7 +1029,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     b = PointerAsValue(ValueAsPointer(b) + ValueAsInt(program.readValue(pc)));
                 else
                     error("INCB mismatch");
-                pc += ValueTypeSize;
+                pc += sizeof(value_t);
                 break;
             case OpCode::INCC:
                 if (IS_INT(c) && IS_INT(program.readValue(pc)))
@@ -1020,7 +1040,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     c = PointerAsValue(ValueAsPointer(c) + ValueAsInt(program.readValue(pc)));
                 else
                     error("INCC mismatch");
-                pc += ValueTypeSize;
+                pc += sizeof(value_t);
                 break;
             case OpCode::IDXA:
                 a = getValue(idx);
@@ -1382,23 +1402,23 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 break;
             case OpCode::SETIDX:
                 idx = program.readPointer(pc);
-                pc += 3;
+                pc += sizeof(vmpointer_t);
                 break;
             case OpCode::LOADIDX:
                 idx = getPointer(program.readPointer(pc));
-                pc += 3;
+                pc += sizeof(vmpointer_t);
                 break;
             case OpCode::STOREIDX:
                 set(idx, program.readValue(pc));
-                pc += ValueTypeSize;
+                pc += sizeof(value_t);
                 break;
             case OpCode::INCIDX:
                 idx += ValueAsInt(program.readValue(pc));
-                pc += ValueTypeSize;
+                pc += sizeof(value_t);
                 break;
             case OpCode::SAVEIDX:
                 set(program.readPointer(pc), PointerAsValue(idx));
-                pc += 3;
+                pc += sizeof(vmpointer_t);
                 break;
             case OpCode::PUSHIDX:
                 stack.push(PointerAsValue(idx));
@@ -1416,25 +1436,25 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 if (c == IntAsValue(0)) 
                     pc = (uint16_t)program.readShort(pc);
                 else
-                    pc += 2;
+                    pc += sizeof(int16_t);
                 break;
             case OpCode::JMPNZ:
                 if (c != IntAsValue(0)) 
                     pc = (uint16_t)program.readShort(pc);
                 else
-                    pc += 2;
+                    pc += sizeof(int16_t);
                 break;
             case OpCode::IDATA:
                 set(idx, IntAsValue(program.readShort(pc)));
-                pc += 2;
+                pc += sizeof(int16_t);
                 break;
             case OpCode::FDATA:
                 set(idx, FloatAsValue(program.readFloat(pc)));
-                pc += ValueTypeSize;
+                pc += sizeof(value_t);
                 break;
             case OpCode::PDATA:
                 set(idx, PointerAsValue(program.readPointer(pc)));
-                pc += 3;
+                pc += sizeof(vmpointer_t);
                 break;
             case OpCode::SDATA:
                 offset = 0;
@@ -1448,12 +1468,12 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 break;
             case OpCode::SYSCALL:
                 if (Syscall(sysIO, (SysCall)program.readShort(pc), (RuntimeValue)program.readShort(pc+2), cycle_budget - cycles))
-                    pc += 4;
+                    pc += sizeof(int16_t) + sizeof(int16_t);
                 else
                     pc -= 1;
                 break;
             case OpCode::CALL:
-                callstack[++sp] = pc + 2; 
+                callstack[++sp] = pc + sizeof(int16_t);
                 pc = (uint16_t)program.readShort(pc);
                 break;
             case OpCode::RETURN:
@@ -1468,7 +1488,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     if (interupt == interupts.end()) {
                         error(std::string("Unknown signal "));
                     } else {
-                        pc += 2;
+                        pc += sizeof(int16_t);
                         interupt->second(this);
                     }
                 }
@@ -1476,7 +1496,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
             case OpCode::ALLOC:
                 heap -= (uint16_t)program.readShort(pc);
                 idx = heap;
-                pc += 2;
+                pc += sizeof(int16_t);
                 break;
             case OpCode::CALLOC:
                 if (IS_INT(c))
@@ -1493,7 +1513,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 break;
             case OpCode::TRACE:
                 trace = program.readShort(pc);
-                pc += 2;
+                pc += sizeof(int16_t);
 
                 if (trace) {
                     debugger = tracer;
@@ -1504,7 +1524,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
 
                 break;
             default:
-                std::cout << "Unknown opcode " << (int)program.fetch(pc-1)  << " " << (int)(pc-1) << " " << (int)program.fetch(pc-2) << " " << (int)program.fetch(pc-3) << " " << (int)program.fetch(pc-4) << " " << (int)program.fetch(pc-5) << " " << (int)program.fetch(pc-6) << " " << (int)program.fetch(pc-7) << " " << (int)program.fetch(pc-8) << " " << (int)program.fetch(pc-9) << " " << (int)program.fetch(pc-10) << std::endl;
+                std::cout << "Unknown opcode " << (int)program.fetch(pc-1)  << " " << (int)(pc-1) << std::endl;
         }
 
         cycles += cost;

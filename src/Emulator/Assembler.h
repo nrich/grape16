@@ -54,18 +54,18 @@ namespace Emulator {
         size_t size() const {
             if (arg != std::nullopt) {
                 if (std::holds_alternative<int16_t>(*arg)) {
-                    return 1+2;
+                    return 1+sizeof(int16_t);
                 } else if (std::holds_alternative<float>(*arg)) {
-                    return 1+4;
+                    return 1+sizeof(float);
                 } else if (std::holds_alternative<int32_t>(*arg)) {
-                    return 1+3;
+                    return 1+sizeof(int32_t);
                 } else if (std::holds_alternative<value_t>(*arg)) {
-                    return 1+ValueTypeSize;
+                    return 1+sizeof(value_t);
                 } else if (std::holds_alternative<std::string>(*arg)) {
                     auto value = std::get<std::string>(*arg);
                     return 1 + value.size();
                 } else if (std::holds_alternative<std::pair<SysCall, RuntimeValue>>(*arg)) {
-                    return 1+2+2;
+                    return 1+sizeof(int16_t)+sizeof(int16_t);
                 } else {
                     std::cerr << "Error in size " << (int)opcode << std::endl;
                 }

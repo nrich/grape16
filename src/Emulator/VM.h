@@ -22,13 +22,15 @@
     #define SIGN_BIT    ((uint64_t)0x8000000000000000)
     #define QNAN        ((uint64_t)0X7FFC000000000000)
     #define BYTEVAL     ((uint64_t)0xFFFFFFFFFFFF00FF)
-    #define INTEGER_MASK 0xFFFFFFFF
+    #define INT_MASK    ((uint64_t)0x00000000FFFFFFFF)
+    #define PTR_MASK    ((uint64_t)0x000000000FFFFFFF)
     #define IS_INT(value)             (((value & SIGN_BIT) != SIGN_BIT) && ((value & QNAN) == QNAN))
 #else
     #define SIGN_BIT    ((uint32_t)0x80000000)
     #define QNAN        ((uint32_t)0x7F800000)
     #define BYTEVAL     ((uint32_t)0xFFFF00FF)
-    #define INTEGER_MASK 0xFFFF
+    #define INT_MASK    ((uint32_t)0x0000FFFF)
+    #define PTR_MASK    ((uint32_t)0x007FFFFF)
     #define IS_INT(value)             (((value & SIGN_BIT) != SIGN_BIT) && ((value & QNAN) == QNAN))
 #endif
 
@@ -39,7 +41,7 @@
 
 namespace Emulator {
 #ifdef SYS32
-    typedef uint64_t vmpointer_t;
+    typedef uint32_t vmpointer_t;
     typedef uint64_t value_t;
     typedef double _float_t;
     typedef int32_t integer_t;
@@ -53,8 +55,6 @@ namespace Emulator {
     typedef uint16_t uinteger_t;
     typedef int32_t overflow_t;
 #endif
-
-    const size_t ValueTypeSize = sizeof(value_t);
 
     inline value_t ShortAsValue(int16_t s) {
         return (QNAN | (uint16_t)s);
@@ -77,7 +77,7 @@ namespace Emulator {
             std::cerr << "Value is not an int!" << std::endl;
             exit(-1);
         }
-        return (integer_t)(INTEGER_MASK & value);
+        return (integer_t)(INT_MASK & value);
     }
 
     inline value_t ByteAsValue(uint8_t b) {

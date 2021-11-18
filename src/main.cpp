@@ -265,7 +265,11 @@ int main(int argc, char **argv) {
         0, // Required?
         1, // Number of args expected.
         0, // Delimiter if expecting multiple args.
+#ifdef SYS32
+        "Memory size (0=1MB, 1=2MB, 2=4MB, 3=8MB, 4=16MB, 5=32MB, 6=64MB, 7=128MB, 8=256MB)", // Help description.
+#else
         "Memory size (0=1MB, 1=2MB, 2=4MB, 3=8MB)", // Help description.
+#endif
         "-m",     // Flag token.
         "-mem",   // Flag token.
         "--mem"  // Flag token.
@@ -457,6 +461,23 @@ int main(int argc, char **argv) {
         case 3:
             memsize = 0x007FFFFF;
             break;
+#ifdef SYS32
+        case 4:
+            memsize = 0x00FFFFFF;
+            break;
+        case 5:
+            memsize = 0x01FFFFFF;
+            break;
+        case 6:
+            memsize = 0x03FFFFFF;
+            break;
+        case 7:
+            memsize = 0x07FFFFFF;
+            break;
+        case 8:
+            memsize = 0x0FFFFFFF;
+            break;
+#endif
     }
 
 

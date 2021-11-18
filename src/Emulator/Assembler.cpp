@@ -568,30 +568,30 @@ std::vector<Emulator::AsmToken> disassemble(const Emulator::Program &program) {
             tokens.push_back(Emulator::AsmToken(opcode));
         } else if (arg == ArgType::INT) {
             tokens.push_back(Emulator::AsmToken(opcode, program.readShort(pc)));
-            pc += 2;
+            pc += sizeof(int16_t);
         } else if (arg == ArgType::FLOAT) {
             tokens.push_back(Emulator::AsmToken(opcode, program.readFloat(pc)));
-            pc += 4;
+            pc += sizeof(float);
         } else if (arg == ArgType::POINTER) {
             tokens.push_back(Emulator::AsmToken(opcode, (int32_t)program.readPointer(pc)));
-            pc += 3;
+            pc += sizeof(int32_t);
         } else if (arg == ArgType::VALUE) {
             tokens.push_back(Emulator::AsmToken(opcode, program.readValue(pc)));
-            pc += ValueTypeSize;
+            pc += sizeof(value_t);
         } else if (arg == ArgType::SYSCALL) {
             tokens.push_back(Emulator::AsmToken(opcode, std::pair<SysCall, RuntimeValue>((SysCall)program.readShort(pc), (RuntimeValue)program.readShort(pc+2))));
-            pc += 2+2;
+            pc += sizeof(int16_t)+sizeof(int16_t);
         } else if (arg == ArgType::STRING) {
             std::string str = "";
             while (uint8_t b = program.readByte(pc)) {
                 str += (char)b;
-                pc += 1;
+                pc += sizeof(uint8_t);
             }
 
             tokens.push_back(Emulator::AsmToken(opcode, str));
         } else if (arg == ArgType::LABEL) {
             tokens.push_back(Emulator::AsmToken(opcode, program.readShort(pc)));
-            pc += 2;
+            pc += sizeof(int16_t);
         } else {
             std::cerr << "Error in disassemble" << std::endl;
         }
@@ -704,21 +704,21 @@ Emulator::Program optimize(const Emulator::Program &code) {
                 program.update(pc+2, OpCode::NOP);
             }
 
-            pc += 2;
+            pc += sizeof(int16_t);
         } else if (arg == ArgType::FLOAT) {
-            pc += 4;
+            pc += sizeof(float);
         } else if (arg == ArgType::POINTER) {
-            pc += 3;
+            pc += sizeof(int32_t);
         } else if (arg == ArgType::VALUE) {
-            pc += ValueTypeSize;
+            pc += sizeof(value_t);
         } else if (arg == ArgType::SYSCALL) {
-            pc += 2+2;
+            pc += sizeof(int16_t)+sizeof(int16_t);
         } else if (arg == ArgType::STRING) {
             while (program.readByte(pc)) {
-                pc += 1;
+                pc += sizeof(uint8_t);
             }
         } else if (arg == ArgType::LABEL) {
-            pc += 2;
+            pc += sizeof(int16_t);
         } else {
             std::cerr << "Error in disassemble" << std::endl;
         }
@@ -743,24 +743,24 @@ std::string ProgramAsString(const Emulator::Program &code, bool resolve_jumps) {
 
             if (arg == ArgType::NONE) {
             } else if (arg == ArgType::INT) {
-                pc += 2;
+                pc += sizeof(int16_t);
             } else if (arg == ArgType::FLOAT) {
-                pc += 4;
+                pc += sizeof(float);
             } else if (arg == ArgType::POINTER) {
-                pc += 3;
+                pc += sizeof(int32_t);
             } else if (arg == ArgType::VALUE) {
-                pc += ValueTypeSize;
+                pc += sizeof(value_t);
             } else if (arg == ArgType::SYSCALL) {
-                pc += 2+2;
+                pc += sizeof(int16_t)+sizeof(int16_t);
             } else if (arg == ArgType::STRING) {
                 while (program.readByte(pc)) {
-                    pc += 1;
+                    pc += sizeof(uint8_t);
                 }
             } else if (arg == ArgType::LABEL) {
                 auto dst = program.readShort(pc);
                 //labels[dst] = std::string("LABEL_") + std::to_string(dst);
                 labels[dst] = std::string("LABEL_") + std::to_string(labels.size());
-                pc += 2;
+                pc += sizeof(int16_t);
             } else {
                 std::cerr << "Error in disassemble" << std::endl;
             }
@@ -786,24 +786,24 @@ std::string ProgramAsString(const Emulator::Program &code, bool resolve_jumps) {
             s << AsmTokenAsString(Emulator::AsmToken(opcode)) << std::endl;
         } else if (arg == ArgType::INT) {
             s << AsmTokenAsString(Emulator::AsmToken(opcode, program.readShort(pc))) << std::endl;
-            pc += 2;
+            pc += sizeof(int16_t);
         } else if (arg == ArgType::FLOAT) {
             s << AsmTokenAsString(Emulator::AsmToken(opcode, program.readFloat(pc))) << std::endl;
-            pc += 4;
+            pc += sizeof(float);
         } else if (arg == ArgType::POINTER) {
             s << AsmTokenAsString(Emulator::AsmToken(opcode, (int32_t)program.readPointer(pc))) << std::endl;
-            pc += 3;
+            pc += sizeof(int32_t);
         } else if (arg == ArgType::VALUE) {
             s << AsmTokenAsString(Emulator::AsmToken(opcode, program.readValue(pc))) << std::endl;
-            pc += ValueTypeSize;
+            pc += sizeof(value_t);
         } else if (arg == ArgType::SYSCALL) {
             s << AsmTokenAsString(Emulator::AsmToken(opcode, std::pair<SysCall, RuntimeValue>((SysCall)program.readShort(pc), (RuntimeValue)program.readShort(pc+2)))) << std::endl;
-            pc += 2+2;
+            pc += sizeof(int16_t)+sizeof(int16_t);
         } else if (arg == ArgType::STRING) {
             std::string str = "";
             while (uint8_t b = program.readByte(pc)) {
                 str += (char)b;
-                pc += 1;
+                pc += sizeof(uint8_t);
             }
 
             s << AsmTokenAsString(Emulator::AsmToken(opcode, str)) << std::endl;
@@ -820,7 +820,7 @@ std::string ProgramAsString(const Emulator::Program &code, bool resolve_jumps) {
             } else {
                 s << AsmTokenAsString(Emulator::AsmToken(opcode, program.readShort(pc))) << std::endl;
             }
-            pc += 2;
+            pc += sizeof(int16_t);
         } else {
             std::cerr << "Error in disassemble" << std::endl;
         }
