@@ -16,8 +16,6 @@
 #include <memory>
 #include <functional>
 
-//#define SYS32
-
 #ifdef SYS32
     #define SIGN_BIT    ((uint64_t)0x8000000000000000)
     #define QNAN        ((uint64_t)0X7FFC000000000000)

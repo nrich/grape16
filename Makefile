@@ -20,6 +20,7 @@ ifdef CONFIG_W32
     endif
     WINDRES = i686-w64-mingw32-windres
     STRIP = i686-w64-mingw32-strip
+    WINDRESARGS = 
 endif
  
 ifdef CONFIG_W64
@@ -35,6 +36,7 @@ ifdef CONFIG_W64
     endif
     WINDRES = x86_64-w64-mingw32-windres
     STRIP = x86_64-w64-mingw32-strip
+    WINDRESARGS = 
 endif
 
 ifdef CONFIG_JS
@@ -50,6 +52,11 @@ ifdef CONFIG_MIN
 CPPFLAGS := $(CPPFLAGS) -DMINBUILD="1"
 endif
 LDFLAGS := $(LDFLAGS)
+
+ifdef CONFIG_SYS32
+CPPFLAGS := $(CPPFLAGS) -DSYS32
+WINDRESARGS := $(WINDRESARGS) -DSYS32
+endif
  
 # Temporary build directories
 ifdef CONFIG_W32
@@ -72,13 +79,29 @@ else
 endif
  
 ifdef CONFIG_W32
-    TARG := grape16.exe
+    ifdef CONFIG_SYS32
+        TARG := grape32.exe
+    else
+        TARG := grape16.exe
+    endif
 else ifdef CONFIG_W64
-    TARG := grape16x64.exe
+    ifdef CONFIG_SYS32
+        TARG := grape32x64.exe
+    else
+        TARG := grape16x64.exe
+    endif
 else ifdef CONFIG_JS
-    TARG := grape16.html
+    ifdef CONFIG_SYS32
+        TARG := grape32.html
+    else
+        TARG := grape16.html
+    endif
 else
-    TARG := grape16
+    ifdef CONFIG_SYS32
+        TARG := grape32
+    else
+        TARG := grape16
+    endif
 endif
  
 all: $(TARG)
@@ -125,12 +148,12 @@ ifdef CONFIG_W32
 OBJS := \
 	$(COMMON_OBJS) \
 	src/Sys/GLFW.o \
-	grape16.res
+	grape.res
 else ifdef CONFIG_W64
 OBJS := \
 	$(COMMON_OBJS) \
 	src/Sys/GLFW.o \
-	grape16.res
+	grape.res
 else ifdef CONFIG_JS
 OBJS := \
 	$(COMMON_OBJS) 
@@ -167,4 +190,4 @@ $(BUILD)/%.o: %.cpp
 
 $(BUILD)/%.res: %.rc
 	$(E) [RES] $@
-	$(Q)$(WINDRES) $< -O coff -o $@
+	$(Q)$(WINDRES) $< -O coff -o $@ $(WINDRESARGS)

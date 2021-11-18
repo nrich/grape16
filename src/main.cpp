@@ -70,8 +70,10 @@
 
 #ifdef SYS32
     #define EXEHEADER "GR32"
+    #define APPNAME "Grape32"
 #else
     #define EXEHEADER "GR16"
+    #define APPNAME "Grape16"
 #endif
 
 std::shared_ptr<Emulator::Program> loadBinary(const std::string &input) {
@@ -382,17 +384,17 @@ int main(int argc, char **argv) {
     opt.get("-s")->getString(sysname);
 
     if (sysname == "glfw") {
-        sys = std::make_shared<Sys::GLFW>("Grape16");
+        sys = std::make_shared<Sys::GLFW>(APPNAME);
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
 #if MINBUILD
 #else
     } else if (sysname == "sdl2") {
-        sys = std::make_shared<Sys::SDL2>("Grape16");
+        sys = std::make_shared<Sys::SDL2>(APPNAME);
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
 #endif
 #ifndef _WIN32
     } else if (sysname == "sfml") {
-        sys = std::make_shared<Sys::SFML>("Grape16");
+        sys = std::make_shared<Sys::SFML>(APPNAME);
         renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
     } else if (sysname == "ncurses") {
         initscr();
@@ -402,7 +404,7 @@ int main(int argc, char **argv) {
             delwin
         );
 
-        sys = std::make_shared<Sys::NCurses>("Grape16", window);
+        sys = std::make_shared<Sys::NCurses>(APPNAME, window);
         renderer = std::make_shared<Renderer::NCurses>(window);
 #endif
     } else {
@@ -486,7 +488,7 @@ int main(int argc, char **argv) {
     uint32_t clockspeed = CLOCK_33MHz_at_60FPS;
     uint32_t memsize = 0x003FFFFF;
     bool debug = false;
-    sys = std::make_shared<Sys::SDL2>("Grape16");
+    sys = std::make_shared<Sys::SDL2>(APPNAME);
     renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
 #endif
 

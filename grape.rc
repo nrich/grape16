@@ -1,0 +1,68 @@
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <windows.h>
+
+#pragma code_page(65001)
+
+#ifdef _DEBUG
+    #define VER_FILEFLAGS   VS_FF_DEBUG
+#else
+    #define VER_FILEFLAGS   0x0L
+#endif
+
+#define VERSION_STR "0.0.1"
+
+#ifdef _WIN64
+    #ifdef SYS32
+        #define VER_FILEDESCRIPTION_STR     "Grape32 (64-bit)"
+        #define VER_ORIGINALFILENAME_STR    "grape32x64.exe"
+    #else
+        #define VER_FILEDESCRIPTION_STR     "Grape16 (64-bit)"
+        #define VER_ORIGINALFILENAME_STR    "grape16x64.exe"
+    #endif
+#else
+    #ifdef SYS32
+        #define VER_FILEDESCRIPTION_STR     "Grape32"
+        #define VER_ORIGINALFILENAME_STR    "grape32.exe"
+    #else
+        #define VER_FILEDESCRIPTION_STR     "Grape16"
+        #define VER_ORIGINALFILENAME_STR    "grape16.exe"
+    #endif
+#endif
+
+#ifdef SYS32
+    #define PRODUCT_NAME "Grape32"
+    #define INTERNAL_NAME "grape32"
+#else
+    #define PRODUCT_NAME "Grape16"
+    #define INTERNAL_NAME "grape16"
+#endif
+
+1 VERSIONINFO
+FILEVERSION     0,0,1,0
+PRODUCTVERSION  0,0,1,0
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "080904E4"
+    BEGIN
+      VALUE "CompanyName", "Neil Richardson"
+      VALUE "FileDescription", VER_FILEDESCRIPTION_STR
+      VALUE "FileVersion", VERSION_STR
+      VALUE "InternalName", INTERNAL_NAME
+      VALUE "LegalCopyright", "Copyright © 2021 Neil Richardson"
+      VALUE "OriginalFilename", VER_FILEDESCRIPTION_STR
+      VALUE "ProductName", PRODUCT_NAME
+      VALUE "ProductVersion", VERSION_STR
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x809, 1252
+  END
+END
+
+100 ICON "grape16.ico"
+GLFW_ICON ICON "grape16.ico"
