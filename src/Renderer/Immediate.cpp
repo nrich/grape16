@@ -90,6 +90,9 @@ void Immediate::configureVirtualDisplay() {
                 std::cerr << "Invalid aspect ratio" << std::endl;
                 exit(-1);
         }
+
+        horizontalRatio = (float)(virtualWidth-2*horizontalOffset)/320.0f;
+        verticalRatio = (float)(virtualHeight-2*verticalOffset)/240.0f;
     } else if (ratio == Common::AspectRatio::_16x9) {
         switch (displayMode.Ratio()) {
             case Common::AspectRatio::_4x3:
@@ -114,6 +117,9 @@ void Immediate::configureVirtualDisplay() {
                 std::cerr << "Invalid aspect ratio" << std::endl;
                 exit(-1);
         }
+
+        horizontalRatio = (float)(virtualWidth-2*horizontalOffset)/320.0f;
+        verticalRatio = (float)(virtualHeight-2*verticalOffset)/180.0f;
     } else if (ratio == Common::AspectRatio::_16x10) {
         switch (displayMode.Ratio()) {
             case Common::AspectRatio::_4x3:
@@ -138,11 +144,17 @@ void Immediate::configureVirtualDisplay() {
                 std::cerr << "Invalid aspect ratio" << std::endl;
                 exit(-1);
         }
+
+        horizontalRatio = (float)(virtualWidth-2*horizontalOffset)/320.0f;
+        verticalRatio = (float)(virtualHeight-2*verticalOffset)/200.0f;
     } else {
         std::cerr << "Invalid aspect ratio" << std::endl;
         exit(-1);
     }
 
+    horizontalRatio *= resolutionScale;
+    verticalRatio *= resolutionScale;
+    interfaceScale = 2.0f * resolutionScale;
     virtualWidth *= resolutionScale;
     horizontalOffset *= resolutionScale;
     virtualHeight *= resolutionScale;
@@ -162,7 +174,27 @@ void Immediate::enableInterfaceMode() {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    glOrtho(0, virtualWidth, virtualHeight, 0, -10, 10);
+    glOrtho(0, virtualWidth*interfaceScale, virtualHeight*interfaceScale, 0, -1, 1);
+
+    //Back to the modelview so we can draw stuff
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+}
+
+void Immediate::enableDrawMode() {
+    if (mode == Mode::Draw)
+        return;
+
+    mode = Mode::Draw;
+
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+
+    glViewport(0, 0, displayMode.Width(), displayMode.Height());   //This sets up the viewport so that the coordinates (0, 0) are at the top left of the window
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    glOrtho(0, virtualWidth, virtualHeight, 0, -1, 1);
 
     //Back to the modelview so we can draw stuff
     glMatrixMode(GL_MODELVIEW);
@@ -172,11 +204,8 @@ void Immediate::enableInterfaceMode() {
 void Immediate::drawString(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const std::string &str, const Common::Colour &colour) {
     enableInterfaceMode();
 
-    float w_ratio = (float)(virtualWidth-2*horizontalOffset)/(float)virtualWidth;
-    float h_ratio = (float)(virtualHeight-2*verticalOffset)/(float)240;
-
     glColor4ub(colour.R(), colour.G(), colour.B(), colour.A());
-    font.drawString((w_ratio*x)+horizontalOffset, (h_ratio*y)+verticalOffset, w*w_ratio, h*h_ratio, str);
+    font.drawString(((horizontalRatio*x)+horizontalOffset)*interfaceScale, ((verticalRatio*y)+verticalOffset)*interfaceScale, (w*horizontalRatio)*interfaceScale, (h*verticalRatio)*interfaceScale, str);
 }
 
 void Immediate::drawRect(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const Common::Colour &colour) {
@@ -230,7 +259,7 @@ void Immediate::drawPoint(const uint16_t x, const uint16_t y, const Common::Colo
 }
 
 void Immediate::drawBuffer(const uint32_t *buffer, uint32_t width, uint32_t height, uint32_t size) {
-    enableInterfaceMode();
+    enableDrawMode();
 
     glEnable(GL_BLEND);
 
@@ -318,7 +347,7 @@ void Immediate::drawBuffer(const uint32_t *buffer, uint32_t width, uint32_t heig
 }
 
 void Immediate::drawBuffer(const uint8_t *buffer, uint32_t width, uint32_t height, uint32_t size) {
-    enableInterfaceMode();
+    enableDrawMode();
 
     glEnable(GL_BLEND);
 

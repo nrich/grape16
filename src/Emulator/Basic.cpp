@@ -826,7 +826,7 @@ static void TokenAsValue(Program &program, uint32_t linenumber, const std::vecto
         program.addValue(OpCode::SETC, ShortAsValue((int16_t)std::stoi(token.str)));
         program.add(OpCode::PUSHC);
     } else if (token.type == BasicTokenType::FLOAT) {
-        program.addValue(OpCode::SETC, FloatAsValue(std::stof(token.str)));
+        program.addValue(OpCode::SETC, RealAsValue(std::stof(token.str)));
         program.add(OpCode::PUSHC);
     } else if (token.type == BasicTokenType::IDENTIFIER) {
         if (env->isGlobal(token.str)) {

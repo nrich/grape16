@@ -252,23 +252,31 @@ int main(int argc, char **argv) {
 
 
     opt.add(
+#ifdef SYS32
+        "7", // Default.
+#else
         "2", // Default.
+#endif
         0, // Required?
         1, // Number of args expected.
         0, // Delimiter if expecting multiple args.
-        "CPU speed (0=8MHz, 1=16MHz, 2=33MHz, 3=66MHz, 4=99MHz)", // Help description.
+        "CPU speed (0=8MHz, 1=16MHz, 2=33MHz, 3=66MHz, 4=100MHz, 5=133MHz, 6=166Mhz, 7=200MHz)", // Help description.
         "-t",     // Flag token.
         "-turbo",   // Flag token.
         "--turbo"  // Flag token.
     );
 
     opt.add(
+#ifdef SYS32
+        "7", // Default.
+#else
         "2", // Default.
+#endif
         0, // Required?
         1, // Number of args expected.
         0, // Delimiter if expecting multiple args.
 #ifdef SYS32
-        "Memory size (0=1MB, 1=2MB, 2=4MB, 3=8MB, 4=16MB, 5=32MB, 6=64MB, 7=128MB, 8=256MB)", // Help description.
+        "Memory size (0=1MB, 1=2MB, 2=4MB, 3=8MB, 4=16MB, 5=32MB, 6=64MB, 7=128MB)", // Help description.
 #else
         "Memory size (0=1MB, 1=2MB, 2=4MB, 3=8MB)", // Help description.
 #endif
@@ -385,7 +393,7 @@ int main(int argc, char **argv) {
 
     if (sysname == "glfw") {
         sys = std::make_shared<Sys::GLFW>(APPNAME);
-        renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());
+        renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode(), Common::AspectRatio::_4x3, 2);
 #if MINBUILD
 #else
     } else if (sysname == "sdl2") {
@@ -476,17 +484,20 @@ int main(int argc, char **argv) {
         case 7:
             memsize = 0x07FFFFFF;
             break;
-        case 8:
-            memsize = 0x0FFFFFFF;
-            break;
 #endif
     }
 
 
     bool debug = opt.isSet("-d");
 #else
+
+#ifdef SYS32
+    uint32_t clockspeed = CLOCK_200MHz_at_60FPS;
+    uint32_t memsize = 0x0FFFFFFF;
+#else
     uint32_t clockspeed = CLOCK_33MHz_at_60FPS;
     uint32_t memsize = 0x003FFFFF;
+#endif
     bool debug = false;
     sys = std::make_shared<Sys::SDL2>(APPNAME);
     renderer = std::make_shared<Renderer::Immediate>(sys->currentDisplayMode());

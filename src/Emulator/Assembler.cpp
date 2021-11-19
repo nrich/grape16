@@ -365,7 +365,7 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
 
                 while (isDigit(line[i]))
                     i++;
-                return Emulator::AsmToken(opcode, FloatAsValue((float)std::stof(line.substr(numstart))));
+                return Emulator::AsmToken(opcode, RealAsValue((float)std::stof(line.substr(numstart))));
             } else {
                 return Emulator::AsmToken(opcode, ShortAsValue((int16_t)std::stoi(line.substr(numstart))));
             }

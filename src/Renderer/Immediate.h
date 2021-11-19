@@ -13,6 +13,7 @@ namespace Renderer {
 class Immediate : public Base {
     enum class Mode {
         Unknown,
+        Draw,
         Interface
     };
 
@@ -21,6 +22,7 @@ class Immediate : public Base {
     Mode mode;
 
     void enableInterfaceMode();
+    void enableDrawMode();
 
     void configureVirtualDisplay();
 
@@ -34,6 +36,11 @@ class Immediate : public Base {
     int horizontalOffset;
 
     int resolutionScale;
+
+    float horizontalRatio;
+    float verticalRatio;
+
+    float interfaceScale;
 public:
     Immediate(const Common::DisplayMode &displayMode, Common::AspectRatio ratio=Common::AspectRatio::_4x3, int resolutionScale=1);
     void drawString(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const std::string &str, const Common::Colour &colour = Common::Colour::White);

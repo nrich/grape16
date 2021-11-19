@@ -112,7 +112,7 @@ void Debugger::debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack,
     else if (IS_POINTER(a))
         std::cerr << "&" << ValueAsPointer(a);
     else
-        std::cerr << ValueAsFloat(a) << "f";
+        std::cerr << ValueAsReal(a) << "f";
 
     std::cerr << ",";
 
@@ -123,7 +123,7 @@ void Debugger::debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack,
     else if (IS_POINTER(b))
         std::cerr << "&" << ValueAsPointer(b);
     else
-        std::cerr << ValueAsFloat(b) << "f";
+        std::cerr << ValueAsReal(b) << "f";
 
     std::cerr << ",";
 
@@ -134,7 +134,7 @@ void Debugger::debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack,
     else if (IS_POINTER(c))
         std::cerr << "&" << ValueAsPointer(c);
     else
-        std::cerr << ValueAsFloat(c) << "f";
+        std::cerr << ValueAsReal(c) << "f";
 
     std::cerr << "] ";
 
@@ -147,7 +147,7 @@ void Debugger::debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack,
     else if (IS_POINTER(memidx))
         std::cerr << "&" << ValueAsPointer(memidx);
     else
-        std::cerr << ValueAsFloat(memidx) << "f";
+        std::cerr << ValueAsReal(memidx) << "f";
 
     std::cerr << "]";
 
@@ -443,13 +443,13 @@ int16_t VM::getShort(vmpointer_t ptr) {
     return ValueAsInt(value);
 }
 
-_float_t VM::getFloat(vmpointer_t ptr) {
+real_t VM::getReal(vmpointer_t ptr) {
     value_t value = mem[ptr];
 
-    if (!(IS_FLOAT(value)))
+    if (!(IS_REAL(value)))
         error("Value is not a float");
 
-    return ValueAsFloat(value);
+    return ValueAsReal(value);
 }
 
 vmpointer_t VM::getPointer(vmpointer_t ptr) {
@@ -490,12 +490,12 @@ static value_t stringToValue(const std::string &str) {
     if (str.size() > 2 && str[0] == '0' && (str[1] =='x' || str[1] =='X' )) {
         value = PointerAsValue(std::stoul(str, &pos, 16));
     } else if (str.find('.') != std::string::npos) {
-        value = FloatAsValue(std::stof(str, &pos));
+        value = RealAsValue(std::stof(str, &pos));
     } else {
         overflow_t overflow = std::stoi(str, &pos);
 
         if (overflow > _INT_MAX || overflow < _INT_MIN) {
-            value = FloatAsValue((_float_t)overflow);
+            value = RealAsValue((real_t)overflow);
         } else {
             value = IntAsValue((integer_t)overflow);
         }
@@ -538,8 +538,8 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                         }
                     } else if (IS_INT(arg)) {
                         sysIO->puts(std::to_string(ValueAsInt(arg)));
-                    } else if (IS_FLOAT(arg)) {
-                        sysIO->puts(std::to_string(ValueAsFloat(arg)));
+                    } else if (IS_REAL(arg)) {
+                        sysIO->puts(std::to_string(ValueAsReal(arg)));
                     }
                 }
             }
@@ -637,40 +637,40 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
         case SysCall::DRAWLINE: {
                 int x0,y0,x1,y1,colour;
 
-                if (IS_FLOAT(mem[idx])) {
-                    x0 = (int)getFloat(idx);
+                if (IS_REAL(mem[idx])) {
+                    x0 = (int)getReal(idx);
                 } else if (IS_INT(mem[idx])) {
                     x0 = (int)getShort(idx);
                 } else {
                     error("Invalid type for x0");
                 }
 
-                if (IS_FLOAT(mem[idx+1])) {
-                    y0 = (int)getFloat(idx+1);
+                if (IS_REAL(mem[idx+1])) {
+                    y0 = (int)getReal(idx+1);
                 } else if (IS_INT(mem[idx+1])) {
                     y0 = (int)getShort(idx+1);
                 } else {
                     error("Invalid type for y0");
                 }
 
-                if (IS_FLOAT(mem[idx+2])) {
-                    x1 = (int)getFloat(idx+2);
+                if (IS_REAL(mem[idx+2])) {
+                    x1 = (int)getReal(idx+2);
                 } else if (IS_INT(mem[idx+2])) {
                     x1 = (int)getShort(idx+2);
                 } else {
                     error("Invalid type for x1");
                 }
 
-                if (IS_FLOAT(mem[idx+3])) {
-                    y1 = (int)getFloat(idx+3);
+                if (IS_REAL(mem[idx+3])) {
+                    y1 = (int)getReal(idx+3);
                 } else if (IS_INT(mem[idx+3])) {
                     y1 = (int)getShort(idx+3);
                 } else {
                     error("Invalid type for y1");
                 }
 
-                if (IS_FLOAT(mem[idx+4])) {
-                    colour = (int)getFloat(idx+4);
+                if (IS_REAL(mem[idx+4])) {
+                    colour = (int)getReal(idx+4);
                 } else if (IS_INT(mem[idx+4])) {
                     colour = (int)getShort(idx+4);
                 } else {
@@ -726,47 +726,47 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
         case SysCall::DRAWBOX: {
                 int x0,y0,x1,y1,colour,filled;
 
-                if (IS_FLOAT(mem[idx])) {
-                    x0 = (int)getFloat(idx);
+                if (IS_REAL(mem[idx])) {
+                    x0 = (int)getReal(idx);
                 } else if (IS_INT(mem[idx])) {
                     x0 = (int)getShort(idx);
                 } else {
                     error("Invalid type for x0");
                 }
 
-                if (IS_FLOAT(mem[idx+1])) {
-                    y0 = (int)getFloat(idx+1);
+                if (IS_REAL(mem[idx+1])) {
+                    y0 = (int)getReal(idx+1);
                 } else if (IS_INT(mem[idx+1])) {
                     y0 = (int)getShort(idx+1);
                 } else {
                     error("Invalid type for y0");
                 }
 
-                if (IS_FLOAT(mem[idx+2])) {
-                    x1 = (int)getFloat(idx+2);
+                if (IS_REAL(mem[idx+2])) {
+                    x1 = (int)getReal(idx+2);
                 } else if (IS_INT(mem[idx+2])) {
                     x1 = (int)getShort(idx+2);
                 } else {
                     error("Invalid type for x1");
                 }
 
-                if (IS_FLOAT(mem[idx+3])) {
-                    y1 = (int)getFloat(idx+3);
+                if (IS_REAL(mem[idx+3])) {
+                    y1 = (int)getReal(idx+3);
                 } else if (IS_INT(mem[idx+3])) {
                     y1 = (int)getShort(idx+3);
                 } else {
                     error("Invalid type for y1");
                 }
 
-                if (IS_FLOAT(mem[idx+4])) {
-                    colour = (int)getFloat(idx+4);
+                if (IS_REAL(mem[idx+4])) {
+                    colour = (int)getReal(idx+4);
                 } else if (IS_INT(mem[idx+4])) {
                     colour = (int)getShort(idx+4);
                 } else {
                     error("Invalid type for colour");
                 }
-                if (IS_FLOAT(mem[idx+5])) {
-                    filled = (int)getFloat(idx+5);
+                if (IS_REAL(mem[idx+5])) {
+                    filled = (int)getReal(idx+5);
                 } else if (IS_INT(mem[idx+5])) {
                     filled = (int)getShort(idx+5);
                 } else {
@@ -817,7 +817,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                 if (IS_INT(a)) {
                      frequency = (float)ValueAsInt(a);
                 } else {
-                    frequency = (float)ValueAsFloat(a);
+                    frequency = (float)ValueAsReal(a);
                 }
                 uint16_t duration = (uint16_t)ValueAsInt(b);
 
@@ -875,6 +875,11 @@ VM::VM(uint32_t _ptrspace) : idx(0),  pc(0), sp(0), ptrspace(_ptrspace) {
     b = IntAsValue(0);
     c = IntAsValue(0);
 
+    if (ptrspace > mem.max_size()) {
+        std::cerr << "Error: memory size is greater than " << mem.max_size() << std::endl;
+        exit(-1);
+    }
+
     if (ptrspace > PTR_MASK) {
         std::cerr << "Error: memory size is greater than " << PTR_MASK << std::endl;
         exit(-1);
@@ -882,7 +887,7 @@ VM::VM(uint32_t _ptrspace) : idx(0),  pc(0), sp(0), ptrspace(_ptrspace) {
 
     callstack.fill(0);
 
-    mem.resize(ptrspace+1, QNAN);
+    mem.resize(ptrspace, QNAN);
 
     heap = mem.size();
 }
@@ -1012,8 +1017,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
             case OpCode::INCA:
                 if (IS_INT(a) && IS_INT(program.readValue(pc)))
                     a = IntAsValue(ValueAsInt(a) + ValueAsInt(program.readValue(pc)));
-                else if (IS_FLOAT(a) && IS_FLOAT(program.readValue(pc)))
-                    a = FloatAsValue(ValueAsFloat(a) + ValueAsFloat(program.readValue(pc)));
+                else if (IS_REAL(a) && IS_REAL(program.readValue(pc)))
+                    a = RealAsValue(ValueAsReal(a) + ValueAsReal(program.readValue(pc)));
                 else if (IS_POINTER(a) && IS_INT(program.readValue(pc)))
                     a = PointerAsValue(ValueAsPointer(a) + ValueAsInt(program.readValue(pc)));
                 else
@@ -1023,8 +1028,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
             case OpCode::INCB:
                 if (IS_INT(b) && IS_INT(program.readValue(pc)))
                     b = IntAsValue(ValueAsInt(b) + ValueAsInt(program.readValue(pc)));
-                else if (IS_FLOAT(b) && IS_FLOAT(program.readValue(pc)))
-                    b = FloatAsValue(ValueAsFloat(b) + ValueAsFloat(program.readValue(pc)));
+                else if (IS_REAL(b) && IS_REAL(program.readValue(pc)))
+                    b = RealAsValue(ValueAsReal(b) + ValueAsReal(program.readValue(pc)));
                 else if (IS_POINTER(b) && IS_INT(program.readValue(pc)))
                     b = PointerAsValue(ValueAsPointer(b) + ValueAsInt(program.readValue(pc)));
                 else
@@ -1034,8 +1039,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
             case OpCode::INCC:
                 if (IS_INT(c) && IS_INT(program.readValue(pc)))
                     c = IntAsValue(ValueAsInt(c) + ValueAsInt(program.readValue(pc)));
-                else if (IS_FLOAT(c) && IS_FLOAT(program.readValue(pc)))
-                    c = FloatAsValue(ValueAsFloat(c) + ValueAsFloat(program.readValue(pc)));
+                else if (IS_REAL(c) && IS_REAL(program.readValue(pc)))
+                    c = RealAsValue(ValueAsReal(c) + ValueAsReal(program.readValue(pc)));
                 else if (IS_POINTER(c) && IS_INT(program.readValue(pc)))
                     c = PointerAsValue(ValueAsPointer(c) + ValueAsInt(program.readValue(pc)));
                 else
@@ -1066,24 +1071,24 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     if (overflow > _INT_MAX || overflow < _INT_MIN) {
                         //error(std::string("ADD overflow: ") + std::to_string(overflow));
                         //std::cerr << std::string("ADD overflow: ") << std::to_string(overflow) << "=" << ValueAsInt(a) << "+" << ValueAsInt(b) << std::endl;
-                        c = FloatAsValue((_float_t)overflow);
+                        c = RealAsValue((real_t)overflow);
                     } else 
                         c = IntAsValue(overflow);
                 }
-                else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = FloatAsValue(ValueAsFloat(a) + ValueAsFloat(b));
-                else if (IS_FLOAT(a) && IS_INT(b))
-                    c = FloatAsValue(ValueAsFloat(a) + (_float_t)ValueAsInt(b));
-                else if (IS_INT(a) && IS_FLOAT(b))
-                    c = FloatAsValue((_float_t)ValueAsInt(a) + ValueAsFloat(b));
+                else if (IS_REAL(a) && IS_REAL(b))
+                    c = RealAsValue(ValueAsReal(a) + ValueAsReal(b));
+                else if (IS_REAL(a) && IS_INT(b))
+                    c = RealAsValue(ValueAsReal(a) + (real_t)ValueAsInt(b));
+                else if (IS_INT(a) && IS_REAL(b))
+                    c = RealAsValue((real_t)ValueAsInt(a) + ValueAsReal(b));
                 else if (IS_POINTER(a) && IS_INT(b))
                     c = PointerAsValue(ValueAsPointer(a) + ValueAsInt(b));
                 else if (IS_INT(a) && IS_POINTER(b))
                     c = PointerAsValue(ValueAsPointer(b) + ValueAsInt(a));
-                else if (IS_POINTER(a) && IS_FLOAT(b))
-                    c = PointerAsValue(ValueAsPointer(a) + (uint16_t)ValueAsFloat(b));
-                else if (IS_FLOAT(a) && IS_POINTER(b))
-                    c = PointerAsValue(ValueAsPointer(b) + (uint16_t)ValueAsFloat(a));
+                else if (IS_POINTER(a) && IS_REAL(b))
+                    c = PointerAsValue(ValueAsPointer(a) + (uint16_t)ValueAsReal(b));
+                else if (IS_REAL(a) && IS_POINTER(b))
+                    c = PointerAsValue(ValueAsPointer(b) + (uint16_t)ValueAsReal(a));
                 else
                     error("ADD mismatch");
                 break;
@@ -1092,24 +1097,24 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     overflow = ValueAsInt(a) - ValueAsInt(b);
                     if (overflow > _INT_MAX || overflow < _INT_MIN) {
                         //std::cerr << std::string("SUB overflow: ") << std::to_string(overflow) << "=" << ValueAsInt(a) << "-" << ValueAsInt(b) << std::endl;
-                        c = FloatAsValue((_float_t)overflow);
+                        c = RealAsValue((real_t)overflow);
                     } else 
                         c = IntAsValue(overflow);
                 }
-                else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = FloatAsValue(ValueAsFloat(a) - ValueAsFloat(b));
-                else if (IS_FLOAT(a) && IS_INT(b))
-                    c = FloatAsValue(ValueAsFloat(a) - (_float_t)ValueAsInt(b));
-                else if (IS_INT(a) && IS_FLOAT(b))
-                    c = FloatAsValue((_float_t)ValueAsInt(a) - ValueAsFloat(b));
+                else if (IS_REAL(a) && IS_REAL(b))
+                    c = RealAsValue(ValueAsReal(a) - ValueAsReal(b));
+                else if (IS_REAL(a) && IS_INT(b))
+                    c = RealAsValue(ValueAsReal(a) - (real_t)ValueAsInt(b));
+                else if (IS_INT(a) && IS_REAL(b))
+                    c = RealAsValue((real_t)ValueAsInt(a) - ValueAsReal(b));
                 else if (IS_POINTER(a) && IS_INT(b))
                     c = PointerAsValue(ValueAsPointer(a) - ValueAsInt(b));
                 else if (IS_INT(a) && IS_POINTER(b))
                     c = PointerAsValue(ValueAsPointer(b) - ValueAsInt(a));
-                else if (IS_POINTER(a) && IS_FLOAT(b))
-                    c = PointerAsValue(ValueAsPointer(a) - (uint16_t)ValueAsFloat(b));
-                else if (IS_FLOAT(a) && IS_POINTER(b))
-                    c = PointerAsValue(ValueAsPointer(b) - (uint16_t)ValueAsFloat(a));
+                else if (IS_POINTER(a) && IS_REAL(b))
+                    c = PointerAsValue(ValueAsPointer(a) - (uint16_t)ValueAsReal(b));
+                else if (IS_REAL(a) && IS_POINTER(b))
+                    c = PointerAsValue(ValueAsPointer(b) - (uint16_t)ValueAsReal(a));
                 else
                     error("SUB mismatch");
                 break;
@@ -1120,28 +1125,28 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     if (overflow > _INT_MAX || overflow < _INT_MIN) {
                         //error(std::string("MUL overflow: ") + std::to_string(overflow));
                         //std::cerr << std::string("MUL overflow: ") << std::to_string(overflow) << "=" << ValueAsInt(a) << "x" << ValueAsInt(b) << std::endl;
-                        c = FloatAsValue((_float_t)overflow);
+                        c = RealAsValue((real_t)overflow);
                     } else
                         c = IntAsValue(overflow);
                 }
-                else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = FloatAsValue(ValueAsFloat(a) * ValueAsFloat(b));
-                else if (IS_FLOAT(a) && IS_INT(b))
-                    c = FloatAsValue(ValueAsFloat(a) * (_float_t)ValueAsInt(b));
-                else if (IS_INT(a) && IS_FLOAT(b))
-                    c = FloatAsValue((_float_t)ValueAsInt(a) * ValueAsFloat(b));
+                else if (IS_REAL(a) && IS_REAL(b))
+                    c = RealAsValue(ValueAsReal(a) * ValueAsReal(b));
+                else if (IS_REAL(a) && IS_INT(b))
+                    c = RealAsValue(ValueAsReal(a) * (real_t)ValueAsInt(b));
+                else if (IS_INT(a) && IS_REAL(b))
+                    c = RealAsValue((real_t)ValueAsInt(a) * ValueAsReal(b));
                 else
                     error("MUL mismatch");
                 break;
             case OpCode::DIV:
                 if (IS_INT(a) && IS_INT(b))
-                    c = FloatAsValue((_float_t)ValueAsInt(a) / (_float_t)ValueAsInt(b));
-                else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = FloatAsValue(ValueAsFloat(a) / ValueAsFloat(b));
-                else if (IS_FLOAT(a) && IS_INT(b))
-                    c = FloatAsValue(ValueAsFloat(a) / (_float_t)ValueAsInt(b));
-                else if (IS_INT(a) && IS_FLOAT(b))
-                    c = FloatAsValue((_float_t)ValueAsInt(a) / ValueAsFloat(b));
+                    c = RealAsValue((real_t)ValueAsInt(a) / (real_t)ValueAsInt(b));
+                else if (IS_REAL(a) && IS_REAL(b))
+                    c = RealAsValue(ValueAsReal(a) / ValueAsReal(b));
+                else if (IS_REAL(a) && IS_INT(b))
+                    c = RealAsValue(ValueAsReal(a) / (real_t)ValueAsInt(b));
+                else if (IS_INT(a) && IS_REAL(b))
+                    c = RealAsValue((real_t)ValueAsInt(a) / ValueAsReal(b));
                 else
                     error("DIV mismatch");
                 break;
@@ -1168,88 +1173,88 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
 
                     if (overflow > _INT_MAX || overflow < _INT_MIN) {
                         //std::cerr << "EXP overflow " << overflow << std::endl;
-                        c = FloatAsValue((_float_t)overflow);
+                        c = RealAsValue((real_t)overflow);
                     } else
                         c = IntAsValue(overflow);
                 }
-                else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = FloatAsValue(std::pow(ValueAsFloat(a), ValueAsFloat(b)));
-                else if (IS_FLOAT(a) && IS_INT(b))
-                    c = FloatAsValue(std::pow(ValueAsFloat(a), ValueAsInt(b)));
-                else if (IS_INT(a) && IS_FLOAT(b))
-                    c = FloatAsValue(std::pow(ValueAsInt(a), ValueAsFloat(b)));
+                else if (IS_REAL(a) && IS_REAL(b))
+                    c = RealAsValue(std::pow(ValueAsReal(a), ValueAsReal(b)));
+                else if (IS_REAL(a) && IS_INT(b))
+                    c = RealAsValue(std::pow(ValueAsReal(a), ValueAsInt(b)));
+                else if (IS_INT(a) && IS_REAL(b))
+                    c = RealAsValue(std::pow(ValueAsInt(a), ValueAsReal(b)));
                 else
                     error("EXP mismatch");
                 break;
             case OpCode::ATAN:
                 if (IS_INT(c))
-                    c = FloatAsValue(std::atan((_float_t)ValueAsInt(c)));
-                else if (IS_FLOAT(c))
-                    c = FloatAsValue(std::atan(ValueAsFloat(c)));
+                    c = RealAsValue(std::atan((real_t)ValueAsInt(c)));
+                else if (IS_REAL(c))
+                    c = RealAsValue(std::atan(ValueAsReal(c)));
                 else
                     error("ATAN argument error");
                 break;
             case OpCode::COS:
                 if (IS_INT(c))
-                    c = FloatAsValue(std::cos((_float_t)ValueAsInt(c)));
-                else if (IS_FLOAT(c))
-                    c = FloatAsValue(std::cos(ValueAsFloat(c)));
+                    c = RealAsValue(std::cos((real_t)ValueAsInt(c)));
+                else if (IS_REAL(c))
+                    c = RealAsValue(std::cos(ValueAsReal(c)));
                 else
                     error("COS argument error");
                 break;
             case OpCode::LOG:
                 if (IS_INT(c))
-                    c = FloatAsValue(std::log((_float_t)ValueAsInt(c)));
-                else if (IS_FLOAT(c))
-                    c = FloatAsValue(std::log(ValueAsFloat(c)));
+                    c = RealAsValue(std::log((real_t)ValueAsInt(c)));
+                else if (IS_REAL(c))
+                    c = RealAsValue(std::log(ValueAsReal(c)));
                 else
                     error("LOG argument error");
                 break;
             case OpCode::SIN:
                 if (IS_INT(c))
-                    c = FloatAsValue(std::sin((_float_t)ValueAsInt(c)));
-                else if (IS_FLOAT(c))
-                    c = FloatAsValue(std::sin(ValueAsFloat(c)));
+                    c = RealAsValue(std::sin((real_t)ValueAsInt(c)));
+                else if (IS_REAL(c))
+                    c = RealAsValue(std::sin(ValueAsReal(c)));
                 else
                     error("SIN argument error");
                 break;
             case OpCode::SQR:
                 if (IS_INT(c))
-                    c = FloatAsValue(std::sqrt((_float_t)ValueAsInt(c)));
-                else if (IS_FLOAT(c))
-                    c = FloatAsValue(std::sqrt(ValueAsFloat(c)));
+                    c = RealAsValue(std::sqrt((real_t)ValueAsInt(c)));
+                else if (IS_REAL(c))
+                    c = RealAsValue(std::sqrt(ValueAsReal(c)));
                 else
                     error("SQR argument error");
                 break;
             case OpCode::TAN:
                 if (IS_INT(c))
-                    c = FloatAsValue(std::tan((_float_t)ValueAsInt(c)));
-                else if (IS_FLOAT(c))
-                    c = FloatAsValue(std::tan(ValueAsFloat(c)));
+                    c = RealAsValue(std::tan((real_t)ValueAsInt(c)));
+                else if (IS_REAL(c))
+                    c = RealAsValue(std::tan(ValueAsReal(c)));
                 else
                     error("TAN argument error");
                 break;
             case OpCode::RND:
                 if (IS_INT(c))
-                    c = FloatAsValue(((_float_t)std::rand()/(_float_t)RAND_MAX) * (_float_t)ValueAsInt(c));
-                else if (IS_FLOAT(c))
-                    c = FloatAsValue(((_float_t)std::rand()/(_float_t)RAND_MAX) * (_float_t)ValueAsFloat(c));
+                    c = RealAsValue(((real_t)std::rand()/(real_t)RAND_MAX) * (real_t)ValueAsInt(c));
+                else if (IS_REAL(c))
+                    c = RealAsValue(((real_t)std::rand()/(real_t)RAND_MAX) * (real_t)ValueAsReal(c));
                 else
                     error("RND argument error");
                 break;
             case OpCode::SEED:
                 if (IS_INT(c))
                     std::srand((uint32_t)ValueAsInt(c));
-                else if (IS_FLOAT(c))
-                    std::srand((uint32_t)ValueAsFloat(c));
+                else if (IS_REAL(c))
+                    std::srand((uint32_t)ValueAsReal(c));
                 else
                     error("RND argument error");
                 break;
             case OpCode::FLT:
                 if (IS_INT(c))
-                    c = FloatAsValue((_float_t)ValueAsInt(c));
-                else if (IS_FLOAT(c))
-                    c = FloatAsValue(ValueAsFloat(c));
+                    c = RealAsValue((real_t)ValueAsInt(c));
+                else if (IS_REAL(c))
+                    c = RealAsValue(ValueAsReal(c));
                 else
                     error("FLT argument error");
                 break;
@@ -1257,8 +1262,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 if (IS_INT(c)) {
                     c = IntAsValue(c);
                 }
-                else if (IS_FLOAT(c)) {
-                    overflow = (overflow_t)ValueAsFloat(c);
+                else if (IS_REAL(c)) {
+                    overflow = (overflow_t)ValueAsReal(c);
 
                     if (overflow > _INT_MAX) {
                         //std::cerr << (std::string("INT overflow") + std::to_string(overflow)) << std::endl;
@@ -1287,8 +1292,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     str = std::to_string(ValueAsInt(c));
                 else if (IS_POINTER(c))
                     str = std::to_string(ValueAsPointer(c));
-                else if (IS_FLOAT(c))
-                    str = std::to_string(ValueAsFloat(c));
+                else if (IS_REAL(c))
+                    str = std::to_string(ValueAsReal(c));
                 else
                     error("STR argument error");
                 for (size_t i = 0; i < str.size(); i++) {
@@ -1307,32 +1312,32 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
             case OpCode::AND:
                 if (IS_INT(a) && IS_INT(b))
                     c = ValueAsInt(a) && ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
-                else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = ValueAsFloat(a) && ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
+                else if (IS_REAL(a) && IS_REAL(b))
+                    c = ValueAsReal(a) && ValueAsReal(b) ? IntAsValue(1) : IntAsValue(0);
                 else
                     error("AND mismatch");
                 break;
             case OpCode::OR:
                 if (IS_INT(a) && IS_INT(b))
                     c = ValueAsInt(a) || ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
-                else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = ValueAsFloat(a) || ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
+                else if (IS_REAL(a) && IS_REAL(b))
+                    c = ValueAsReal(a) || ValueAsReal(b) ? IntAsValue(1) : IntAsValue(0);
                 else
                     error("OR mismatch");
                 break;
             case OpCode::NOT:
                 if (IS_INT(c))
                     c = IntAsValue(!ValueAsInt(c));
-                else if (IS_FLOAT(c))
-                    c = FloatAsValue(!ValueAsFloat(c));
+                else if (IS_REAL(c))
+                    c = RealAsValue(!ValueAsReal(c));
                 else
                     error("NOT mismatch");
                 break;
             case OpCode::EQ:
                 if (IS_INT(a) && IS_INT(b))
                     c = ValueAsInt(a) == ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
-                else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = ValueAsFloat(a) == ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
+                else if (IS_REAL(a) && IS_REAL(b))
+                    c = ValueAsReal(a) == ValueAsReal(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_POINTER(a) && IS_POINTER(b))
                     c = compare(ValueAsPointer(a), ValueAsPointer(b)) == 0 ? IntAsValue(1) : IntAsValue(0);
                 else
@@ -1341,8 +1346,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
             case OpCode::NE:
                 if (IS_INT(a) && IS_INT(b))
                     c = ValueAsInt(a) != ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
-                else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = ValueAsFloat(a) != ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
+                else if (IS_REAL(a) && IS_REAL(b))
+                    c = ValueAsReal(a) != ValueAsReal(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_POINTER(a) && IS_POINTER(b))
                     c = compare(ValueAsPointer(a), ValueAsPointer(b)) != 0 ? IntAsValue(1) : IntAsValue(0);
                 else
@@ -1351,8 +1356,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
             case OpCode::GT:
                 if (IS_INT(a) && IS_INT(b))
                     c = ValueAsInt(a) > ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
-                else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = ValueAsFloat(a) > ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
+                else if (IS_REAL(a) && IS_REAL(b))
+                    c = ValueAsReal(a) > ValueAsReal(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_POINTER(a) && IS_POINTER(b))
                     c = compare(ValueAsPointer(a), ValueAsPointer(b)) > 0 ? IntAsValue(1) : IntAsValue(0);
                 else
@@ -1361,8 +1366,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
             case OpCode::GE:
                 if (IS_INT(a) && IS_INT(b))
                     c = ValueAsInt(a) >= ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
-                else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = ValueAsFloat(a) >= ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
+                else if (IS_REAL(a) && IS_REAL(b))
+                    c = ValueAsReal(a) >= ValueAsReal(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_POINTER(a) && IS_POINTER(b))
                     c = compare(ValueAsPointer(a), ValueAsPointer(b)) >= 0 ? IntAsValue(1) : IntAsValue(0);
                 else
@@ -1371,8 +1376,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
             case OpCode::LT:
                 if (IS_INT(a) && IS_INT(b))
                     c = ValueAsInt(a) < ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
-                else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = ValueAsFloat(a) < ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
+                else if (IS_REAL(a) && IS_REAL(b))
+                    c = ValueAsReal(a) < ValueAsReal(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_POINTER(a) && IS_POINTER(b))
                     c = compare(ValueAsPointer(a), ValueAsPointer(b)) < 0 ? IntAsValue(1) : IntAsValue(0);
                 else
@@ -1381,8 +1386,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
             case OpCode::LE:
                 if (IS_INT(a) && IS_INT(b))
                     c = ValueAsInt(a) <= ValueAsInt(b) ? IntAsValue(1) : IntAsValue(0);
-                else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = ValueAsFloat(a) <= ValueAsFloat(b) ? IntAsValue(1) : IntAsValue(0);
+                else if (IS_REAL(a) && IS_REAL(b))
+                    c = ValueAsReal(a) <= ValueAsReal(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_POINTER(a) && IS_POINTER(b))
                     c = compare(ValueAsPointer(a), ValueAsPointer(b)) <= 0 ? IntAsValue(1) : IntAsValue(0);
                 else
@@ -1391,12 +1396,12 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
             case OpCode::CMP:
                 if (IS_INT(a) && IS_INT(b))
                     c = ValueAsInt(a) > ValueAsInt(b) ? IntAsValue(1) : ValueAsInt(a) < ValueAsInt(b) ? IntAsValue(-1) : IntAsValue(0);
-                else if (IS_FLOAT(a) && IS_FLOAT(b))
-                    c = ValueAsFloat(a) > ValueAsFloat(b) ? IntAsValue(1) : ValueAsFloat(a) < ValueAsFloat(b) ? IntAsValue(-1) : IntAsValue(0);
-                else if (IS_FLOAT(a) && IS_INT(b))
-                    c = ValueAsFloat(a) > ValueAsInt(b) ? IntAsValue(1) : ValueAsFloat(a) < ValueAsInt(b) ? IntAsValue(-1) : IntAsValue(0);
-                else if (IS_INT(a) && IS_FLOAT(b))
-                    c = ValueAsInt(a) > ValueAsFloat(b) ? IntAsValue(1) : ValueAsInt(a) < ValueAsFloat(b) ? IntAsValue(-1) : IntAsValue(0);
+                else if (IS_REAL(a) && IS_REAL(b))
+                    c = ValueAsReal(a) > ValueAsReal(b) ? IntAsValue(1) : ValueAsReal(a) < ValueAsReal(b) ? IntAsValue(-1) : IntAsValue(0);
+                else if (IS_REAL(a) && IS_INT(b))
+                    c = ValueAsReal(a) > ValueAsInt(b) ? IntAsValue(1) : ValueAsReal(a) < ValueAsInt(b) ? IntAsValue(-1) : IntAsValue(0);
+                else if (IS_INT(a) && IS_REAL(b))
+                    c = ValueAsInt(a) > ValueAsReal(b) ? IntAsValue(1) : ValueAsInt(a) < ValueAsReal(b) ? IntAsValue(-1) : IntAsValue(0);
                 else
                     error("CMP mismatch");
                 break;
@@ -1449,7 +1454,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 pc += sizeof(int16_t);
                 break;
             case OpCode::FDATA:
-                set(idx, FloatAsValue(program.readFloat(pc)));
+                set(idx, RealAsValue(program.readFloat(pc)));
                 pc += sizeof(value_t);
                 break;
             case OpCode::PDATA:
@@ -1501,8 +1506,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
             case OpCode::CALLOC:
                 if (IS_INT(c))
                     heap -= (uint16_t)ValueAsInt(c);
-                else if (IS_FLOAT(c))
-                    heap -= (uint16_t)ValueAsFloat(c);
+                else if (IS_REAL(c))
+                    heap -= (uint16_t)ValueAsReal(c);
                 else
                     error("CALLOC is not a number");
                 idx = heap;

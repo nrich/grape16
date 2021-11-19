@@ -21,7 +21,7 @@
     #define QNAN        ((uint64_t)0X7FFC000000000000)
     #define BYTEVAL     ((uint64_t)0xFFFFFFFFFFFF00FF)
     #define INT_MASK    ((uint64_t)0x00000000FFFFFFFF)
-    #define PTR_MASK    ((uint64_t)0x000000000FFFFFFF)
+    #define PTR_MASK    ((uint64_t)0x0000000007FFFFFF)
     #define IS_INT(value)             (((value & SIGN_BIT) != SIGN_BIT) && ((value & QNAN) == QNAN))
 #else
     #define SIGN_BIT    ((uint32_t)0x80000000)
@@ -34,21 +34,21 @@
 
 #define IS_SHORT(value)             (((value & SIGN_BIT) != SIGN_BIT) && ((value & QNAN) == QNAN))
 #define IS_BYTE(value)              ((((value & SIGN_BIT) != SIGN_BIT) && ((value & QNAN) == QNAN)) && ((value & BYTEVAL) == value))
-#define IS_FLOAT(value)             (((value) & QNAN) != QNAN)
+#define IS_REAL(value)              (((value) & QNAN) != QNAN)
 #define IS_POINTER(value)           (((value) & (QNAN | SIGN_BIT)) == (QNAN | SIGN_BIT))
 
 namespace Emulator {
 #ifdef SYS32
     typedef uint32_t vmpointer_t;
     typedef uint64_t value_t;
-    typedef double _float_t;
+    typedef double real_t;
     typedef int32_t integer_t;
     typedef uint32_t uinteger_t;
     typedef int64_t overflow_t;
 #else
     typedef uint32_t vmpointer_t;
     typedef uint32_t value_t;
-    typedef float _float_t;
+    typedef float real_t;
     typedef int16_t integer_t;
     typedef uint16_t uinteger_t;
     typedef int32_t overflow_t;
@@ -94,18 +94,18 @@ namespace Emulator {
         return (vmpointer_t)((~(QNAN | SIGN_BIT)) & value);
     }
 
-    inline value_t FloatAsValue(_float_t f) {
+    inline value_t RealAsValue(real_t f) {
         value_t value;
 
-        memcpy(&value, &f, sizeof(_float_t));
+        memcpy(&value, &f, sizeof(real_t));
 
         return value;
     }
 
-    inline _float_t ValueAsFloat(value_t value) {
-        _float_t f;
+    inline real_t ValueAsReal(value_t value) {
+        real_t f;
 
-        memcpy(&f, &value, sizeof(_float_t));
+        memcpy(&f, &value, sizeof(real_t));
 
         return f;
     }
@@ -113,8 +113,8 @@ namespace Emulator {
     inline std::string ValueToString(value_t value) {
         if (IS_SHORT(value))
             return std::to_string(ValueAsShort(value));
-        if (IS_FLOAT(value))
-            return std::to_string(ValueAsFloat(value));
+        if (IS_REAL(value))
+            return std::to_string(ValueAsReal(value));
         if (IS_POINTER(value))
             return std::string("&") +  std::to_string(ValueAsPointer(value));
 
@@ -413,7 +413,7 @@ namespace Emulator {
 
             uint8_t getByte(vmpointer_t ptr);
             int16_t getShort(vmpointer_t ptr);
-            _float_t getFloat(vmpointer_t prt);
+            real_t getReal(vmpointer_t prt);
             vmpointer_t getPointer(vmpointer_t ptr);
             std::string getString(vmpointer_t ptr, uint32_t len);
 
