@@ -194,7 +194,7 @@ void Program::addPointer(vmpointer_t p) {
 
 #ifdef SYS32
     addByte(bytes[2]);
-    addByte((uint8_t)(bytes[3] & 0x0F));
+    addByte((uint8_t)(bytes[3] & 0x07));
 #else
     addByte((uint8_t)(bytes[2] & 0x7F));
     addByte(0);
@@ -337,7 +337,7 @@ void Program::updatePointer(uint32_t pos, vmpointer_t p) {
 
 #ifdef SYS32
     code[pos+2] = bytes[2];
-    code[pos+3] = (bytes[3] & 0x0F);
+    code[pos+3] = (bytes[3] & 0x07);
 #else
     code[pos+2] = (bytes[2] & 0x7F);
     code[pos+3] = 0;
