@@ -125,6 +125,10 @@ static bool isAlpha(char c) {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
 }
 
+static bool isAlphaDigit(char c) {
+    return isAlpha(c) || isDigit(c);
+}
+
 static bool isWhitespace(char c) {
     return (c == ' ') || (c == '\t');
 }
@@ -449,7 +453,7 @@ static Emulator::AsmToken parseAsmLine(const std::string &line, uint32_t offset,
             }
 
             auto labelstart = i;
-            while (isAlpha(line[i++]) || isDigit(line[i++])) {
+            while (isAlphaDigit(line[i++])) {
             }
 
             auto label = line.substr(labelstart, i-labelstart-1);
