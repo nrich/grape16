@@ -721,6 +721,7 @@ Emulator::Program optimize(const Emulator::Program &code) {
             while (program.readByte(pc)) {
                 pc += sizeof(uint8_t);
             }
+            pc += sizeof(uint8_t);
         } else if (arg == ArgType::LABEL) {
             pc += sizeof(int16_t);
         } else {
@@ -760,6 +761,7 @@ std::string ProgramAsString(const Emulator::Program &code, bool resolve_jumps) {
                 while (program.readByte(pc)) {
                     pc += sizeof(uint8_t);
                 }
+                pc += sizeof(uint8_t);
             } else if (arg == ArgType::LABEL) {
                 auto dst = program.readShort(pc);
                 //labels[dst] = std::string("LABEL_") + std::to_string(dst);
@@ -810,6 +812,7 @@ std::string ProgramAsString(const Emulator::Program &code, bool resolve_jumps) {
                 pc += sizeof(uint8_t);
             }
 
+            pc += sizeof(uint8_t);
             s << AsmTokenAsString(Emulator::AsmToken(opcode, str)) << std::endl;
         } else if (arg == ArgType::LABEL) {
             if (resolve_jumps) {

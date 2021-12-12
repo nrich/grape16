@@ -63,7 +63,7 @@ namespace Emulator {
                     return 1+sizeof(value_t);
                 } else if (std::holds_alternative<std::string>(*arg)) {
                     auto value = std::get<std::string>(*arg);
-                    return 1 + value.size();
+                    return 1 + value.size() + 1;
                 } else if (std::holds_alternative<std::pair<SysCall, RuntimeValue>>(*arg)) {
                     return 1+sizeof(int16_t)+sizeof(int16_t);
                 } else {
