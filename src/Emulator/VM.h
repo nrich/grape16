@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <iterator>
 #include <fstream>
+#include <sstream>
 #include <memory>
 #include <functional>
 
@@ -115,8 +116,11 @@ namespace Emulator {
             return std::to_string(ValueAsShort(value));
         if (IS_REAL(value))
             return std::to_string(ValueAsReal(value));
-        if (IS_POINTER(value))
-            return std::string("&") +  std::to_string(ValueAsPointer(value));
+        if (IS_POINTER(value)) {
+            std::stringstream stream;
+            stream << std::hex << ValueAsPointer(value);
+            return std::string("&") + stream.str();
+        }
 
         return "";
     }
@@ -297,7 +301,7 @@ namespace Emulator {
 
     class Debugger {
         public:
-            virtual void debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack, value_t a, value_t b, value_t c, vmpointer_t idx, value_t memidx, uint32_t heap, std::stack<value_t> stack, std::vector<value_t> mem);
+            virtual void debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack, value_t a, value_t b, value_t c, vmpointer_t idx, value_t memidx, uint32_t heapidx, std::stack<value_t> stack, std::vector<value_t> mem, std::vector<value_t> heap);
             virtual ~Debugger() {}
     };
 

@@ -102,7 +102,7 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
     }
 }
 
-void Debugger::debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack, value_t a, value_t b, value_t c, vmpointer_t idx, value_t memidx, uint32_t heap, std::stack<value_t> stack, std::vector<value_t> mem) {
+void Debugger::debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack, value_t a, value_t b, value_t c, vmpointer_t idx, value_t memidx, uint32_t heapidx, std::stack<value_t> stack, std::vector<value_t> mem, std::vector<value_t> heap) {
     std::cerr << "[" << pc << "] " << (int)opcode << ":" << OpCodeAsString(opcode) << " sp: " << (uint32_t)sp << " callstack: " << callstack << " [";
 
     if (IS_BYTE(a) && 0)
@@ -151,7 +151,7 @@ void Debugger::debug(OpCode opcode, uint32_t pc, uint8_t sp, uint32_t callstack,
 
     std::cerr << "]";
 
-    std::cerr << " heap: " << heap;
+    std::cerr << " heap: " << heapidx;
     std::cerr << " stack: " << stack.size();
 
     std::cerr << std::endl;
@@ -927,7 +927,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
         str.clear();
 
         if (debugger)
-            debugger->debug(program.fetch(pc), pc, sp, callstack[sp], a, b, c, idx, mem[idx], heap, stack, {mem.begin(), mem.begin()+50});
+            debugger->debug(program.fetch(pc), pc, sp, callstack[sp], a, b, c, idx, mem[idx], heap, stack, {mem.begin(), mem.begin()+48}, {mem.end()-32, mem.end()});
 
         switch (program.fetch(pc++)) {
             case OpCode::NOP:
@@ -1438,13 +1438,13 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 pc = (uint16_t)program.readShort(pc);
                 break;
             case OpCode::JMPEZ:
-                if (c == IntAsValue(0)) 
+                if (c == IntAsValue(0))
                     pc = (uint16_t)program.readShort(pc);
                 else
                     pc += sizeof(int16_t);
                 break;
             case OpCode::JMPNZ:
-                if (c != IntAsValue(0)) 
+                if (c != IntAsValue(0))
                     pc = (uint16_t)program.readShort(pc);
                 else
                     pc += sizeof(int16_t);
