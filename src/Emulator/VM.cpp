@@ -1465,7 +1465,11 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 pc += sizeof(vmpointer_t);
                 break;
             case OpCode::MOVIDX:
-                idx = fp();
+                if (IS_INT(program.readValue(pc)))
+                    idx = fp() + ValueAsInt(program.readValue(pc));
+                else
+                    error("MOVIDX value is not an integer");
+                pc += sizeof(value_t);
                 break;
             case OpCode::LOADIDX:
                 idx = getPointer(program.readPointer(pc));
