@@ -83,6 +83,7 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
         case OpCode::LE: return "LE";
         case OpCode::CMP: return "CMP";
         case OpCode::SETIDX: return "SETIDX";
+        case OpCode::MOVIDX: return "MOVIDX";
         case OpCode::LOADIDX: return "LOADIDX";
         case OpCode::STOREIDX: return "STOREIDX";
         case OpCode::INCIDX: return "INCIDX";
@@ -1462,6 +1463,9 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
             case OpCode::SETIDX:
                 idx = program.readPointer(pc);
                 pc += sizeof(vmpointer_t);
+                break;
+            case OpCode::MOVIDX:
+                idx = fp();
                 break;
             case OpCode::LOADIDX:
                 idx = getPointer(program.readPointer(pc));

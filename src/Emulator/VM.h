@@ -220,6 +220,7 @@ namespace Emulator {
         CMP,
 
         SETIDX,
+        MOVIDX,
         LOADIDX,
         STOREIDX,
         INCIDX,
