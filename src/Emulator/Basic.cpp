@@ -1258,6 +1258,7 @@ static void statement(Program &program, uint32_t linenumber, const std::vector<B
     } else if (tokens[current].type == BasicTokenType::PALETTE) {
         current += 1;
         expression(program, linenumber, {tokens.begin(), tokens.end()});
+        program.add(OpCode::POPC);
         program.addSyscall(OpCode::SYSCALL, SysCall::PALETTE, RuntimeValue::C);
     } else if (tokens[current].type == BasicTokenType::COLOR) {
         current += 1;

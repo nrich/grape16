@@ -38,6 +38,9 @@
 #define IS_REAL(value)              (((value) & QNAN) != QNAN)
 #define IS_POINTER(value)           (((value) & (QNAN | SIGN_BIT)) == (QNAN | SIGN_BIT))
 
+#define CALLSTACK_SIZE 256
+#define STACKFRAME_SIZE 256
+
 namespace Emulator {
 #ifdef SYS32
     typedef uint32_t vmpointer_t;
@@ -147,6 +150,14 @@ namespace Emulator {
         STOREA,
         STOREB,
         STOREC,
+
+        READA,
+        READB,
+        READC,
+
+        WRITEA,
+        WRITEB,
+        WRITEC,
 
         PUSHA,
         PUSHB,
@@ -399,7 +410,7 @@ namespace Emulator {
             uint32_t heap;
 
             uint8_t sp;
-            std::array<uint32_t, 256> callstack;
+            std::array<uint32_t, CALLSTACK_SIZE> callstack;
 
             std::vector<value_t> mem;
 
@@ -438,6 +449,10 @@ namespace Emulator {
                     default:
                         return ShortAsValue(0);
                 }
+            }
+
+            vmpointer_t fp() const {
+                return (vmpointer_t)(sp * STACKFRAME_SIZE);
             }
 
         public:

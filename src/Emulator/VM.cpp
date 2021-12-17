@@ -28,6 +28,12 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
         case OpCode::STOREA: return "STOREA";
         case OpCode::STOREB: return "STOREB";
         case OpCode::STOREC: return "STOREC";
+        case OpCode::READA: return "READA";
+        case OpCode::READB: return "READB";
+        case OpCode::READC: return "READC";
+        case OpCode::WRITEA: return "WRITEA";
+        case OpCode::WRITEB: return "WRITEB";
+        case OpCode::WRITEC: return "WRITEC";
         case OpCode::PUSHA: return "PUSHA";
         case OpCode::PUSHB: return "PUSHB";
         case OpCode::PUSHC: return "PUSHC";
@@ -979,6 +985,54 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 set(p, c);
                 pc += sizeof(vmpointer_t);
                 break;
+            case OpCode::READA:
+                if (IS_INT(program.readValue(pc)))
+                    p = fp() + ValueAsInt(program.readValue(pc));
+                else
+                    error("READA is not an integer");
+                a = getValue(p);
+                pc += sizeof(value_t);
+                break;
+            case OpCode::READB:
+                if (IS_INT(program.readValue(pc)))
+                    p = fp() + ValueAsInt(program.readValue(pc));
+                else
+                    error("READB is not an integer");
+                b = getValue(p);
+                pc += sizeof(value_t);
+                break;
+            case OpCode::READC:
+                if (IS_INT(program.readValue(pc)))
+                    p = fp() + ValueAsInt(program.readValue(pc));
+                else
+                    error("READC is not an integer");
+                c = getValue(p);
+                pc += sizeof(value_t);
+                break;
+            case OpCode::WRITEA:
+                if (IS_INT(program.readValue(pc)))
+                    p = fp() + ValueAsInt(program.readValue(pc));
+                else
+                    error("WRITEA is not an integer");
+                set(p, a);
+                pc += sizeof(value_t);
+                break;
+            case OpCode::WRITEB:
+                if (IS_INT(program.readValue(pc)))
+                    p = fp() + ValueAsInt(program.readValue(pc));
+                else
+                    error("WRITEC is not an integer");
+                set(p, b);
+                pc += sizeof(value_t);
+                break;
+            case OpCode::WRITEC:
+                if (IS_INT(program.readValue(pc)))
+                    p = fp() + ValueAsInt(program.readValue(pc));
+                else
+                    error("WRITEC is not an integer");
+                set(p, c);
+                pc += sizeof(value_t);
+                break;
             case OpCode::PUSHA:
                 stack.push(a);
                 break;
@@ -1513,7 +1567,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 idx = heap;
                 break;
             case OpCode::YIELD:
-                //std::cerr << "Yield " << cycles << std::endl;
+                std::cerr << "Yield " << cycles << std::endl;
                 return done;
                 break;
             case OpCode::TRACE:
