@@ -197,6 +197,7 @@ namespace Emulator {
 
         LSHIFT,
         RSHIFT,
+        BNOT,
         BAND,
         BOR,
         XOR,

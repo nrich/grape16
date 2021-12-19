@@ -61,6 +61,7 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
         case OpCode::EXP: return "EXP";
         case OpCode::LSHIFT: return "LSHIFT";
         case OpCode::RSHIFT: return "RSHIFT";
+        case OpCode::BNOT: return "BNOT";
         case OpCode::BAND: return "BAND";
         case OpCode::BOR: return "BOR";
         case OpCode::XOR: return "XOR";
@@ -1270,6 +1271,12 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     c = IntAsValue(ValueAsInt(a) >> ValueAsInt(b));
                 else
                     error("RSHIFT mismatch");
+                break;
+            case OpCode::BNOT:
+                if (IS_INT(c))
+                    c = IntAsValue(~(ValueAsInt(c)));
+                else
+                    error("BNOT mismatch");
                 break;
             case OpCode::BAND:
                 if (IS_INT(a) && IS_INT(b))
