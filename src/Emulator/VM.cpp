@@ -441,7 +441,6 @@ void VM::error(const std::string &err) {
 }
 
 void VM::set(vmpointer_t ptr, value_t v) {
-    std::cerr << (vmpointer_t)ptr << " " << mem.size() << std::endl;
     mem[ptr] = v;
 }
 
