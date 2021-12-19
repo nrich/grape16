@@ -202,11 +202,17 @@ void Program::addPointer(vmpointer_t p) {
 #ifdef SYS32
     addByte(bytes[2]);
     addByte((uint8_t)(bytes[3] & 0x07));
+
+#ifdef POINTER64
+    addByte(0);
+    addByte(0);
+    addByte(0);
+    addByte(0);
+#endif
 #else
     addByte((uint8_t)(bytes[2] & 0x7F));
     addByte(0);
 #endif
-
 }
 
 void Program::addValue(value_t v) {
@@ -345,6 +351,13 @@ void Program::updatePointer(uint32_t pos, vmpointer_t p) {
 #ifdef SYS32
     code[pos+2] = bytes[2];
     code[pos+3] = (bytes[3] & 0x07);
+
+#ifdef POINTER64
+    code[pos+4] = 0;
+    code[pos+5] = 0;
+    code[pos+6] = 0;
+    code[pos+7] = 0;
+#endif
 #else
     code[pos+2] = (bytes[2] & 0x7F);
     code[pos+3] = 0;
@@ -399,7 +412,7 @@ float Program::readFloat(uint32_t pos) const {
 vmpointer_t Program::readPointer(uint32_t pos) const {
     const uint8_t *bytes = code.data();
 
-    vmpointer_t p = bytes[pos] | (uint32_t)(bytes[pos+1])<<8 | (uint32_t)(bytes[pos+2]) << 16;
+    vmpointer_t p = bytes[pos] | (uint32_t)(bytes[pos+1])<<8 | (uint32_t)(bytes[pos+2]) << 16 | (uint32_t)(bytes[pos+3]) << 24;
 
     return (p & (~(QNAN | SIGN_BIT)));
 }
@@ -428,6 +441,7 @@ void VM::error(const std::string &err) {
 }
 
 void VM::set(vmpointer_t ptr, value_t v) {
+    std::cerr << (vmpointer_t)ptr << " " << mem.size() << std::endl;
     mem[ptr] = v;
 }
 
@@ -1575,7 +1589,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 idx = heap;
                 break;
             case OpCode::YIELD:
-                std::cerr << "Yield " << cycles << std::endl;
+                //std::cerr << "Yield " << cycles << std::endl;
                 return done;
                 break;
             case OpCode::TRACE:

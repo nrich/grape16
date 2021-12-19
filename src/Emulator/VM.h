@@ -43,7 +43,11 @@
 
 namespace Emulator {
 #ifdef SYS32
+#ifdef POINTER64
+    typedef uint64_t vmpointer_t;
+#else
     typedef uint32_t vmpointer_t;
+#endif
     typedef uint64_t value_t;
     typedef double real_t;
     typedef int32_t integer_t;
