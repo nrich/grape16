@@ -195,6 +195,12 @@ namespace Emulator {
         MOD,
         EXP,
 
+        LSHIFT,
+        RSHIFT,
+        BAND,
+        BOR,
+        XOR,
+
         ATAN,
         COS,
         LOG,

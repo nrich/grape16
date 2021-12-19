@@ -59,6 +59,11 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
         case OpCode::IDIV: return "IDIV";
         case OpCode::MOD: return "MOD";
         case OpCode::EXP: return "EXP";
+        case OpCode::LSHIFT: return "LSHIFT";
+        case OpCode::RSHIFT: return "RSHIFT";
+        case OpCode::BAND: return "BAND";
+        case OpCode::BOR: return "BOR";
+        case OpCode::XOR: return "XOR";
         case OpCode::ATAN: return "ATAN";
         case OpCode::COS: return "COS";
         case OpCode::LOG: return "LOG";
@@ -1253,6 +1258,36 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     c = RealAsValue(std::pow(ValueAsInt(a), ValueAsReal(b)));
                 else
                     error("EXP mismatch");
+                break;
+            case OpCode::LSHIFT:
+                if (IS_INT(a) && IS_INT(b))
+                    c = IntAsValue(ValueAsInt(a) << ValueAsInt(b));
+                else
+                    error("LSHIFT mismatch");
+                break;
+            case OpCode::RSHIFT:
+                if (IS_INT(a) && IS_INT(b))
+                    c = IntAsValue(ValueAsInt(a) >> ValueAsInt(b));
+                else
+                    error("RSHIFT mismatch");
+                break;
+            case OpCode::BAND:
+                if (IS_INT(a) && IS_INT(b))
+                    c = IntAsValue(ValueAsInt(a) & ValueAsInt(b));
+                else
+                    error("BAND mismatch");
+                break;
+            case OpCode::BOR:
+                if (IS_INT(a) && IS_INT(b))
+                    c = IntAsValue(ValueAsInt(a) | ValueAsInt(b));
+                else
+                    error("BOR mismatch");
+                break;
+            case OpCode::XOR:
+                if (IS_INT(a) && IS_INT(b))
+                    c = IntAsValue(ValueAsInt(a) ^ ValueAsInt(b));
+                else
+                    error("XOR mismatch");
                 break;
             case OpCode::ATAN:
                 if (IS_INT(c))
