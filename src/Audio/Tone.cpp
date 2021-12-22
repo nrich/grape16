@@ -16,6 +16,11 @@
 #define PINK_RANDOM_BITS       (24)
 #define PINK_RANDOM_SHIFT      ((sizeof(int32_t)*8)-PINK_RANDOM_BITS)
 
+static double fRand(double fMin, double fMax) {
+    double f = (double)rand() / RAND_MAX;
+    return fMin + f * (fMax - fMin);
+}
+
 class PinkNoise {
     private:
         std::array<int32_t, PINK_MAX_RANDOM_ROWS> rows;
@@ -129,6 +134,13 @@ void Audio::Tone::tone(float freq, uint16_t duration, uint8_t waveForm, uint8_t 
 void Audio::Tone::generateSamples(float *stream, int length, float amplitude) {
     static PinkNoise pinknoise(16);
     int i = 0;
+
+    std::array<float, 32> noise;
+
+    for (size_t i = 0; i < noise.size(); i++) {
+        noise[i] = fRand(-1.0, 1);
+    }
+
     while (i < length) {
         if (tones.empty()) {
             while (i < length) {
@@ -176,6 +188,9 @@ void Audio::Tone::generateSamples(float *stream, int length, float amplitude) {
                     stream[i] += attack * decay * sustain * release * to.volume * amplitude * (std::sin(pos*2*M_PI) >= 0 ? 1.0 : -1.0);
                     break;
                 case Common::WaveForm::NOISE:
+                    stream[i] += attack * decay * sustain * release * to.volume * amplitude * (noise[(int)(std::fmod(v/FREQUENCY,noise.size()))]);
+                    break;
+                case Common::WaveForm::PINKNOISE:
                     stream[i] += attack * decay * sustain * release * to.volume * amplitude * (pinknoise.generate());
                     break;
                 case Common::WaveForm::SINE:

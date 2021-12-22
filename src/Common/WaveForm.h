@@ -11,6 +11,7 @@ namespace Common {
             TRIANGLE,
             SQUARE,
             NOISE,
+            PINKNOISE,
             COUNT
         };
     }; // namespace WaveForm
