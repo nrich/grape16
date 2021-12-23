@@ -258,6 +258,9 @@ namespace Emulator {
         ALLOC,
         CALLOC,
 
+        FREE,
+        FREEC,
+
         YIELD,
 
         TRACE,
@@ -466,6 +469,9 @@ namespace Emulator {
             vmpointer_t fp() const {
                 return (vmpointer_t)(sp * STACKFRAME_SIZE);
             }
+
+            std::map<vmpointer_t, uint16_t> freeList;
+            void HeapFree(vmpointer_t ptr, uint16_t size);
 
         public:
             VM(const uint32_t _ptrspace);

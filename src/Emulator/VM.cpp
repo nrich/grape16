@@ -109,6 +109,8 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
         case OpCode::IRQ: return "IRQ";
         case OpCode::ALLOC: return "ALLOC";
         case OpCode::CALLOC: return "CALLOC";
+        case OpCode::FREE: return "FREE";
+        case OpCode::FREEC: return "FREEC";
         case OpCode::YIELD: return "YIELD";
         case OpCode::TRACE: return "TRACE";
         default: return "????";
@@ -1629,6 +1631,18 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     error("CALLOC is not a number");
                 idx = heap;
                 break;
+            case OpCode::FREE:
+                HeapFree(idx, (uint16_t)program.readShort(pc));
+                pc += sizeof(int16_t);
+                break;
+            case OpCode::FREEC:
+                if (IS_INT(c))
+                    HeapFree(idx, (uint16_t)ValueAsInt(c));
+                else if (IS_REAL(c))
+                    HeapFree(idx, (uint16_t)ValueAsReal(c));
+                else
+                    error("FREEC is not a number");
+                break;
             case OpCode::YIELD:
                 //std::cerr << "Yield " << cycles << std::endl;
                 return done;
@@ -1673,6 +1687,19 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
     }
 
     return done;
+}
+
+void VM::HeapFree(vmpointer_t ptr, uint16_t size) {
+    freeList.emplace(ptr, size);
+
+    for (auto it = freeList.cbegin(); it != freeList.cend(); /**/) {
+        if (it->first <= heap) {
+            heap += it->second;
+            freeList.erase(it++);
+        } else {
+            ++it;
+        }
+    }
 }
 
 VM::~VM() {
