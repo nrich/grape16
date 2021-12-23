@@ -1693,10 +1693,13 @@ void VM::HeapFree(vmpointer_t ptr, uint16_t size) {
     freeList.emplace(ptr, size);
 
     for (auto it = freeList.cbegin(); it != freeList.cend(); /**/) {
+        //std::cerr << "Freeing " << std::to_string(it->second) << std::endl;
         if (it->first <= heap) {
             heap += it->second;
+            //std::cerr << "Freed " << std::to_string(it->second) << std::endl;
             freeList.erase(it++);
         } else {
+            //std::cerr << "Skipped " << std::to_string(it->second) << std::endl;
             ++it;
         }
     }
