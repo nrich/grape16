@@ -101,9 +101,6 @@ void Audio::Tone::tone(float freq, uint16_t duration, uint8_t waveForm, uint8_t 
 
     const int Scale = to.samplesLeft / (10 * FREQUENCY / 1000);
 
-    std::cerr << to.samplesLeft << std::endl;
-    std::cerr << Scale << std::endl;
-
     to.sustainLevel = (float)sustain/(float)UINT8_MAX;
 
     to.attackLeft = attack*Scale;
