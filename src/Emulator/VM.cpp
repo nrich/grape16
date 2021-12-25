@@ -110,7 +110,7 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
         case OpCode::ALLOC: return "ALLOC";
         case OpCode::CALLOC: return "CALLOC";
         case OpCode::FREE: return "FREE";
-        case OpCode::FREEC: return "FREEC";
+        case OpCode::FREEIDX: return "FREEIDX";
         case OpCode::YIELD: return "YIELD";
         case OpCode::TRACE: return "TRACE";
         default: return "????";
@@ -1618,30 +1618,25 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 }
                 break;
             case OpCode::ALLOC:
-                heap -= (uint16_t)program.readShort(pc);
+                heap = HeapAlloc((uint16_t)program.readShort(pc));
                 idx = heap;
                 pc += sizeof(int16_t);
                 break;
             case OpCode::CALLOC:
                 if (IS_INT(c))
-                    heap -= (uint16_t)ValueAsInt(c);
+                    heap = HeapAlloc((uint16_t)ValueAsInt(c));
                 else if (IS_REAL(c))
-                    heap -= (uint16_t)ValueAsReal(c);
+                    heap = HeapAlloc((uint16_t)ValueAsReal(c));
                 else
                     error("CALLOC is not a number");
                 idx = heap;
                 break;
             case OpCode::FREE:
-                HeapFree(idx, (uint16_t)program.readShort(pc));
-                pc += sizeof(int16_t);
+                HeapFree(PointerAsValue(program.readPointer(pc)));
+                pc += sizeof(vmpointer_t);
                 break;
-            case OpCode::FREEC:
-                if (IS_INT(c))
-                    HeapFree(idx, (uint16_t)ValueAsInt(c));
-                else if (IS_REAL(c))
-                    HeapFree(idx, (uint16_t)ValueAsReal(c));
-                else
-                    error("FREEC is not a number");
+            case OpCode::FREEIDX:
+                HeapFree(idx);
                 break;
             case OpCode::YIELD:
                 //std::cerr << "Yield " << cycles << std::endl;
@@ -1689,17 +1684,20 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
     return done;
 }
 
-void VM::HeapFree(vmpointer_t ptr, uint16_t size) {
-    freeList.emplace(ptr, size);
+vmpointer_t VM::HeapAlloc(uint16_t size) {
+    vmpointer_t ptr = heap - size;
 
-    for (auto it = freeList.cbegin(); it != freeList.cend(); /**/) {
-        //std::cerr << "Freeing " << std::to_string(it->second) << std::endl;
+    allocList.emplace(ptr, size);
+
+    return ptr;
+}
+
+void VM::HeapFree(vmpointer_t ptr) {
+    for (auto it = allocList.cbegin(); it != allocList.cend(); /**/) {
         if (it->first <= heap) {
             heap += it->second;
-            //std::cerr << "Freed " << std::to_string(it->second) << std::endl;
-            freeList.erase(it++);
+            allocList.erase(it++);
         } else {
-            //std::cerr << "Skipped " << std::to_string(it->second) << std::endl;
             ++it;
         }
     }

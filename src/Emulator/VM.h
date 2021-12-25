@@ -40,6 +40,7 @@
 
 #define CALLSTACK_SIZE 256
 #define STACKFRAME_SIZE 256
+#define DATA_SEGMENT_SIZE 4096
 
 namespace Emulator {
 #ifdef SYS32
@@ -259,7 +260,7 @@ namespace Emulator {
         CALLOC,
 
         FREE,
-        FREEC,
+        FREEIDX,
 
         YIELD,
 
@@ -424,7 +425,7 @@ namespace Emulator {
 
             uint32_t heap;
 
-            uint8_t sp;
+            uint16_t sp;
             std::array<uint32_t, CALLSTACK_SIZE> callstack;
 
             std::vector<value_t> mem;
@@ -467,11 +468,12 @@ namespace Emulator {
             }
 
             vmpointer_t fp() const {
-                return (vmpointer_t)(sp * STACKFRAME_SIZE);
+                return (vmpointer_t)(sp * STACKFRAME_SIZE) + DATA_SEGMENT_SIZE;
             }
 
-            std::map<vmpointer_t, uint16_t> freeList;
-            void HeapFree(vmpointer_t ptr, uint16_t size);
+            std::map<vmpointer_t, uint16_t> allocList;
+            vmpointer_t HeapAlloc(uint16_t size);
+            void HeapFree(vmpointer_t ptr);
 
         public:
             VM(const uint32_t _ptrspace);
