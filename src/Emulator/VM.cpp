@@ -1191,6 +1191,8 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     c = PointerAsValue(ValueAsPointer(a) - (uint16_t)ValueAsReal(b));
                 else if (IS_REAL(a) && IS_POINTER(b))
                     c = PointerAsValue(ValueAsPointer(b) - (uint16_t)ValueAsReal(a));
+                else if (IS_POINTER(a) && IS_POINTER(b))
+                    c = IntAsValue(std::abs((overflow_t)ValueAsPointer(a) - (overflow_t)ValueAsPointer(b)));
                 else
                     error("SUB mismatch");
                 break;
