@@ -131,6 +131,8 @@ std::map<std::string, std::pair<OpCode, ArgType>> def = {
     {"FREE", {OpCode::FREE, ArgType::POINTER}},
     {"FREEIDX", {OpCode::FREEIDX, ArgType::NONE}},
 
+    {"COPY", {OpCode::COPY, ArgType::NONE}},
+
     {"YIELD", {OpCode::YIELD, ArgType::NONE}},
 
     {"TRACE", {OpCode::TRACE, ArgType::INT}}

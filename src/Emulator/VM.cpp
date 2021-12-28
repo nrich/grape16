@@ -111,6 +111,7 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
         case OpCode::CALLOC: return "CALLOC";
         case OpCode::FREE: return "FREE";
         case OpCode::FREEIDX: return "FREEIDX";
+        case OpCode::COPY: return "COPY";
         case OpCode::YIELD: return "YIELD";
         case OpCode::TRACE: return "TRACE";
         default: return "????";
@@ -1640,6 +1641,9 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
             case OpCode::FREEIDX:
                 HeapFree(idx);
                 break;
+            case OpCode::COPY:
+                MemCopy(ValueAsPointer(a), ValueAsPointer(b), IntAsValue(c));
+                break;
             case OpCode::YIELD:
                 //std::cerr << "Yield " << cycles << std::endl;
                 return done;
@@ -1702,6 +1706,12 @@ void VM::HeapFree(vmpointer_t ptr) {
         } else {
             ++it;
         }
+    }
+}
+
+void VM::MemCopy(vmpointer_t dst, vmpointer_t src, integer_t count) {
+    for (integer_t i = 0; i < count; i++) {
+        mem[dst+i] = mem[src+i];
     }
 }
 

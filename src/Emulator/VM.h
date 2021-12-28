@@ -262,6 +262,8 @@ namespace Emulator {
         FREE,
         FREEIDX,
 
+        COPY,
+
         YIELD,
 
         TRACE,
@@ -475,6 +477,7 @@ namespace Emulator {
             vmpointer_t HeapAlloc(uint16_t size);
             void HeapFree(vmpointer_t ptr);
 
+            void MemCopy(vmpointer_t dst, vmpointer_t src, integer_t count);
         public:
             VM(const uint32_t _ptrspace);
             ~VM();
