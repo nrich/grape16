@@ -1454,7 +1454,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 else if (IS_REAL(a) && IS_REAL(b))
                     c = ValueAsReal(a) == ValueAsReal(b) ? IntAsValue(1) : IntAsValue(0);
                 else if (IS_POINTER(a) && IS_POINTER(b))
-                    c = compare(ValueAsPointer(a), ValueAsPointer(b)) == 0 ? IntAsValue(1) : IntAsValue(0);
+                    c = ValueAsPointer(a) == ValueAsPointer(b) ? IntAsValue(1) : IntAsValue(0);
                 else
                     error("EQ mismatch");
                 break;
