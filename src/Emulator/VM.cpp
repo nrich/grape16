@@ -1517,7 +1517,21 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                     c = ValueAsReal(a) > ValueAsInt(b) ? IntAsValue(1) : ValueAsReal(a) < ValueAsInt(b) ? IntAsValue(-1) : IntAsValue(0);
                 else if (IS_INT(a) && IS_REAL(b))
                     c = ValueAsInt(a) > ValueAsReal(b) ? IntAsValue(1) : ValueAsInt(a) < ValueAsReal(b) ? IntAsValue(-1) : IntAsValue(0);
-                else
+                else if (IS_POINTER(a) && IS_POINTER(b)) {
+                    auto valueA = getValue(ValueAsPointer(a));
+                    auto valueB = getValue(ValueAsPointer(b));
+
+                    if (IS_INT(valueA) && IS_INT(valueB))
+                        c = ValueAsInt(valueA) > ValueAsInt(valueB) ? IntAsValue(1) : ValueAsInt(valueA) < ValueAsInt(valueB) ? IntAsValue(-1) : IntAsValue(0);
+                    else if (IS_REAL(valueA) && IS_REAL(valueB))
+                        c = ValueAsReal(valueA) > ValueAsReal(valueB) ? IntAsValue(1) : ValueAsReal(valueA) < ValueAsReal(valueB) ? IntAsValue(-1) : IntAsValue(0);
+                    else if (IS_REAL(valueA) && IS_INT(valueB))
+                        c = ValueAsReal(valueA) > ValueAsInt(valueB) ? IntAsValue(1) : ValueAsReal(valueA) < ValueAsInt(valueB) ? IntAsValue(-1) : IntAsValue(0);
+                    else if (IS_INT(valueA) && IS_REAL(valueB))
+                        c = ValueAsInt(valueA) > ValueAsReal(valueB) ? IntAsValue(1) : ValueAsInt(valueA) < ValueAsReal(valueB) ? IntAsValue(-1) : IntAsValue(0);
+                    else
+                        error("CMP PTR mismatch");
+                } else
                     error("CMP mismatch");
                 break;
             case OpCode::SETIDX:
