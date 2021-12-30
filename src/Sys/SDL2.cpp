@@ -301,11 +301,11 @@ static void clientMouseButtonPress(std::shared_ptr<Client::State> clientState, c
 
     event.x = sdlEvent.x;
     event.y = sdlEvent.y;
-    event.leftPressed = sdlEvent.state & SDL_BUTTON_LMASK;
-    event.middlePressed = sdlEvent.state & SDL_BUTTON_MMASK;
-    event.rightPressed = sdlEvent.state & SDL_BUTTON_RMASK;
-    event.x1Pressed = sdlEvent.state & SDL_BUTTON_X1MASK;
-    event.x2Pressed = sdlEvent.state & SDL_BUTTON_X2MASK;
+    event.leftPressed = sdlEvent.button == SDL_BUTTON_LEFT;
+    event.middlePressed = sdlEvent.button == SDL_BUTTON_MIDDLE;
+    event.rightPressed = sdlEvent.button == SDL_BUTTON_RIGHT;
+    event.x1Pressed = sdlEvent.button == SDL_BUTTON_X1;
+    event.x2Pressed = sdlEvent.button == SDL_BUTTON_X2;
 
     clientState->mouseButtonPress(event);
 }
@@ -315,11 +315,11 @@ static void clientMouseButtonRelease(std::shared_ptr<Client::State> clientState,
 
     event.x = sdlEvent.x;
     event.y = sdlEvent.y;
-    event.leftPressed = sdlEvent.state & SDL_BUTTON_LMASK;
-    event.middlePressed = sdlEvent.state & SDL_BUTTON_MMASK;
-    event.rightPressed = sdlEvent.state & SDL_BUTTON_RMASK;
-    event.x1Pressed = sdlEvent.state & SDL_BUTTON_X1MASK;
-    event.x2Pressed = sdlEvent.state & SDL_BUTTON_X2MASK;
+    event.leftPressed = sdlEvent.button == SDL_BUTTON_LEFT;
+    event.middlePressed = sdlEvent.button == SDL_BUTTON_MIDDLE;
+    event.rightPressed = sdlEvent.button == SDL_BUTTON_RIGHT;
+    event.x1Pressed = sdlEvent.button == SDL_BUTTON_X1;
+    event.x2Pressed = sdlEvent.button == SDL_BUTTON_X2;
 
     clientState->mouseButtonRelease(event);
 }
