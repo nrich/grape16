@@ -49,6 +49,12 @@ namespace Client {
                 return 0;
             }
 
+            void mousestate(int16_t &x, int16_t &y, uint16_t &buttonState) {
+                x = 0;
+                y = 0;
+                buttonState = 0;
+            }
+
             void setcursor(uint16_t row, uint16_t column) {
             }
 

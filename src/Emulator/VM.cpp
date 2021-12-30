@@ -891,6 +891,18 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
 
             }
             break;
+        case SysCall::MOUSE: {
+                int16_t x;
+                int16_t y;
+                uint16_t buttons;
+
+                sysIO->mousestate(x, y, buttons);
+
+                a = IntAsValue((integer_t)x);
+                b = IntAsValue((integer_t)y);
+                c = IntAsValue((uint16_t)buttons);
+            }
+            break;
         default:
             error("Unknown SYSCALL");
     }

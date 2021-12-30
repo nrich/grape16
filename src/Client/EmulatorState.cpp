@@ -408,6 +408,12 @@ bool SystemIO::keyset(const uint8_t c) {
     return keysPressed[c] != 0;
 }
 
+void SystemIO::mousestate(int16_t &x, int16_t &y, uint16_t &buttonState) {
+    x = (int16_t)mouse.X();
+    y = (int16_t)mouse.Y();
+    buttonState = mouseButtons;
+}
+
 void SystemIO::puts(const std::string &str) {
     for (auto c : str) {
         write(c);
@@ -477,6 +483,37 @@ void SystemIO::keydown(char key) {
 void SystemIO::keyup(char key) {
     keysPressed[key] = 0;
 }
+
+void SystemIO::mousemove(const MouseMove &move) {
+    mouse = Point(move.x, move.y);
+}
+
+void SystemIO::mousedown(const MouseClick &click) {
+    if (click.leftPressed)
+        mouseButtons |= LeftPressed;
+    if (click.middlePressed)
+        mouseButtons |= MiddlePressed;
+    if (click.rightPressed)
+        mouseButtons |= RightPressed;
+    if (click.x1Pressed)
+        mouseButtons |= X1Pressed;
+    if (click.x2Pressed)
+        mouseButtons |= X2Pressed;
+}
+
+void SystemIO::mouseup(const MouseClick &click) {
+    if (click.leftPressed)
+        mouseButtons &= ~LeftPressed;
+    if (click.middlePressed)
+        mouseButtons &= ~MiddlePressed;
+    if (click.rightPressed)
+        mouseButtons &= ~RightPressed;
+    if (click.x1Pressed)
+        mouseButtons &= ~X1Pressed;
+    if (click.x2Pressed)
+        mouseButtons &= ~X2Pressed;
+}
+
 
 void EmulatorState::onRender(State *state, const uint32_t time) {
     static std::array<uint32_t, SystemIO::Width * SystemIO::Height> buffer;
@@ -591,12 +628,15 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
 }
 
 void EmulatorState::onMouseMove(State *state, const MouseMove &event) {
+    sysio->mousemove(event);
 }
 
 void EmulatorState::onMouseButtonPress(State *state, const MouseClick &event) {
+    sysio->mousedown(event);
 }
 
 void EmulatorState::onMouseButtonRelease(State *state, const MouseClick &event) {
+    sysio->mouseup(event);
 }
 
 void EmulatorState::onKeyDown(State *state, const KeyPress &event) {

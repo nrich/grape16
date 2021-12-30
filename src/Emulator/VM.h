@@ -296,6 +296,7 @@ namespace Emulator {
         BLIT,
         SOUND,
         VOICE,
+        MOUSE,
         COUNT
     };
 
@@ -309,6 +310,8 @@ namespace Emulator {
             virtual uint8_t read(bool noecho) = 0;
 
             virtual bool keyset(const uint8_t c) = 0;
+
+            virtual void mousestate(int16_t &x, int16_t &y, uint16_t &buttonState) = 0;
 
             virtual void puts(const std::string &str) = 0;
             virtual std::string gets() = 0; 

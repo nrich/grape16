@@ -14,6 +14,12 @@
 namespace Client {
     class State;
 
+    const uint32_t LeftPressed       = 1 << 0;
+    const uint32_t MiddlePressed     = 1 << 1;
+    const uint32_t RightPressed      = 1 << 2;
+    const uint32_t X1Pressed         = 1 << 3;
+    const uint32_t X2Pressed         = 1 << 4;
+
     struct VoiceConfig {
         uint8_t waveForm;
         uint8_t volume;
@@ -68,6 +74,9 @@ namespace Client {
 
             uint64_t nextKeyId;
             std::array<uint64_t, 256> keysPressed;
+
+            Point mouse;
+            uint16_t mouseButtons = 0;
         public:
             SystemIO();
 
@@ -107,6 +116,10 @@ namespace Client {
             void keydown(char key);
             void keyup(char key);
 
+            void mousemove(const MouseMove &move);
+            void mousedown(const MouseClick &click);
+            void mouseup(const MouseClick &click);
+
             void palette(uint8_t id) {
                 if (id < palettes.size()) {
                     currentPalette = id;
@@ -123,6 +136,8 @@ namespace Client {
                     cursor = Point(column, row);
                 }
             }
+
+            void mousestate(int16_t &x, int16_t &y, uint16_t &buttonState);
 
             void setpixel(uint16_t x, uint16_t y, uint8_t pixel);
             uint8_t getpixel(uint16_t x, uint16_t y);
