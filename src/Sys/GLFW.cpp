@@ -9,7 +9,6 @@
 static bool RepeatKeys = false;
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-
     Client::State *clientState = (Client::State *)glfwGetWindowUserPointer(window);
     Client::KeyPress event;
 
@@ -231,6 +230,48 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     }
 }
 
+static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+    Client::State *clientState = (Client::State *)glfwGetWindowUserPointer(window);
+    Client::MouseClick event;
+
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
+
+    event.x = (int32_t)xpos;
+    event.y = (int32_t)ypos;
+
+    event.leftPressed = button == GLFW_MOUSE_BUTTON_LEFT;
+    event.middlePressed = button == GLFW_MOUSE_BUTTON_MIDDLE;
+    event.rightPressed = button == GLFW_MOUSE_BUTTON_RIGHT;
+    event.x1Pressed = button == GLFW_MOUSE_BUTTON_4;
+    event.x2Pressed = button == GLFW_MOUSE_BUTTON_5;
+
+    if (action == GLFW_PRESS) {
+        clientState->mouseButtonPress(event);
+    } else if (action == GLFW_RELEASE) {
+        clientState->mouseButtonRelease(event);
+    }
+}
+
+static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
+    Client::State *clientState = (Client::State *)glfwGetWindowUserPointer(window);
+    Client::MouseMove event;
+
+    static double xrel = 0;
+    static double yrel = 0;
+
+    event.x = (int32_t)xpos;
+    event.y = (int32_t)ypos;
+    event.xrel = (int32_t)xpos - xrel;
+    event.yrel = (int32_t)ypos - yrel;
+
+    xrel = xpos;
+    yrel = ypos;
+
+    clientState->mouseMove(event);
+}
+
+
 Common::DisplayMode Sys::GLFW::changeDisplayMode(const Common::DisplayMode &displayMode, bool fullscreen) {
     auto current = currentDisplayMode();
 
@@ -375,6 +416,8 @@ Sys::GLFW::GLFW(const std::string &title) {
     glfwSwapInterval(0);
 
     glfwSetKeyCallback(window.get(), key_callback);
+    glfwSetMouseButtonCallback(window.get(), mouse_button_callback);
+    glfwSetCursorPosCallback(window.get(), cursor_position_callback);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
