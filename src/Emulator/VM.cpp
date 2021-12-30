@@ -1709,6 +1709,10 @@ vmpointer_t VM::HeapAlloc(uint16_t size) {
 
     allocList.emplace(ptr, size);
 
+    for (size_t i = 0; i < size; i++) {
+        mem[i+ptr] = IntAsValue(0);
+    }
+
     return ptr;
 }
 
