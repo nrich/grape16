@@ -340,11 +340,14 @@ void SystemIO::cls() {
 }
 
 void SystemIO::setpixel(uint16_t x, uint16_t y, uint8_t pixel) {
-    screen[y*Width + x] = pixel;
+    if (x < Width && y < Height)
+        screen[y*Width + x] = pixel;
 }
 
 uint8_t SystemIO::getpixel(uint16_t x, uint16_t y) {
-    return screen[y*Width + x];
+    if (x < Width && y < Height)
+        return screen[y*Width + x];
+    return 0;
 }
 
 void SystemIO::write(uint8_t c) {
