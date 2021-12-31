@@ -58,6 +58,7 @@ std::string Emulator::OpCodeAsString(OpCode opcode) {
         case OpCode::DIV: return "DIV";
         case OpCode::IDIV: return "IDIV";
         case OpCode::MOD: return "MOD";
+        case OpCode::POW: return "POW";
         case OpCode::EXP: return "EXP";
         case OpCode::LSHIFT: return "LSHIFT";
         case OpCode::RSHIFT: return "RSHIFT";
@@ -1258,7 +1259,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 else
                     error("MOD mismatch");
                 break;
-            case OpCode::EXP:
+            case OpCode::POW:
                 if (IS_INT(a) && IS_INT(b)) {
                     overflow = std::pow(ValueAsInt(a), ValueAsInt(b));
 
@@ -1275,7 +1276,15 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
                 else if (IS_INT(a) && IS_REAL(b))
                     c = RealAsValue(std::pow(ValueAsInt(a), ValueAsReal(b)));
                 else
-                    error("EXP mismatch");
+                    error("POW mismatch");
+                break;
+            case OpCode::EXP:
+                if (IS_INT(c))
+                    c = RealAsValue(std::exp((real_t)ValueAsInt(c)));
+                else if (IS_REAL(c))
+                    c = RealAsValue(std::exp(ValueAsReal(c)));
+                else
+                    error("EXP argument error");
                 break;
             case OpCode::LSHIFT:
                 if (IS_INT(a) && IS_INT(b))

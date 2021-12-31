@@ -895,7 +895,7 @@ static void Op(Program &program, uint32_t linenumber, const std::vector<BasicTok
         expression(program, linenumber, {tokens.begin(), tokens.end()}, token.lbp);
         program.add(OpCode::POPB);
         program.add(OpCode::POPA);
-        program.add(OpCode::EXP);
+        program.add(OpCode::POW);
         program.add(OpCode::PUSHC);
     } else if (token.type == BasicTokenType::EQUAL) {
         expression(program, linenumber, {tokens.begin(), tokens.end()}, token.lbp);

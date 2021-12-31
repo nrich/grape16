@@ -194,6 +194,7 @@ namespace Emulator {
         DIV,
         IDIV,
         MOD,
+        POW,
         EXP,
 
         LSHIFT,
