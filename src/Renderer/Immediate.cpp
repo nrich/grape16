@@ -443,6 +443,27 @@ void Immediate::changeDisplayMode(const Common::DisplayMode &displayMode) {
     enableInterfaceMode();
 }
 
+bool Immediate::translatePoint(Point &screen, const Point &real) {
+    float hratio = ((float)virtualWidth) / (float)displayMode.Width();
+    float vratio = ((float)virtualHeight) / (float)displayMode.Height();
+
+    auto tx = real.X() * hratio;
+    auto ty = real.Y() * vratio;
+
+    if (tx < horizontalOffset)
+        return false;
+    if (tx > (virtualWidth - horizontalOffset))
+        return false;
+    if (ty < verticalOffset)
+        return false;
+    if (ty > (virtualHeight - verticalOffset))
+        return false;
+
+    screen = Point((tx-horizontalOffset)/horizontalRatio, (ty-verticalOffset)/verticalRatio);
+
+    return true;
+}
+
 Immediate::~Immediate() {
 
 }

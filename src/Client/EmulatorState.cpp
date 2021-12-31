@@ -484,8 +484,8 @@ void SystemIO::keyup(char key) {
     keysPressed[key] = 0;
 }
 
-void SystemIO::mousemove(const MouseMove &move) {
-    mouse = Point(move.x, move.y);
+void SystemIO::mousemove(const Point &move) {
+    mouse = move;
 }
 
 void SystemIO::mousedown(const MouseClick &click) {
@@ -628,7 +628,11 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
 }
 
 void EmulatorState::onMouseMove(State *state, const MouseMove &event) {
-    sysio->mousemove(event);
+    Point move;
+    Point real(event.x, event.y);
+    if (state->getRenderer()->translatePoint(move, real)) {
+        sysio->mousemove(move);
+    }
 }
 
 void EmulatorState::onMouseButtonPress(State *state, const MouseClick &event) {

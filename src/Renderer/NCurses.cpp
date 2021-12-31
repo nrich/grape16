@@ -32,5 +32,9 @@ void NCurses::drawBuffer(const uint8_t *buffer, uint32_t width, uint32_t height,
 void NCurses::changeDisplayMode(const Common::DisplayMode &displayMode) {
 }
 
+bool NCurses::translatePoint(Point &screen, const Point &real) {
+    return false;
+}
+
 NCurses::~NCurses() {
 }

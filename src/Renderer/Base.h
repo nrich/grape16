@@ -25,6 +25,8 @@ public:
     virtual void drawBuffer(const uint32_t *buffer, uint32_t width, uint32_t height, uint32_t size=1) = 0;
     virtual void drawBuffer(const uint8_t *buffer, uint32_t width, uint32_t height, uint32_t size=1) = 0;
 
+    virtual bool translatePoint(Point &screen, const Point &real) = 0;
+
     virtual void changeDisplayMode(const Common::DisplayMode &displayMode) = 0;
 
     virtual ~Base() {}

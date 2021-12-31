@@ -116,7 +116,7 @@ namespace Client {
             void keydown(char key);
             void keyup(char key);
 
-            void mousemove(const MouseMove &move);
+            void mousemove(const Point &move);
             void mousedown(const MouseClick &click);
             void mouseup(const MouseClick &click);
 
