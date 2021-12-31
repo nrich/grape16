@@ -1256,6 +1256,12 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
             case OpCode::MOD:
                 if (IS_INT(a) && IS_INT(b))
                     c = IntAsValue(ValueAsInt(a) % ValueAsInt(b));
+                else if (IS_REAL(a) && IS_REAL(b))
+                    c = RealAsValue(std::fmod(ValueAsReal(a), ValueAsReal(b)));
+                else if (IS_REAL(a) && IS_INT(b))
+                    c = RealAsValue(std::fmod(ValueAsReal(a), (real_t)ValueAsInt(b)));
+                else if (IS_INT(a) && IS_REAL(b))
+                    c = RealAsValue(std::fmod((real_t)ValueAsInt(a), ValueAsReal(b)));
                 else
                     error("MOD mismatch");
                 break;
