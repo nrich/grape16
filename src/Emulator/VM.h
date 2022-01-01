@@ -477,7 +477,7 @@ namespace Emulator {
                 return (vmpointer_t)(sp * STACKFRAME_SIZE) + DATA_SEGMENT_SIZE;
             }
 
-            std::map<vmpointer_t, uint16_t> allocList;
+            std::map<vmpointer_t, std::pair<uint16_t, int>> allocList;
             vmpointer_t HeapAlloc(uint16_t size);
             void HeapFree(vmpointer_t ptr);
 

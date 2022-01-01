@@ -1736,7 +1736,7 @@ bool VM::run(std::shared_ptr<SysIO> sysIO, const Program &program, uint32_t cycl
 vmpointer_t VM::HeapAlloc(uint16_t size) {
     vmpointer_t ptr = heap - size;
 
-    allocList.emplace(ptr, size);
+    allocList.emplace(ptr, std::make_pair(size, 1));
 
     for (size_t i = 0; i < size; i++) {
         mem[i+ptr] = IntAsValue(0);
@@ -1746,9 +1746,20 @@ vmpointer_t VM::HeapAlloc(uint16_t size) {
 }
 
 void VM::HeapFree(vmpointer_t ptr) {
+    auto alloc = allocList.find(ptr);
+
+    if (alloc == allocList.end())
+        return;
+
+    alloc->second.second = 0;
+
+    for (size_t i = 0; i < alloc->second.first; i++) {
+        mem[i+ptr] = IntAsValue(0);
+    }
+
     for (auto it = allocList.cbegin(); it != allocList.cend(); /**/) {
-        if (it->first <= heap) {
-            heap += it->second;
+        if (it->first <= heap && !it->second.second) {
+            heap += it->second.first;
             allocList.erase(it++);
         } else {
             ++it;
