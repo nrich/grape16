@@ -308,6 +308,8 @@ uint32_t Program::addString(OpCode opcode, const std::string &str, const std::st
 uint32_t Program::addPointer(OpCode opcode, vmpointer_t p, const std::string &label) {
     uint32_t pos = code.size();
 
+    addLabel(label, pos);
+
     code.push_back((uint8_t)opcode);
     addPointer(p);
 
