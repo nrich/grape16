@@ -15,8 +15,8 @@ namespace Client {
     class State;
 
     const uint32_t LeftPressed       = 1 << 0;
-    const uint32_t MiddlePressed     = 1 << 1;
-    const uint32_t RightPressed      = 1 << 2;
+    const uint32_t RightPressed      = 1 << 1;
+    const uint32_t MiddlePressed     = 1 << 2;
     const uint32_t X1Pressed         = 1 << 3;
     const uint32_t X2Pressed         = 1 << 4;
 
