@@ -579,6 +579,7 @@ Sys::SDL2::SDL2(const std::string &title) : repeatKeys(false) {
 
     SDL_AudioSpec have;
 
+    /*
     int i, count = SDL_GetNumAudioDevices(0);
 
     SDL_Log("Audio driver: %s", SDL_GetCurrentAudioDriver());
@@ -586,6 +587,7 @@ Sys::SDL2::SDL2(const std::string &title) : repeatKeys(false) {
     for (i = 0; i < count; ++i) {
         SDL_Log("Audio device %d: %s", i, SDL_GetAudioDeviceName(i, 0));
     }
+    */
 
     // you might want to look for errors here
     dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
