@@ -667,7 +667,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
             sysIO->setpixel(ValueAsInt(a), ValueAsInt(b), ValueAsInt(c));
             break;
         case SysCall::DRAWLINE: {
-                int x0,y0,x1,y1,colour;
+                int x0=0,y0=0,x1=0,y1=0,colour=0;
 
                 if (IS_REAL(mem[idx])) {
                     x0 = (int)getReal(idx);
@@ -756,7 +756,7 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
             }
             break;
         case SysCall::DRAWBOX: {
-                int x0,y0,x1,y1,colour,filled;
+                int x0=0,y0=0,x1=0,y1=0,colour=0,filled=0;
 
                 if (IS_REAL(mem[idx])) {
                     x0 = (int)getReal(idx);
