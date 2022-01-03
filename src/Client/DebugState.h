@@ -7,6 +7,7 @@ namespace Client {
     class State;
 
     class DebugIO : public Emulator::SysIO {
+            uint32_t time;
         public:
             DebugIO() {
 
@@ -14,6 +15,14 @@ namespace Client {
 
             void cls() {
 
+            }
+
+            void setTime(uint32_t _time) {
+                time += _time;
+            }
+
+            uint32_t clock() {
+                return time;
             }
 
             void write(uint8_t c) {

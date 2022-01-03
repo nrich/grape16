@@ -298,6 +298,7 @@ namespace Emulator {
         SOUND,
         VOICE,
         MOUSE,
+        CLOCK,
         COUNT
     };
 
@@ -306,6 +307,8 @@ namespace Emulator {
     class SysIO {
         public:
             virtual void cls() = 0;
+
+            virtual uint32_t clock() = 0;
 
             virtual void write(const uint8_t c) = 0;
             virtual uint8_t read(bool noecho) = 0;

@@ -100,6 +100,7 @@ void DebugState::onRender(State *state, const uint32_t time) {
 }
 
 void DebugState::onTick(State *state, const uint32_t time) {
+    sysio->setTime(time);
 }
 
 void DebugState::onMouseMove(State *state, const MouseMove &event) {

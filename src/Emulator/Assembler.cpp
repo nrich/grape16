@@ -204,6 +204,8 @@ std::pair<SysCall, RuntimeValue> getSysCall(uint32_t linenumber, const std::stri
         syscall = SysCall::VOICE;
     } else if (syscallname == "MOUSE") {
         syscall = SysCall::MOUSE;
+    } else if (syscallname == "CLOCK") {
+        syscall = SysCall::CLOCK;
     } else {
         error(linenumber, opcode, "Unknown SysCall");
     }
@@ -259,6 +261,8 @@ std::pair<std::string, std::string> getSysCall(SysCall syscall, RuntimeValue rt)
         syscallname = "VOICE";
     } else if (syscall == SysCall::MOUSE) {
         syscallname = "MOUSE";
+    } else if (syscall == SysCall::CLOCK) {
+        syscallname = "CLOCK";
     } else {
         throw std::domain_error("Unknown SysCall");
     }

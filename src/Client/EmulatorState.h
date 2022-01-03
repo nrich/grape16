@@ -77,6 +77,8 @@ namespace Client {
 
             Point mouse;
             uint16_t mouseButtons = 0;
+
+            uint32_t time = 0;
         public:
             SystemIO();
 
@@ -85,6 +87,14 @@ namespace Client {
             }
 
             void cls();
+
+            void setTime(uint32_t _time) {
+                time += _time;
+            }
+
+            uint32_t clock() {
+                return time;
+            }
 
             void write(uint8_t c);
 

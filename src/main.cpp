@@ -138,13 +138,14 @@ void emscripten_loop(void *userdata) {
     uint32_t renderTime = sys->getTicks();
 
     while (sys->handleEvents(clientState)) {
+        lastRender = renderTime;
+
         auto t1 = std::chrono::high_resolution_clock::now();
 
         sys->clearScreen();
+        renderTime = sys->getTicks();
         clientState->tick(renderTime - lastRender);
         clientState->render(renderTime - lastRender);
-
-        lastRender = renderTime;
 
         sys->swapBuffers();
 
@@ -528,20 +529,18 @@ int main(int argc, char **argv) {
     uint32_t renderTime = sys->getTicks();
 
     while (sys->handleEvents(clientState)) {
-        auto t1 = std::chrono::high_resolution_clock::now();
-        sys->clearScreen();
-        clientState->tick(renderTime - lastRender);
-        //auto t2 = std::chrono::high_resolution_clock::now();
-        clientState->render(renderTime - lastRender);
-        //auto t3 = std::chrono::high_resolution_clock::now();
-
         lastRender = renderTime;
 
+        auto t1 = std::chrono::high_resolution_clock::now();
+        sys->clearScreen();
+        renderTime = sys->getTicks();
+        clientState->tick(renderTime - lastRender);
+        clientState->render(renderTime - lastRender);
+
         sys->swapBuffers();
+
         auto t4 = std::chrono::high_resolution_clock::now();
         auto taken = std::chrono::duration_cast<std::chrono::milliseconds>(t4 - t1).count();
-
-//        std::cerr << taken << std::endl;
 
         if (std::chrono::milliseconds(16 - taken).count() > 0)
             std::this_thread::sleep_for(std::chrono::milliseconds(16 - taken));

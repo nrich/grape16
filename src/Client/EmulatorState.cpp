@@ -549,6 +549,8 @@ void EmulatorState::onTick(State *state, const uint32_t time) {
     static std::string input = "";
     static std::shared_ptr<Emulator::Debugger> debugger = std::make_shared<Emulator::Debugger>();
 
+    sysio->setTime(time);
+
     if (!done) {
         try {
             done = vm->run(std::dynamic_pointer_cast<Emulator::SysIO>(sysio), *program, clockspeed, debug ? debugger : NULL);

@@ -906,6 +906,25 @@ int32_t VM::Syscall(std::shared_ptr<SysIO> sysIO, SysCall syscall, RuntimeValue 
                 c = IntAsValue((uint16_t)buttons);
             }
             break;
+        case SysCall::CLOCK: {
+                auto clock = sysIO->clock();
+
+                switch (rvalue) {
+                    case RuntimeValue::A:
+                        a = IntAsValue((integer_t)clock);
+                        break;
+                    case RuntimeValue::B:
+                        b = IntAsValue((integer_t)clock);
+                        break;
+                    case RuntimeValue::C:
+                        c = IntAsValue((integer_t)clock);
+                        break;
+                    default:
+                        error("Invalid clock");
+                }
+            }
+            break;
+
         default:
             error("Unknown SYSCALL");
     }
