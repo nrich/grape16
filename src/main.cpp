@@ -508,7 +508,7 @@ int main(int argc, char **argv) {
 
     auto vm = std::make_shared<Emulator::VM>(memsize);
 
-    auto debugState = std::make_shared<Client::DebugState>(vm);
+    auto debugState = std::make_shared<Client::DebugState>(vm, clockspeed);
     auto emulatorState = std::make_shared<Client::EmulatorState>(vm, program, clockspeed, debug);
     auto displayMenuState = std::make_shared<Client::DisplayMenuState>();
 

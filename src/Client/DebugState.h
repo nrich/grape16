@@ -81,8 +81,10 @@ namespace Client {
             std::shared_ptr<Emulator::VM> vm;
             std::shared_ptr<Emulator::Program> program;
             std::shared_ptr<DebugIO> sysio;
+            uint32_t clockspeed;
+            std::string exception;
         public:
-            DebugState(std::shared_ptr<Emulator::VM> vm) : vm(vm) {
+            DebugState(std::shared_ptr<Emulator::VM> vm, uint32_t clockspeed) : vm(vm), clockspeed(clockspeed), exception("<NONE>") {
                 sysio = std::make_shared<DebugIO>();
             }
 

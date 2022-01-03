@@ -77,6 +77,7 @@ void DebugState::onRender(State *state, const uint32_t time) {
 
     renderer->drawString(0, 72, 8, 8, std::string("HEAP: &") + stream.str());
 
+    renderer->drawString(0, 88, 8, 8, std::string("EXCEPTION: ") + exception);
 
     size_t xoffset = 0;
     size_t yoffset = 0;
@@ -85,16 +86,16 @@ void DebugState::onRender(State *state, const uint32_t time) {
         xoffset = i / 16;
         yoffset = i % 16;
 
-        renderer->drawString(0 + xoffset*64, 88+(yoffset*8), 8, 8, std::to_string(i));
-        renderer->drawString(24 + xoffset*64, 88+(yoffset*8), 8, 8, std::string(Emulator::ValueToString(debugger->mem[i])));
+        renderer->drawString(0 + xoffset*64, 104+(yoffset*8), 8, 8, std::to_string(i));
+        renderer->drawString(24 + xoffset*64, 104+(yoffset*8), 8, 8, std::string(Emulator::ValueToString(debugger->mem[i])));
     }
 
     for (size_t i = 0; i < debugger->heap.size(); i++) {
         xoffset = (i + debugger->mem.size()) / 16;
         yoffset = (i + debugger->mem.size()) % 16;
 
-        renderer->drawString(0 + xoffset*64, 88+(yoffset*8), 8, 8, std::to_string(i));
-        renderer->drawString(24 + xoffset*64, 88+(yoffset*8), 8, 8, std::string(Emulator::ValueToString(debugger->heap[i])));
+        renderer->drawString(0 + xoffset*64, 104+(yoffset*8), 8, 8, std::to_string(i));
+        renderer->drawString(24 + xoffset*64, 104+(yoffset*8), 8, 8, std::string(Emulator::ValueToString(debugger->heap[i])));
     }
 
 }
@@ -119,7 +120,22 @@ void DebugState::onKeyDown(State *state, const KeyPress &event) {
     if (event.keyCode == Common::Keys::F2) {
         state->changeState(0);
     } else if (event.keyCode == Common::Keys::Space) {
-        vm->run(std::dynamic_pointer_cast<Emulator::SysIO>(sysio), *program, 1, debugger);
+        try {
+            vm->run(std::dynamic_pointer_cast<Emulator::SysIO>(sysio), *program, 1, debugger);
+            exception = "<NONE>";
+        } catch (const std::runtime_error &re) {
+            exception = std::string(re.what());
+        }
+    } else if (event.keyCode == Common::Keys::R) {
+        try {
+            bool done = false;
+            while (!done) {
+                done = vm->run(std::dynamic_pointer_cast<Emulator::SysIO>(sysio), *program, clockspeed, debugger);
+            }
+        } catch (const std::runtime_error &re) {
+            //sysio->puts(std::string("Runtime Error: ") + re.what() + std::string("\n"));
+            std::cerr << "Runtime Error: " << re.what() << std::endl;
+        }
     }
 }
 
