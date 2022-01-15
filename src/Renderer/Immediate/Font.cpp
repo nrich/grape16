@@ -2597,28 +2597,37 @@ static const char *pixelbitmaps[] = {
 };
 
 Font::Font() {
-    std::array<char, 64> nul{0};
-    for (int i = 0; i < 64; i++) {
+    std::array<char, 256> nul{0};
+    for (int i = 0, z = 0; i < 64; i++, z+=4) {
         auto pixel = nulpixelbitmap[i] != ' ' ? 255 : 0;
-        nul[i] = pixel;
+        nul[z+0] = pixel;
+        nul[z+1] = pixel;
+        nul[z+2] = pixel;
+        nul[z+3] = pixel;
     }
     nulTexture = CreateTexture(nul);
 
-    std::array<char, 64> block{0};
-    for (int i = 0; i < 64; i++) {
+    std::array<char, 256> block{0};
+    for (int i = 0, z = 0; i < 64; i++, z+=4) {
         auto pixel = blockpixelbitmap[i] != ' ' ? 255 : 0;
-        block[i] = pixel;
+        block[z+0] = pixel;
+        block[z+1] = pixel;
+        block[z+2] = pixel;
+        block[z+3] = pixel;
     }
 
     blockTexture = CreateTexture(block); 
 
     for (uint32_t i = 0; i < fontTextures.size(); i++) {
-        std::array<char, 64> chr{0};
+        std::array<char, 256> chr{0};
         auto pixelbitmap = pixelbitmaps[i];
         if (pixelbitmap) {
-            for (int i = 0; i < 64; i++) {
+            for (int i = 0, z = 0; i < 64; i++, z+=4) {
                 auto pixel = pixelbitmap[i] != ' ' ? 255 : 0;
-                chr[i] = pixel;
+                chr[z+0] = pixel;
+                chr[z+1] = pixel;
+                chr[z+2] = pixel;
+                chr[z+3] = pixel;
             }
 
             fontTextures[i] = CreateTexture(chr);
@@ -2628,7 +2637,7 @@ Font::Font() {
     }
 }
 
-GLuint Font::CreateTexture(std::array<char, 64> pixels) {
+GLuint Font::CreateTexture(std::array<char, 256> pixels) {
     GLuint texture;
 
     glGenTextures(1, &texture);
@@ -2637,24 +2646,15 @@ GLuint Font::CreateTexture(std::array<char, 64> pixels) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, 8, 8, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels.data());
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_INTENSITY, 8, 8, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels.data());
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA8, 8, 8, 0, GL_ALPHA, GL_UNSIGNED_BYTE, pixels.data());
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 8, 8, 0, GL_ALPHA, GL_UNSIGNED_BYTE, pixels.data());
-    //glTexImage2D(GL_TEXTURE_2D, 0,  GL_LUMINANCE_ALPHA, 8, 8, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels.data());
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 8, 8, 0, GL_RED, GL_UNSIGNED_BYTE, pixels.data());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 8, 8, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
 
     return texture;
 }
 
 void Font::drawString(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const std::string &str) {
     glEnable(GL_BLEND);
-    //glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     uint16_t offset = 0;
 

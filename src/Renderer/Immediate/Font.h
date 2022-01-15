@@ -15,7 +15,7 @@ class Font {
     GLuint blockTexture;
     std::array<GLuint, 256> fontTextures;
 
-    static GLuint CreateTexture(std::array<char, 64> pixels);
+    static GLuint CreateTexture(std::array<char, 256> pixels);
 public:
     Font();
     void drawString(const uint16_t x, const uint16_t y, const uint16_t w, const uint16_t h, const std::string &str);
